@@ -1,24 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Canvas from "./components/Canvas";
+import Edit from "./components/Edit";
+import Toolbar from "./components/Toolbar";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Toolbar />
+      <Canvas
+        canvasState={{
+          elements: {
+            "1": {
+              type: "circle",
+              cx: 50,
+              cy: 50,
+              r: 50,
+              style: { fill: "red" },
+            },
+            "2": {
+              type: "rect",
+              width: 100,
+              height: 100,
+              x: 200,
+              y: 200,
+              style: { fill: "blue" },
+            },
+          },
+        }}
+      />
+      <Edit />
     </div>
   );
 }
