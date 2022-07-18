@@ -17,6 +17,7 @@ import { CSSProperties } from "react";
 */
 
 interface Circle {
+  id: string;
   type: "circle";
   style?: CSSProperties;
   cx: number;
@@ -25,6 +26,7 @@ interface Circle {
 }
 
 interface Rect {
+  id: string;
   type: "rect";
   width: number;
   height: number;
@@ -37,22 +39,28 @@ interface Rect {
 
 type Element = Circle | Rect;
 
-interface CanvasState {
+export interface CanvasState {
   elements: {
     [id: string]: Element;
   };
 }
 
-const Canvas = ({ canvasState }: { canvasState: CanvasState }) => {
+const Canvas = ({
+  canvasState,
+  onClick,
+}: {
+  canvasState: CanvasState;
+  onClick: (e: React.MouseEvent<SVGElement>) => void;
+}) => {
   const { elements } = canvasState;
   const renderElements = Object.values(elements).map((e) => {
     if (e.type === "rect") {
       const { type, ...props } = e;
-      return <rect {...props} />;
+      return <rect {...props} onClick={onClick} />;
     } else {
       const { type, ...props } = e;
 
-      return <circle {...props} />;
+      return <circle {...props} onClick={onClick} />;
     }
   });
   return (
