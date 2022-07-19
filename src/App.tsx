@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import {
   LegacyRef,
   MouseEventHandler,
@@ -6,40 +7,19 @@ import {
   useState,
 } from "react";
 import "./App.css";
-import Canvas, { CanvasState } from "./components/Canvas";
+import Canvas from "./components/Canvas";
 import Edit from "./components/Edit";
 import Toolbar from "./components/Toolbar";
-
-const initialState: CanvasState = {
-  elements: {
-    "1": {
-      id: "1",
-      type: "circle",
-      cx: 50,
-      cy: 50,
-      r: 50,
-      style: { fill: "red" },
-    },
-    "2": {
-      id: "2",
-      type: "rect",
-      width: 100,
-      height: 100,
-      x: 200,
-      y: 200,
-      style: { fill: "blue" },
-    },
-  },
-};
-
-interface SelectionCoordinates {
-  currentX: null | number;
-  currentY: null | number;
-  initialX: null | number;
-  initialY: null | number;
-  xOffset: number;
-  yOffset: number;
-}
+import {
+  initialState,
+  SelectionCoordinates,
+  SelectionModes,
+  SelectionMode,
+  CanvasState,
+  ElementType,
+  Rect,
+  ElementState,
+} from "./Types";
 
 function App() {
   const [appState, setAppState] = useState<CanvasState>(initialState);
@@ -53,38 +33,161 @@ function App() {
       xOffset: 0,
       yOffset: 0,
     });
+  const [selectionMode, setSelectionMode] = useState<SelectionMode>({
+    type: SelectionModes.None,
+  });
+
   const containerRef = useRef<SVGSVGElement>(null);
 
-  const dragStart: MouseEventHandler<SVGSVGElement> = (e) => {
-    const { xOffset, yOffset } = selectionCoordinates;
+  const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
+    console.log("onMouseDown");
+    // Enter add element state
+    switch (selectionMode.type) {
+      case SelectionModes.None: {
+        if (!(e.target instanceof Element) || e.target.id === "container") {
+          removeSelection();
+          return;
+        }
+        const id = e.target.id;
+        if (selectedElement !== null && id !== selectedElement) {
+          removeSelection();
+        }
+        const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
 
-    const initialX = e.clientX - xOffset;
-    const initialY = e.clientY - yOffset;
-    setSelectionCoordinates({ ...selectionCoordinates, initialX, initialY });
+        setSelectedElement(id);
+        setSelectedBorder(id, {
+          stroke: "pink",
+          strokeWidth: "5",
+          fillOpacity: "0.8",
+        });
+
+        const initialX = e.clientX - xOffset;
+        const initialY = e.clientY - yOffset;
+        setSelectionCoordinates({
+          ...selectionCoordinates,
+          xOffset,
+          yOffset,
+          initialX,
+          initialY,
+        });
+        break;
+      }
+      case SelectionModes.Add: {
+        // Create temp obj and draw it on the screen, assign selectedElemId(id) right?
+        console.log(e);
+        const initialX = e.clientX;
+        const initialY = e.clientY;
+        setSelectionCoordinates({
+          ...selectionCoordinates,
+          initialX,
+          initialY,
+        });
+        const id = uuid();
+        setSelectedElement(id);
+
+        switch (selectionMode.elementType) {
+          case ElementType.Rect: {
+            const newRect: Rect = {
+              id,
+              type: ElementType.Rect,
+              width: 0,
+              height: 0,
+              x: initialX,
+              y: initialY,
+              state: ElementState.Creation,
+            };
+            const newAppState = Object.assign({}, appState);
+            newAppState.elements[id] = newRect;
+            setAppState(newAppState);
+            break;
+          }
+          case ElementType.Circle: {
+            // Implement
+            break;
+          }
+        }
+      }
+    }
   };
 
-  const dragEnd: MouseEventHandler<SVGSVGElement> = (e) => {
-    const initialX = selectionCoordinates.currentX;
-    const initialY = selectionCoordinates.currentY;
-    setSelectionCoordinates({ ...selectionCoordinates, initialX, initialY });
+  const onMouseUp: MouseEventHandler<SVGSVGElement> = (e) => {
+    console.log("onMouseUp");
+    // On mouse up add the element to the screen
+    switch (selectionMode.type) {
+      case SelectionModes.None: {
+        const initialX = selectionCoordinates.currentX;
+        const initialY = selectionCoordinates.currentY;
+        setSelectionCoordinates({
+          ...selectionCoordinates,
+          initialX,
+          initialY,
+        });
+        break;
+      }
+      case SelectionModes.Add: {
+        // Record selection elements and draw the element directly but with faded bg?
+        if (!selectedElement) return;
+        const newAppState = Object.assign({}, appState);
+        const creationElement = Object.assign(
+          {},
+          newAppState.elements[selectedElement]
+        );
+        let initialX, initialY;
+        if (creationElement.type === "rect") {
+          creationElement.width = e.clientX - creationElement.x;
+          creationElement.height = e.clientY - creationElement.y;
+          initialX = creationElement.x;
+          initialY = creationElement.y;
+        }
+        newAppState.elements[selectedElement] = creationElement;
+        setAppState(newAppState);
+        setSelectionMode({ type: SelectionModes.None, elementType: undefined });
+        setSelectedElement(null);
+      }
+    }
   };
 
-  const drag: MouseEventHandler<SVGSVGElement> = (e) => {
-    const { initialX, initialY } = selectionCoordinates;
-    if (selectedElement && initialX && initialY) {
-      e.preventDefault();
+  const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
+    console.log("onMouseMove");
+    // Record size of the add element state and draw faded element
 
-      const currentX = e.clientX - initialX;
-      const currentY = e.clientY - initialY;
-      const xOffset = currentX;
-      const yOffset = currentY;
+    switch (selectionMode.type) {
+      case SelectionModes.None: {
+        const { initialX, initialY } = selectionCoordinates;
+        if (selectedElement && initialX && initialY) {
+          e.preventDefault();
 
-      setElementCoords(selectedElement, currentX, currentY);
-      setSelectionCoordinates({
-        ...selectionCoordinates,
-        xOffset,
-        yOffset,
-      });
+          const currentX = e.clientX - initialX;
+          const currentY = e.clientY - initialY;
+          const xOffset = currentX;
+          const yOffset = currentY;
+
+          setElementCoords(selectedElement, currentX, currentY);
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            xOffset,
+            yOffset,
+          });
+        }
+        break;
+      }
+      case SelectionModes.Add: {
+        // Get the selection coordinates and add element
+        // If element size is too small, skip adding it
+        if (!selectedElement) return;
+        const newAppState = Object.assign({}, appState);
+        const creationElement = Object.assign(
+          {},
+          newAppState.elements[selectedElement]
+        );
+        if (creationElement.type === "rect") {
+          creationElement.width = e.clientX - creationElement.x;
+          creationElement.height = e.clientY - creationElement.y;
+        }
+        creationElement.state = ElementState.Visible;
+        newAppState.elements[selectedElement] = creationElement;
+        setAppState(newAppState);
+      }
     }
   };
 
@@ -125,37 +228,23 @@ function App() {
   };
 
   const onClick = (e: React.MouseEvent<SVGElement>) => {
-    if (!(e.target instanceof Element) || e.target.id === "container") {
-      removeSelection();
-      return;
-    }
-    const id = e.target.id;
-    if (selectedElement !== null && id !== selectedElement) {
-      removeSelection();
-    }
-    const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-    setSelectionCoordinates({
-      ...selectionCoordinates,
-      xOffset,
-      yOffset,
-    });
-    setSelectedElement(id);
-    setSelectedBorder(id, {
-      stroke: "pink",
-      strokeWidth: "5",
-      fillOpacity: "0.8",
-    });
+    // This function could be replaced by the other ones 🤔
+    // TODO: Need to record selection to see how big the element to be added should be.
+    // This will need updates to mousemove functions.
   };
   return (
     <div className="App">
-      <Toolbar />
+      <Toolbar
+        selectionMode={selectionMode}
+        setSelectionMode={setSelectionMode}
+      />
       <Canvas
         containerRef={containerRef}
+        selectionMode={selectionMode}
         canvasState={appState}
-        onClick={onClick}
-        onMouseDown={dragStart}
-        onMouseUp={dragEnd}
-        onMouseMove={drag}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
       />
       <Edit />
     </div>

@@ -1,11 +1,14 @@
 import { CSSProperties, LegacyRef, MouseEventHandler, MouseEvent } from "react";
 import "./Canvas.css";
+import { CanvasState, SelectionMode, SelectionModes } from "../../Types";
+
 /*
 
   Basic
   ----
   ✅ Drag elements around
   Add different elements to canvas
+  Add hover cursor when mouse is over element
 
   Advanced
   ----
@@ -16,45 +19,16 @@ import "./Canvas.css";
   ----
 */
 
-interface Circle {
-  id: string;
-  type: "circle";
-  style?: CSSProperties;
-  cx: number;
-  cy: number;
-  r: number;
-}
-
-interface Rect {
-  id: string;
-  type: "rect";
-  width: number;
-  height: number;
-  style?: CSSProperties;
-  rx?: number;
-  ry?: number;
-  x: number;
-  y: number;
-}
-
-type Element = Circle | Rect;
-
-export interface CanvasState {
-  elements: {
-    [id: string]: Element;
-  };
-}
-
 const Canvas = ({
   canvasState,
-  onClick,
+  selectionMode,
   containerRef,
   onMouseDown,
   onMouseUp,
   onMouseMove,
 }: {
   canvasState: CanvasState;
-  onClick: (e: MouseEvent<SVGElement>) => void;
+  selectionMode: SelectionMode;
   containerRef: LegacyRef<SVGSVGElement>;
   onMouseDown: MouseEventHandler<SVGSVGElement>;
   onMouseUp: MouseEventHandler<SVGSVGElement>;
@@ -71,12 +45,12 @@ const Canvas = ({
       return <circle {...props} />;
     }
   });
+  const isAdding = selectionMode.type === SelectionModes.Add;
   return (
     <svg
-      className="canvas"
+      className={`canvas ${isAdding ? "isAdding" : ""}`}
       ref={containerRef}
       id="container"
-      onClick={onClick}
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
       onMouseMove={onMouseMove}
