@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { CSSProperties, LegacyRef, MouseEventHandler, MouseEvent } from "react";
 
 /*
 
@@ -48,23 +48,40 @@ export interface CanvasState {
 const Canvas = ({
   canvasState,
   onClick,
+  containerRef,
+  onMouseDown,
+  onMouseUp,
+  onMouseMove,
 }: {
   canvasState: CanvasState;
-  onClick: (e: React.MouseEvent<SVGElement>) => void;
+  onClick: (e: MouseEvent<SVGElement>) => void;
+  containerRef: LegacyRef<SVGSVGElement>;
+  onMouseDown: MouseEventHandler<SVGSVGElement>;
+  onMouseUp: MouseEventHandler<SVGSVGElement>;
+  onMouseMove: MouseEventHandler<SVGSVGElement>;
 }) => {
   const { elements } = canvasState;
   const renderElements = Object.values(elements).map((e) => {
     if (e.type === "rect") {
       const { type, ...props } = e;
-      return <rect {...props} onClick={onClick} />;
+      return <rect {...props} />;
     } else {
       const { type, ...props } = e;
 
-      return <circle {...props} onClick={onClick} />;
+      return <circle {...props} />;
     }
   });
   return (
-    <svg height="1000" width="1000">
+    <svg
+      ref={containerRef}
+      id="container"
+      height="1000"
+      width="1000"
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+      onMouseMove={onMouseMove}
+    >
       {renderElements}
     </svg>
   );
