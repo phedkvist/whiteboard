@@ -1,9 +1,10 @@
 import { CSSProperties, LegacyRef, MouseEventHandler, MouseEvent } from "react";
-
+import "./Canvas.css";
 /*
 
   Basic
   ----
+  ✅ Drag elements around
   Add different elements to canvas
 
   Advanced
@@ -11,8 +12,7 @@ import { CSSProperties, LegacyRef, MouseEventHandler, MouseEvent } from "react";
   Handle zooming in/out
   Handle turning an element around
   Handle resizing an element
-
-  Collaboration
+  Collaboration features
   ----
 */
 
@@ -73,10 +73,9 @@ const Canvas = ({
   });
   return (
     <svg
+      className="canvas"
       ref={containerRef}
       id="container"
-      height="1000"
-      width="1000"
       onClick={onClick}
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}

@@ -148,7 +148,7 @@ function App() {
   };
   return (
     <div className="App">
-      {/*<Toolbar /> TODO: Make the canvas absolute start at top left corner */}
+      <Toolbar />
       <Canvas
         containerRef={containerRef}
         canvasState={appState}
