@@ -38,11 +38,11 @@ const Canvas = ({
   const renderElements = Object.values(elements).map((e) => {
     if (e.type === "rect") {
       const { type, ...props } = e;
-      return <rect {...props} />;
+      return <rect {...props} className={e.state} />;
     } else {
       const { type, ...props } = e;
 
-      return <ellipse {...props} />;
+      return <ellipse {...props} className={e.state} />;
     }
   });
   const isAdding = selectionMode.type === SelectionModes.Add;

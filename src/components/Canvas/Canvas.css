@@ -7,3 +7,7 @@
 .isAdding {
   cursor: crosshair;
 }
+
+.creation {
+  opacity: 40%;
+}

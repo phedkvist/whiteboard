@@ -22,9 +22,9 @@ export interface SelectionMode {
 }
 
 export enum ElementState {
-  Visible,
-  Hidden,
-  Creation,
+  Visible = "visible",
+  Hidden = "hidden",
+  Creation = "creation",
 }
 
 export interface Ellipse {

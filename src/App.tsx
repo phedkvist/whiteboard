@@ -162,6 +162,7 @@ function App() {
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
         }
+        creationElement.state = ElementState.Visible;
         newAppState.elements[selectedElement] = creationElement;
         setAppState(newAppState);
         setSelectionMode({ type: SelectionModes.None, elementType: undefined });
@@ -215,7 +216,7 @@ function App() {
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
         }
-        creationElement.state = ElementState.Visible;
+        creationElement.state = ElementState.Creation;
         newAppState.elements[selectedElement] = creationElement;
         setAppState(newAppState);
       }
