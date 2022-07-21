@@ -27,13 +27,14 @@ export enum ElementState {
   Creation,
 }
 
-export interface Circle {
+export interface Ellipse {
   id: string;
-  type: ElementType.Circle;
+  type: ElementType.Ellipse;
   style?: CSSProperties;
   cx: number;
   cy: number;
-  r: number;
+  rx: number;
+  ry: number;
   state: ElementState;
 }
 
@@ -52,9 +53,9 @@ export interface Rect {
 
 export enum ElementType {
   Rect = "rect",
-  Circle = "circle",
+  Ellipse = "ellipse",
 }
-export type Element = Circle | Rect;
+export type Element = Ellipse | Rect;
 
 export interface CanvasState {
   elements: {
@@ -66,10 +67,11 @@ export const initialState: CanvasState = {
   elements: {
     "1": {
       id: "1",
-      type: ElementType.Circle,
+      type: ElementType.Ellipse,
       cx: 50,
       cy: 50,
-      r: 50,
+      rx: 50,
+      ry: 50,
       style: { fill: "red" },
       state: ElementState.Visible,
     },

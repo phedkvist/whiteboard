@@ -2,7 +2,7 @@ import "./Toolbar.css";
 import {
   SelectionMode,
   SelectionModes,
-  Circle,
+  Ellipse,
   Rect,
   ElementType,
 } from "../../Types";
@@ -45,7 +45,7 @@ const Toolbar = ({
         onClick={() =>
           setSelectionMode({
             type: SelectionModes.Add,
-            elementType: ElementType.Circle,
+            elementType: ElementType.Ellipse,
           })
         }
       >

@@ -19,6 +19,7 @@ import {
   ElementType,
   Rect,
   ElementState,
+  Ellipse,
 } from "./Types";
 
 function App() {
@@ -101,8 +102,20 @@ function App() {
             setAppState(newAppState);
             break;
           }
-          case ElementType.Circle: {
+          case ElementType.Ellipse: {
             // Implement
+            const newCircle: Ellipse = {
+              id,
+              type: ElementType.Ellipse,
+              rx: 0,
+              ry: 0,
+              cx: initialX,
+              cy: initialY,
+              state: ElementState.Creation,
+            };
+            const newAppState = Object.assign({}, appState);
+            newAppState.elements[id] = newCircle;
+            setAppState(newAppState);
             break;
           }
         }
@@ -138,6 +151,16 @@ function App() {
           creationElement.height = e.clientY - creationElement.y;
           initialX = creationElement.x;
           initialY = creationElement.y;
+        } else if (creationElement.type === "ellipse") {
+          // Make sure the cx and cy are set correctly
+          // initialX = e.clientX - 2 * creationElement.cx;
+          // initialY = e.clientY - 2 * creationElement.cy;
+          const { initialX, initialY } = selectionCoordinates;
+          if (!(initialX && initialY)) return;
+          creationElement.rx = e.clientX - initialX;
+          creationElement.ry = e.clientY - initialY;
+          creationElement.cx = initialX + creationElement.rx;
+          creationElement.cy = initialY + creationElement.ry;
         }
         newAppState.elements[selectedElement] = creationElement;
         setAppState(newAppState);
@@ -183,6 +206,14 @@ function App() {
         if (creationElement.type === "rect") {
           creationElement.width = e.clientX - creationElement.x;
           creationElement.height = e.clientY - creationElement.y;
+        } else if (creationElement.type === "ellipse") {
+          // const radius =
+          const { initialX, initialY } = selectionCoordinates;
+          if (!(initialX && initialY)) return;
+          creationElement.rx = e.clientX - initialX;
+          creationElement.ry = e.clientY - initialY;
+          creationElement.cx = initialX + creationElement.rx;
+          creationElement.cy = initialY + creationElement.ry;
         }
         creationElement.state = ElementState.Visible;
         newAppState.elements[selectedElement] = creationElement;
@@ -194,10 +225,10 @@ function App() {
   const setElementCoords = (id: string, x: number, y: number) => {
     const newAppState = Object.assign({}, appState);
     const obj = newAppState.elements[id];
-    if (obj.type === "circle") {
+    if (obj.type === "ellipse") {
       // CX is center of circle, hence add radius since incoming xy coords are top left
-      obj.cx = x + obj.r;
-      obj.cy = y + obj.r;
+      obj.cx = x + obj.rx;
+      obj.cy = y + obj.ry;
     } else if (obj.type === "rect") {
       obj.x = x;
       obj.y = y;
@@ -227,11 +258,6 @@ function App() {
     setSelectedElement(null);
   };
 
-  const onClick = (e: React.MouseEvent<SVGElement>) => {
-    // This function could be replaced by the other ones 🤔
-    // TODO: Need to record selection to see how big the element to be added should be.
-    // This will need updates to mousemove functions.
-  };
   return (
     <div className="App">
       <Toolbar

@@ -7,7 +7,7 @@ import { CanvasState, SelectionMode, SelectionModes } from "../../Types";
   Basic
   ----
   ✅ Drag elements around
-  Add different elements to canvas
+  ✅ Add different elements to canvas
   Add hover cursor when mouse is over element
 
   Advanced
@@ -42,7 +42,7 @@ const Canvas = ({
     } else {
       const { type, ...props } = e;
 
-      return <circle {...props} />;
+      return <ellipse {...props} />;
     }
   });
   const isAdding = selectionMode.type === SelectionModes.Add;
