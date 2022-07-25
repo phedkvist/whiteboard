@@ -11,3 +11,7 @@
 .creation {
   opacity: 40%;
 }
+
+.isSelected {
+  outline: 2px dashed lightblue;
+}

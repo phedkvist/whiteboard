@@ -1,11 +1,5 @@
 import { v4 as uuid } from "uuid";
-import {
-  LegacyRef,
-  MouseEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MouseEventHandler, useRef, useState } from "react";
 import "./App.css";
 import Canvas from "./components/Canvas";
 import Edit from "./components/Edit";
@@ -20,7 +14,9 @@ import {
   Rect,
   ElementState,
   Ellipse,
+  Text,
 } from "./Types";
+import { Properties } from "./components/Properties";
 
 function App() {
   const [appState, setAppState] = useState<CanvasState>(initialState);
@@ -56,11 +52,6 @@ function App() {
         const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
 
         setSelectedElement(id);
-        setSelectedBorder(id, {
-          stroke: "pink",
-          strokeWidth: "5",
-          fillOpacity: "0.8",
-        });
 
         const initialX = e.clientX - xOffset;
         const initialY = e.clientY - yOffset;
@@ -118,6 +109,21 @@ function App() {
             setAppState(newAppState);
             break;
           }
+          case ElementType.Text: {
+            const newText: Text = {
+              id,
+              type: ElementType.Text,
+              x: initialX,
+              y: initialY,
+              text: "Text",
+              state: ElementState.Creation,
+              style: { fontSize: "14px", color: "black" },
+            };
+            const newAppState = Object.assign({}, appState);
+            newAppState.elements[id] = newText;
+            setAppState(newAppState);
+            break;
+          }
         }
       }
     }
@@ -145,12 +151,9 @@ function App() {
           {},
           newAppState.elements[selectedElement]
         );
-        let initialX, initialY;
         if (creationElement.type === "rect") {
           creationElement.width = e.clientX - creationElement.x;
           creationElement.height = e.clientY - creationElement.y;
-          initialX = creationElement.x;
-          initialY = creationElement.y;
         } else if (creationElement.type === "ellipse") {
           // Make sure the cx and cy are set correctly
           // initialX = e.clientX - 2 * creationElement.cx;
@@ -161,6 +164,9 @@ function App() {
           creationElement.ry = e.clientY - initialY;
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
+        } else if (creationElement.type === "text") {
+          creationElement.x = e.clientX;
+          creationElement.y = e.clientY;
         }
         creationElement.state = ElementState.Visible;
         newAppState.elements[selectedElement] = creationElement;
@@ -230,7 +236,7 @@ function App() {
       // CX is center of circle, hence add radius since incoming xy coords are top left
       obj.cx = x + obj.rx;
       obj.cy = y + obj.ry;
-    } else if (obj.type === "rect") {
+    } else if (obj.type === "rect" || obj.type === "text") {
       obj.x = x;
       obj.y = y;
     }
@@ -238,24 +244,7 @@ function App() {
     setAppState(newAppState);
   };
 
-  const setSelectedBorder = (id: string, style: any) => {
-    const newAppState = Object.assign({}, appState);
-    const obj = newAppState.elements[id];
-    obj.style = {
-      ...obj.style,
-      ...style,
-    };
-    newAppState.elements = { ...newAppState.elements, [id]: obj };
-    setAppState(newAppState);
-  };
-
   const removeSelection = () => {
-    selectedElement &&
-      setSelectedBorder(selectedElement, {
-        stroke: "pink",
-        strokeWidth: "0",
-        fillOpacity: "1",
-      });
     setSelectedElement(null);
   };
 
@@ -265,8 +254,15 @@ function App() {
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
       />
+      <Properties
+        selectionMode={selectionMode}
+        appState={appState}
+        selectedElement={selectedElement}
+        setAppState={setAppState}
+      />
       <Canvas
         containerRef={containerRef}
+        selectedElement={selectedElement}
         selectionMode={selectionMode}
         canvasState={appState}
         onMouseDown={onMouseDown}

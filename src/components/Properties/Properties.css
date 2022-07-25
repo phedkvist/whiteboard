@@ -1,0 +1,9 @@
+.properties {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 2;
+  background-color: lightcyan;
+  padding: 5px 10px;
+}

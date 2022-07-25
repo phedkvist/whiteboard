@@ -27,35 +27,44 @@ export enum ElementState {
   Creation = "creation",
 }
 
-export interface Ellipse {
+interface ElementBase {
   id: string;
-  type: ElementType.Ellipse;
   style?: CSSProperties;
+  state: ElementState;
+}
+
+// TODO: Turn these into classes that can also contain rendering functions.
+export interface Ellipse extends ElementBase {
+  type: ElementType.Ellipse;
   cx: number;
   cy: number;
   rx: number;
   ry: number;
-  state: ElementState;
 }
 
-export interface Rect {
-  id: string;
+export interface Rect extends ElementBase {
   type: ElementType.Rect;
   width: number;
   height: number;
-  style?: CSSProperties;
   rx?: number;
   ry?: number;
   x: number;
   y: number;
-  state: ElementState;
+}
+
+export interface Text extends ElementBase {
+  type: ElementType.Text;
+  text: string;
+  x: number;
+  y: number;
 }
 
 export enum ElementType {
   Rect = "rect",
   Ellipse = "ellipse",
+  Text = "text",
 }
-export type Element = Ellipse | Rect;
+export type Element = Ellipse | Rect | Text;
 
 export interface CanvasState {
   elements: {
@@ -72,7 +81,12 @@ export const initialState: CanvasState = {
       cy: 50,
       rx: 50,
       ry: 50,
-      style: { fill: "red" },
+      style: {
+        fill: "red",
+        strokeWidth: 5,
+        strokeDasharray: 5,
+        stroke: "#f8a100",
+      },
       state: ElementState.Visible,
     },
     "2": {

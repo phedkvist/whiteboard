@@ -1,11 +1,5 @@
 import "./Toolbar.css";
-import {
-  SelectionMode,
-  SelectionModes,
-  Ellipse,
-  Rect,
-  ElementType,
-} from "../../Types";
+import { SelectionMode, SelectionModes, ElementType } from "../../Types";
 /*
 Add element
 - Rect, Circle, Text, Arrow
@@ -50,6 +44,16 @@ const Toolbar = ({
         }
       >
         Circle
+      </button>
+      <button
+        onClick={() =>
+          setSelectionMode({
+            type: SelectionModes.Add,
+            elementType: ElementType.Text,
+          })
+        }
+      >
+        Text
       </button>
     </div>
   );
