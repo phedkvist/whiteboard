@@ -12,8 +12,9 @@ export interface SelectionCoordinates {
 export enum SelectionModes {
   None,
   Add,
-  Edit,
-  Selection,
+  Selected,
+  Resizing,
+  Turning,
 }
 
 export interface SelectionMode {

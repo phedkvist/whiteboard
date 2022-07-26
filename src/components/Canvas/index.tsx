@@ -2,29 +2,6 @@ import { LegacyRef, MouseEventHandler } from "react";
 import "./Canvas.css";
 import { CanvasState, SelectionMode, SelectionModes } from "../../Types";
 
-/*
-
-  Basic
-  ----
-  ✅ Drag elements around
-  ✅ Add basic elements to canvas (rect, ellipse)
-  ✅ Add hover cursor when mouse is over element
-  ✅ Add text element to canvas
-  Add element property settings on the left handside
-  Change color of element on canvas
-
-
-  Advanced
-  ----
-  Handle zooming in/out
-  Handle turning an element around
-  Handle resizing an element
-  Add history logs
-  Add undo/redo of operations
-  Collaboration features
-  ----
-*/
-
 const Canvas = ({
   canvasState,
   selectionMode,
@@ -51,20 +28,62 @@ const Canvas = ({
     const isSelected = e.id === selectedElement ? "isSelected" : "";
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
     const classes = `${e.state} ${isSelected} ${isHovering}`;
+    let renderElement;
     if (e.type === "rect") {
       const { type, ...props } = e;
-      return <rect {...props} className={classes} />;
+      renderElement = <rect {...props} className={classes} />;
     } else if (e.type === "ellipse") {
       const { type, ...props } = e;
 
-      return <ellipse {...props} className={classes} />;
+      renderElement = <ellipse {...props} className={classes} />;
     } else if (e.type === "text") {
       const { type, text, ...props } = e;
-      return (
+      renderElement = (
         <text {...props} className={classes}>
           {text}
         </text>
       );
+    }
+    if (isSelected && e.type === "rect") {
+      return (
+        <g>
+          {renderElement}
+          <rect
+            id={`${e.id}-resize-top-left`}
+            x={e.x - 8}
+            y={e.y - 8}
+            width={8}
+            height={8}
+            fill={"darkblue"}
+          />
+          <rect
+            id={`${e.id}-resize-top-right`}
+            x={e.x + e.width}
+            y={e.y - 8}
+            width={8}
+            height={8}
+            fill={"darkblue"}
+          />
+          <rect
+            id={`${e.id}-resize-bottom-right`}
+            x={e.x + e.width}
+            y={e.y + e.height}
+            width={8}
+            height={8}
+            fill={"darkblue"}
+          />
+          <rect
+            id={`${e.id}-resize-bottom-left`}
+            x={e.x - 8}
+            y={e.y + e.height}
+            width={8}
+            height={8}
+            fill={"darkblue"}
+          />
+        </g>
+      );
+    } else {
+      return renderElement;
     }
   });
   const isAdding = selectionMode.type === SelectionModes.Add;

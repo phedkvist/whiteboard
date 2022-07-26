@@ -42,6 +42,8 @@ function App() {
       setHoverElement(null);
       return;
     }
+    // TODO: If hovering over a "resize element" we don't need to add it to the state
+    console.log(e.target.id);
     setHoverElement(e.target.id);
   };
 
@@ -61,6 +63,8 @@ function App() {
         const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
 
         setSelectedElement(id);
+        // should get elementType here.
+        setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
 
         const initialX = e.clientX - xOffset;
         const initialY = e.clientY - yOffset;
@@ -134,6 +138,22 @@ function App() {
             break;
           }
         }
+        break;
+      }
+      case SelectionModes.Selected: {
+        // If pressing down on a resize element.
+        // start capturing the movements which should update the size
+        // Could set selection mode to resizing if this is the case.
+        if (!(e.target instanceof Element) || e.target.id === "container") {
+          return;
+        }
+        console.log();
+        if (e.target.id.includes("resize")) {
+          // TODO: Might need to add elementType below as well :)
+          setSelectionMode({ ...selectionMode, type: SelectionModes.Resizing });
+          console.log("SET TO RESISING");
+        }
+        break;
       }
     }
   };
@@ -142,7 +162,7 @@ function App() {
     // console.log("onMouseUp");
     // On mouse up add the element to the screen
     switch (selectionMode.type) {
-      case SelectionModes.None: {
+      case SelectionModes.Selected: {
         const initialX = selectionCoordinates.currentX;
         const initialY = selectionCoordinates.currentY;
         setSelectionCoordinates({
@@ -150,6 +170,7 @@ function App() {
           initialX,
           initialY,
         });
+        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
         break;
       }
       case SelectionModes.Add: {
@@ -180,8 +201,19 @@ function App() {
         creationElement.state = ElementState.Visible;
         newAppState.elements[selectedElement] = creationElement;
         setAppState(newAppState);
-        setSelectionMode({ type: SelectionModes.None, elementType: undefined });
+        // Need to handle it being selected but not in selection mode which drags elements around?
+        setSelectionMode({
+          ...selectionMode,
+          type: SelectionModes.None,
+        });
         setSelectedElement(null);
+        break;
+      }
+      case SelectionModes.Resizing: {
+        // Size should already be set.
+        // Change from resizing to selection mode.
+
+        break;
       }
     }
   };
@@ -191,7 +223,7 @@ function App() {
     // Record size of the add element state and draw faded element
 
     switch (selectionMode.type) {
-      case SelectionModes.None: {
+      case SelectionModes.Selected: {
         const { initialX, initialY } = selectionCoordinates;
         if (selectedElement && initialX && initialY) {
           e.preventDefault();
@@ -201,6 +233,7 @@ function App() {
           const xOffset = currentX;
           const yOffset = currentY;
 
+          // setSelectionMode({ ...selectionMode, type: SelectionModes.Moving });
           setElementCoords(selectedElement, currentX, currentY);
           setSelectionCoordinates({
             ...selectionCoordinates,
@@ -234,6 +267,14 @@ function App() {
         creationElement.state = ElementState.Creation;
         newAppState.elements[selectedElement] = creationElement;
         setAppState(newAppState);
+        break;
+      }
+      case SelectionModes.Resizing: {
+        // Resize the given element according to how the mouse moves
+        // Need to know which corner we have selected.
+        // This will then be used to know how to resize the element.
+        console.log(e.clientX, e.clientY);
+        break;
       }
     }
   };
@@ -241,6 +282,9 @@ function App() {
   const setElementCoords = (id: string, x: number, y: number) => {
     const newAppState = Object.assign({}, appState);
     const obj = newAppState.elements[id];
+    if (!obj) {
+      throw new Error(`Can't find element with id: ${id} on the screen.`);
+    }
     if (obj.type === "ellipse") {
       // CX is center of circle, hence add radius since incoming xy coords are top left
       obj.cx = x + obj.rx;
@@ -260,6 +304,7 @@ function App() {
   return (
     <div className="App">
       <Toolbar
+        setSelectedElement={setSelectedElement}
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
       />
