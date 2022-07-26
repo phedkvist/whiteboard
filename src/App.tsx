@@ -21,6 +21,7 @@ import { Properties } from "./components/Properties";
 function App() {
   const [appState, setAppState] = useState<CanvasState>(initialState);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [hoverElement, setHoverElement] = useState<string | null>(null);
   const [selectionCoordinates, setSelectionCoordinates] =
     useState<SelectionCoordinates>({
       currentX: null,
@@ -36,8 +37,16 @@ function App() {
 
   const containerRef = useRef<SVGSVGElement>(null);
 
+  const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {
+    if (!(e.target instanceof Element) || e.target.id === "container") {
+      setHoverElement(null);
+      return;
+    }
+    setHoverElement(e.target.id);
+  };
+
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
-    console.log("onMouseDown");
+    //  console.log("onMouseDown");
     // Enter add element state
     switch (selectionMode.type) {
       case SelectionModes.None: {
@@ -66,7 +75,7 @@ function App() {
       }
       case SelectionModes.Add: {
         // Create temp obj and draw it on the screen, assign selectedElemId(id) right?
-        console.log(e);
+        // console.log(e);
         const initialX = e.clientX;
         const initialY = e.clientY;
         setSelectionCoordinates({
@@ -130,7 +139,7 @@ function App() {
   };
 
   const onMouseUp: MouseEventHandler<SVGSVGElement> = (e) => {
-    console.log("onMouseUp");
+    // console.log("onMouseUp");
     // On mouse up add the element to the screen
     switch (selectionMode.type) {
       case SelectionModes.None: {
@@ -178,7 +187,7 @@ function App() {
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
-    console.log("onMouseMove");
+    // console.log("onMouseMove");
     // Record size of the add element state and draw faded element
 
     switch (selectionMode.type) {
@@ -263,8 +272,10 @@ function App() {
       <Canvas
         containerRef={containerRef}
         selectedElement={selectedElement}
+        hoverElement={hoverElement}
         selectionMode={selectionMode}
         canvasState={appState}
+        onMouseOver={onMouseOver}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onMouseMove={onMouseMove}

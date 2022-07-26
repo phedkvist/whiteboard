@@ -8,7 +8,7 @@ import { CanvasState, SelectionMode, SelectionModes } from "../../Types";
   ----
   ✅ Drag elements around
   ✅ Add basic elements to canvas (rect, ellipse)
-  Add hover cursor when mouse is over element
+  ✅ Add hover cursor when mouse is over element
   ✅ Add text element to canvas
   Add element property settings on the left handside
   Change color of element on canvas
@@ -29,7 +29,9 @@ const Canvas = ({
   canvasState,
   selectionMode,
   selectedElement,
+  hoverElement,
   containerRef,
+  onMouseOver,
   onMouseDown,
   onMouseUp,
   onMouseMove,
@@ -37,7 +39,9 @@ const Canvas = ({
   canvasState: CanvasState;
   selectionMode: SelectionMode;
   selectedElement: string | null;
+  hoverElement: string | null;
   containerRef: LegacyRef<SVGSVGElement>;
+  onMouseOver: MouseEventHandler<SVGSVGElement>;
   onMouseDown: MouseEventHandler<SVGSVGElement>;
   onMouseUp: MouseEventHandler<SVGSVGElement>;
   onMouseMove: MouseEventHandler<SVGSVGElement>;
@@ -45,17 +49,19 @@ const Canvas = ({
   const { elements } = canvasState;
   const renderElements = Object.values(elements).map((e) => {
     const isSelected = e.id === selectedElement ? "isSelected" : "";
+    const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
+    const classes = `${e.state} ${isSelected} ${isHovering}`;
     if (e.type === "rect") {
       const { type, ...props } = e;
-      return <rect {...props} className={`${e.state} ${isSelected}`} />;
+      return <rect {...props} className={classes} />;
     } else if (e.type === "ellipse") {
       const { type, ...props } = e;
 
-      return <ellipse {...props} className={`${e.state} ${isSelected}`} />;
+      return <ellipse {...props} className={classes} />;
     } else if (e.type === "text") {
       const { type, text, ...props } = e;
       return (
-        <text {...props} className={`${e.state} ${isSelected}`}>
+        <text {...props} className={classes}>
           {text}
         </text>
       );
@@ -70,6 +76,7 @@ const Canvas = ({
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
       onMouseMove={onMouseMove}
+      onMouseOver={onMouseOver}
     >
       {renderElements}
     </svg>

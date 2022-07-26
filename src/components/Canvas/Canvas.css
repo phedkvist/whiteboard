@@ -15,3 +15,7 @@
 .isSelected {
   outline: 2px dashed lightblue;
 }
+
+.isHovering {
+  outline: 1px dashed rgba(173, 216, 230, 0.7);
+}
