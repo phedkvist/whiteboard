@@ -54,6 +54,7 @@ const Canvas = ({
             y={e.y - 8}
             width={8}
             height={8}
+            style={{ cursor: "nwse-resize" }}
             fill={"darkblue"}
           />
           <rect
@@ -62,6 +63,7 @@ const Canvas = ({
             y={e.y - 8}
             width={8}
             height={8}
+            style={{ cursor: "nesw-resize" }}
             fill={"darkblue"}
           />
           <rect
@@ -70,6 +72,7 @@ const Canvas = ({
             y={e.y + e.height}
             width={8}
             height={8}
+            style={{ cursor: "nwse-resize" }}
             fill={"darkblue"}
           />
           <rect
@@ -78,6 +81,7 @@ const Canvas = ({
             y={e.y + e.height}
             width={8}
             height={8}
+            style={{ cursor: "nesw-resize" }}
             fill={"darkblue"}
           />
         </g>

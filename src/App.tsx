@@ -15,8 +15,10 @@ import {
   ElementState,
   Ellipse,
   Text,
+  Corner,
 } from "./Types";
 import { Properties } from "./components/Properties";
+import { getClosestCorner } from "./utility";
 
 function App() {
   const [appState, setAppState] = useState<CanvasState>(initialState);
@@ -28,8 +30,11 @@ function App() {
       currentY: null,
       initialX: null,
       initialY: null,
+      initialHeight: null,
+      initialWidth: null,
       xOffset: 0,
       yOffset: 0,
+      selectedCorner: null,
     });
   const [selectionMode, setSelectionMode] = useState<SelectionMode>({
     type: SelectionModes.None,
@@ -43,7 +48,6 @@ function App() {
       return;
     }
     // TODO: If hovering over a "resize element" we don't need to add it to the state
-    console.log(e.target.id);
     setHoverElement(e.target.id);
   };
 
@@ -144,22 +148,154 @@ function App() {
         // If pressing down on a resize element.
         // start capturing the movements which should update the size
         // Could set selection mode to resizing if this is the case.
+
         if (!(e.target instanceof Element) || e.target.id === "container") {
+          setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+          setSelectedElement(null);
           return;
         }
-        console.log();
         if (e.target.id.includes("resize")) {
           // TODO: Might need to add elementType below as well :)
+          const {
+            x: xOffset,
+            y: yOffset,
+            width,
+            height,
+          } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
+            x: null,
+            y: null,
+          };
+          if (!xOffset || !yOffset) return;
+          const initialX = e.clientX;
+          const initialY = e.clientY;
+          if (!selectedElement) return;
+          const element = appState.elements[selectedElement];
+          const selectedCorner = getClosestCorner(element, initialX, initialY);
+          if (!selectedCorner) return;
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            xOffset,
+            yOffset,
+            initialX,
+            initialY,
+            initialWidth: width,
+            initialHeight: height,
+            selectedCorner,
+          });
           setSelectionMode({ ...selectionMode, type: SelectionModes.Resizing });
-          console.log("SET TO RESISING");
+          console.log("SET TO RESIZING");
         }
         break;
       }
     }
   };
 
+  const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
+    // console.log("onMouseMove");
+    // Record size of the add element state and draw faded element
+
+    switch (selectionMode.type) {
+      case SelectionModes.Selected: {
+        const { initialX, initialY } = selectionCoordinates;
+        if (selectedElement && initialX && initialY) {
+          e.preventDefault();
+
+          const currentX = e.clientX - initialX;
+          const currentY = e.clientY - initialY;
+          const xOffset = currentX;
+          const yOffset = currentY;
+
+          console.log("ON MOUSE MOVE SELECTED");
+
+          // setSelectionMode({ ...selectionMode, type: SelectionModes.Moving });
+          setElementCoords(selectedElement, currentX, currentY);
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            xOffset,
+            yOffset,
+          });
+        }
+        break;
+      }
+      case SelectionModes.Add: {
+        // Get the selection coordinates and add element
+        // If element size is too small, skip adding it
+        if (!selectedElement) return;
+        const newAppState = Object.assign({}, appState);
+        const creationElement = Object.assign(
+          {},
+          newAppState.elements[selectedElement]
+        );
+        if (creationElement.type === "rect") {
+          creationElement.width = e.clientX - creationElement.x;
+          creationElement.height = e.clientY - creationElement.y;
+        } else if (creationElement.type === "ellipse") {
+          // const radius =
+          const { initialX, initialY } = selectionCoordinates;
+          if (!(initialX && initialY)) return;
+          creationElement.rx = e.clientX - initialX;
+          creationElement.ry = e.clientY - initialY;
+          creationElement.cx = initialX + creationElement.rx;
+          creationElement.cy = initialY + creationElement.ry;
+        }
+        creationElement.state = ElementState.Creation;
+        newAppState.elements[selectedElement] = creationElement;
+        setAppState(newAppState);
+        break;
+      }
+      case SelectionModes.Resizing: {
+        // Resize the given element according to how the mouse moves
+        // Need to know which corner we have selected.
+        // This will then be used to know how to resize the element.
+
+        /*
+          Bottom left: calc diff and update width and height
+          Others: update x,y and width and height
+        */
+        const {
+          initialX,
+          initialY,
+          initialWidth,
+          initialHeight,
+          selectedCorner,
+        } = selectionCoordinates;
+        if (
+          selectedElement &&
+          initialX &&
+          initialY &&
+          initialWidth &&
+          initialHeight
+        ) {
+          e.preventDefault();
+          if (selectedCorner === Corner.BottomRight) {
+            const newWidth = initialWidth + e.clientX - initialX;
+            const newHeight = initialHeight + e.clientY - initialY;
+            setElementSize(selectedElement, newWidth, newHeight, null, null);
+          } else if (selectedCorner === Corner.BottomLeft) {
+            const newWidth = initialWidth - (e.clientX - initialX);
+            const newHeight = initialHeight + e.clientY - initialY;
+            const newX = e.clientX;
+            setElementSize(selectedElement, newWidth, newHeight, newX, null);
+          } else if (selectedCorner === Corner.TopRight) {
+            const newWidth = initialWidth + e.clientX - initialX;
+            const newHeight = initialHeight - (e.clientY - initialY);
+            const newY = e.clientY;
+            setElementSize(selectedElement, newWidth, newHeight, null, newY);
+          } else if (selectedCorner === Corner.TopLeft) {
+            const newWidth = initialWidth - (e.clientX - initialX);
+            const newHeight = initialHeight - (e.clientY - initialY);
+            const newX = e.clientX;
+            const newY = e.clientY;
+            setElementSize(selectedElement, newWidth, newHeight, newX, newY);
+          }
+        }
+
+        break;
+      }
+    }
+  };
+
   const onMouseUp: MouseEventHandler<SVGSVGElement> = (e) => {
-    // console.log("onMouseUp");
     // On mouse up add the element to the screen
     switch (selectionMode.type) {
       case SelectionModes.Selected: {
@@ -170,7 +306,8 @@ function App() {
           initialX,
           initialY,
         });
-        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+        console.log("ON MOUSE UP SELECTED");
+        // setSelectionMode({ ...selectionMode, type: SelectionModes.None });
         break;
       }
       case SelectionModes.Add: {
@@ -213,67 +350,11 @@ function App() {
         // Size should already be set.
         // Change from resizing to selection mode.
 
-        break;
-      }
-    }
-  };
-
-  const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
-    // console.log("onMouseMove");
-    // Record size of the add element state and draw faded element
-
-    switch (selectionMode.type) {
-      case SelectionModes.Selected: {
-        const { initialX, initialY } = selectionCoordinates;
-        if (selectedElement && initialX && initialY) {
-          e.preventDefault();
-
-          const currentX = e.clientX - initialX;
-          const currentY = e.clientY - initialY;
-          const xOffset = currentX;
-          const yOffset = currentY;
-
-          // setSelectionMode({ ...selectionMode, type: SelectionModes.Moving });
-          setElementCoords(selectedElement, currentX, currentY);
-          setSelectionCoordinates({
-            ...selectionCoordinates,
-            xOffset,
-            yOffset,
-          });
-        }
-        break;
-      }
-      case SelectionModes.Add: {
-        // Get the selection coordinates and add element
-        // If element size is too small, skip adding it
-        if (!selectedElement) return;
-        const newAppState = Object.assign({}, appState);
-        const creationElement = Object.assign(
-          {},
-          newAppState.elements[selectedElement]
-        );
-        if (creationElement.type === "rect") {
-          creationElement.width = e.clientX - creationElement.x;
-          creationElement.height = e.clientY - creationElement.y;
-        } else if (creationElement.type === "ellipse") {
-          // const radius =
-          const { initialX, initialY } = selectionCoordinates;
-          if (!(initialX && initialY)) return;
-          creationElement.rx = e.clientX - initialX;
-          creationElement.ry = e.clientY - initialY;
-          creationElement.cx = initialX + creationElement.rx;
-          creationElement.cy = initialY + creationElement.ry;
-        }
-        creationElement.state = ElementState.Creation;
-        newAppState.elements[selectedElement] = creationElement;
-        setAppState(newAppState);
-        break;
-      }
-      case SelectionModes.Resizing: {
-        // Resize the given element according to how the mouse moves
-        // Need to know which corner we have selected.
-        // This will then be used to know how to resize the element.
-        console.log(e.clientX, e.clientY);
+        setSelectionMode({
+          ...selectionMode,
+          type: SelectionModes.None,
+        });
+        setSelectedElement(null);
         break;
       }
     }
@@ -292,6 +373,32 @@ function App() {
     } else if (obj.type === "rect" || obj.type === "text") {
       obj.x = x;
       obj.y = y;
+    }
+    newAppState.elements = { ...newAppState.elements, [id]: obj };
+    setAppState(newAppState);
+  };
+
+  const setElementSize = (
+    id: string,
+    width: number,
+    height: number,
+    x: number | null,
+    y: number | null
+  ) => {
+    const newAppState = Object.assign({}, appState);
+    const obj = newAppState.elements[id];
+    if (!obj) {
+      throw new Error(`Can't find element with id: ${id} on the screen.`);
+    }
+    if (obj.type === "ellipse") {
+      // TODO: Implement later
+      //obj.cx = x + obj.rx;
+      //obj.cy = y + obj.ry;
+    } else if (obj.type === "rect") {
+      obj.width = width;
+      obj.height = height;
+      if (x) obj.x = x;
+      if (y) obj.y = y;
     }
     newAppState.elements = { ...newAppState.elements, [id]: obj };
     setAppState(newAppState);

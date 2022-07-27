@@ -5,8 +5,18 @@ export interface SelectionCoordinates {
   currentY: null | number;
   initialX: null | number;
   initialY: null | number;
+  initialWidth: null | number;
+  initialHeight: null | number;
   xOffset: number;
   yOffset: number;
+  selectedCorner: null | Corner;
+}
+
+export enum Corner {
+  TopLeft = "TopLeft",
+  TopRight = "TopRight",
+  BottomLeft = "BottomLeft",
+  BottomRight = "BottomRight",
 }
 
 export enum SelectionModes {
