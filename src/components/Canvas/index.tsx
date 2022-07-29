@@ -1,6 +1,37 @@
 import { LegacyRef, MouseEventHandler } from "react";
 import "./Canvas.css";
-import { CanvasState, SelectionMode, SelectionModes } from "../../Types";
+import {
+  CanvasState,
+  SelectionMode,
+  SelectionModes,
+  Element,
+} from "../../Types";
+
+const CORNER_OFFSET = 8;
+const getCornerCoords = (e: Element) => {
+  if (e.type === "rect") {
+    return {
+      tL: { x: e.x - CORNER_OFFSET, y: e.y - CORNER_OFFSET },
+      tR: { x: e.x + e.width, y: e.y - CORNER_OFFSET },
+      bR: { x: e.x + e.width, y: e.y + e.height },
+      bL: { x: e.x - CORNER_OFFSET, y: e.y + e.height },
+    };
+  } else if (e.type === "ellipse") {
+    return {
+      tL: { x: e.cx - e.rx - CORNER_OFFSET, y: e.cy - e.ry - CORNER_OFFSET },
+      tR: { x: e.cx + e.rx, y: e.cy - e.ry - CORNER_OFFSET },
+      bR: { x: e.cx + e.rx, y: e.cy + e.ry },
+      bL: { x: e.cx - e.rx - CORNER_OFFSET, y: e.cy + e.ry },
+    };
+  } else {
+    return {
+      tL: { x: 0, y: 0 },
+      tR: { x: 0, y: 0 },
+      bR: { x: 0, y: 0 },
+      bL: { x: 0, y: 0 },
+    };
+  }
+};
 
 const Canvas = ({
   canvasState,
@@ -44,14 +75,15 @@ const Canvas = ({
         </text>
       );
     }
-    if (isSelected && e.type === "rect") {
+    if (isSelected && ["rect", "ellipse"].includes(e.type)) {
+      const { tL, tR, bR, bL } = getCornerCoords(e);
       return (
         <g>
           {renderElement}
           <rect
             id={`${e.id}-resize-top-left`}
-            x={e.x - 8}
-            y={e.y - 8}
+            x={tL.x}
+            y={tL.y}
             width={8}
             height={8}
             style={{ cursor: "nwse-resize" }}
@@ -59,8 +91,8 @@ const Canvas = ({
           />
           <rect
             id={`${e.id}-resize-top-right`}
-            x={e.x + e.width}
-            y={e.y - 8}
+            x={tR.x}
+            y={tR.y}
             width={8}
             height={8}
             style={{ cursor: "nesw-resize" }}
@@ -68,8 +100,8 @@ const Canvas = ({
           />
           <rect
             id={`${e.id}-resize-bottom-right`}
-            x={e.x + e.width}
-            y={e.y + e.height}
+            x={bR.x}
+            y={bR.y}
             width={8}
             height={8}
             style={{ cursor: "nwse-resize" }}
@@ -77,8 +109,8 @@ const Canvas = ({
           />
           <rect
             id={`${e.id}-resize-bottom-left`}
-            x={e.x - 8}
-            y={e.y + e.height}
+            x={bL.x}
+            y={bL.y}
             width={8}
             height={8}
             style={{ cursor: "nesw-resize" }}

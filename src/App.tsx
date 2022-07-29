@@ -19,6 +19,9 @@ import {
 } from "./Types";
 import { Properties } from "./components/Properties";
 import { getClosestCorner } from "./utility";
+import { Debugger } from "./components/Debugger/Debugger";
+
+const SHOW_DEBUGGER = true;
 
 function App() {
   const [appState, setAppState] = useState<CanvasState>(initialState);
@@ -47,13 +50,10 @@ function App() {
       setHoverElement(null);
       return;
     }
-    // TODO: If hovering over a "resize element" we don't need to add it to the state
     setHoverElement(e.target.id);
   };
 
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
-    //  console.log("onMouseDown");
-    // Enter add element state
     switch (selectionMode.type) {
       case SelectionModes.None: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
@@ -82,8 +82,6 @@ function App() {
         break;
       }
       case SelectionModes.Add: {
-        // Create temp obj and draw it on the screen, assign selectedElemId(id) right?
-        // console.log(e);
         const initialX = e.clientX;
         const initialY = e.clientY;
         setSelectionCoordinates({
@@ -183,7 +181,22 @@ function App() {
             selectedCorner,
           });
           setSelectionMode({ ...selectionMode, type: SelectionModes.Resizing });
-          console.log("SET TO RESIZING");
+        } else {
+          const id = e.target.id;
+          if (selectedElement !== null && id !== selectedElement) {
+            removeSelection();
+          }
+          const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
+          setSelectedElement(id);
+          const initialX = e.clientX - xOffset;
+          const initialY = e.clientY - yOffset;
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            xOffset,
+            yOffset,
+            initialX,
+            initialY,
+          });
         }
         break;
       }
@@ -191,9 +204,6 @@ function App() {
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
-    // console.log("onMouseMove");
-    // Record size of the add element state and draw faded element
-
     switch (selectionMode.type) {
       case SelectionModes.Selected: {
         const { initialX, initialY } = selectionCoordinates;
@@ -205,9 +215,6 @@ function App() {
           const xOffset = currentX;
           const yOffset = currentY;
 
-          console.log("ON MOUSE MOVE SELECTED");
-
-          // setSelectionMode({ ...selectionMode, type: SelectionModes.Moving });
           setElementCoords(selectedElement, currentX, currentY);
           setSelectionCoordinates({
             ...selectionCoordinates,
@@ -306,8 +313,6 @@ function App() {
           initialX,
           initialY,
         });
-        console.log("ON MOUSE UP SELECTED");
-        // setSelectionMode({ ...selectionMode, type: SelectionModes.None });
         break;
       }
       case SelectionModes.Add: {
@@ -391,9 +396,11 @@ function App() {
       throw new Error(`Can't find element with id: ${id} on the screen.`);
     }
     if (obj.type === "ellipse") {
-      // TODO: Implement later
-      //obj.cx = x + obj.rx;
-      //obj.cy = y + obj.ry;
+      obj.rx = width / 2;
+      obj.ry = height / 2;
+      // The cx and cy needs to updated
+      if (x) obj.cx = x + width / 2;
+      if (y) obj.cy = y + height / 2;
     } else if (obj.type === "rect") {
       obj.width = width;
       obj.height = height;
@@ -433,6 +440,13 @@ function App() {
         onMouseMove={onMouseMove}
       />
       <Edit />
+      {SHOW_DEBUGGER && (
+        <Debugger
+          selectionCoordinates={selectionCoordinates}
+          selectionMode={selectionMode}
+          selectedElement={selectedElement}
+        />
+      )}
     </div>
   );
 }

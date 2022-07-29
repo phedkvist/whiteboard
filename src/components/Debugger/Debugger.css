@@ -1,0 +1,8 @@
+.debugger {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  background-color: lightcyan;
+  padding: 5px 10px;
+}

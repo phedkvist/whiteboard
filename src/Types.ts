@@ -20,11 +20,11 @@ export enum Corner {
 }
 
 export enum SelectionModes {
-  None,
-  Add,
-  Selected,
-  Resizing,
-  Turning,
+  None = "None",
+  Add = "Add",
+  Selected = "Selected",
+  Resizing = "Resizing",
+  Turning = "Turning",
 }
 
 export interface SelectionMode {
