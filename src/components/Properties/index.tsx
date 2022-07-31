@@ -5,7 +5,7 @@ import {
   SelectionCoordinates,
   SelectionModes,
   SelectionMode,
-  CanvasState,
+  AppState,
   ElementType,
   Rect,
   ElementState,
@@ -13,6 +13,7 @@ import {
   Element,
   Text,
 } from "../../Types";
+import { useAppState } from "../../context/AppState";
 
 // When there is a selected element.
 // Find its state and respective properties.
@@ -32,17 +33,8 @@ import {
     }
 */
 
-export const Properties = ({
-  appState,
-  setAppState,
-  selectedElement,
-  selectionMode,
-}: {
-  selectedElement: string | null;
-  appState: CanvasState;
-  setAppState: React.Dispatch<React.SetStateAction<CanvasState>>;
-  selectionMode: SelectionMode;
-}) => {
+export const Properties = () => {
+  const { appState, setAppState, selectedElement } = useAppState();
   const element = selectedElement ? appState.elements[selectedElement] : null;
 
   const property = (

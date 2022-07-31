@@ -1,16 +1,10 @@
 import React from "react";
-import { SelectionCoordinates, SelectionMode } from "../../Types";
+import { useAppState } from "../../context/AppState";
 import "./Debugger.css";
 
-export const Debugger = ({
-  selectedElement,
-  selectionCoordinates,
-  selectionMode,
-}: {
-  selectedElement: string | null;
-  selectionCoordinates: SelectionCoordinates;
-  selectionMode: SelectionMode;
-}) => {
+export const Debugger = () => {
+  const { selectedElement, selectionCoordinates, selectionMode } =
+    useAppState();
   return (
     <div className="debugger">
       <p>Selected element: {selectedElement}</p>

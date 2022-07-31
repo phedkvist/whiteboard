@@ -3,13 +3,16 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import { AppStateProvider } from "./context/AppState";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <AppStateProvider>
+      <App />
+    </AppStateProvider>
   </React.StrictMode>
 );
 
@@ -39,4 +42,11 @@ reportWebVitals();
   Add undo/redo of operations
   Collaboration features
   ----
-*/
+
+  General improvements
+  -----
+  Place the appState into a context, removes prop drilling.
+  Make use of classes for different elements, should make it easier to have methods tied to the element.
+  
+
+  */

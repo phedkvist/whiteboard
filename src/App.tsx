@@ -9,7 +9,7 @@ import {
   SelectionCoordinates,
   SelectionModes,
   SelectionMode,
-  CanvasState,
+  AppState,
   ElementType,
   Rect,
   ElementState,
@@ -20,30 +20,23 @@ import {
 import { Properties } from "./components/Properties";
 import { getClosestCorner } from "./utility";
 import { Debugger } from "./components/Debugger/Debugger";
+import { useAppState } from "./context/AppState";
 
 const SHOW_DEBUGGER = true;
 
 function App() {
-  const [appState, setAppState] = useState<CanvasState>(initialState);
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [hoverElement, setHoverElement] = useState<string | null>(null);
-  const [selectionCoordinates, setSelectionCoordinates] =
-    useState<SelectionCoordinates>({
-      currentX: null,
-      currentY: null,
-      initialX: null,
-      initialY: null,
-      initialHeight: null,
-      initialWidth: null,
-      xOffset: 0,
-      yOffset: 0,
-      selectedCorner: null,
-    });
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>({
-    type: SelectionModes.None,
-  });
-
-  const containerRef = useRef<SVGSVGElement>(null);
+  const {
+    appState,
+    setAppState,
+    selectedElement,
+    setSelectedElement,
+    hoverElement,
+    setHoverElement,
+    selectionCoordinates,
+    setSelectionCoordinates,
+    selectionMode,
+    setSelectionMode,
+  } = useAppState();
 
   const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element) || e.target.id === "container") {
@@ -511,36 +504,16 @@ function App() {
 
   return (
     <div className="App">
-      <Toolbar
-        setSelectedElement={setSelectedElement}
-        selectionMode={selectionMode}
-        setSelectionMode={setSelectionMode}
-      />
-      <Properties
-        selectionMode={selectionMode}
-        appState={appState}
-        selectedElement={selectedElement}
-        setAppState={setAppState}
-      />
+      <Toolbar />
+      <Properties />
       <Canvas
-        containerRef={containerRef}
-        selectedElement={selectedElement}
-        hoverElement={hoverElement}
-        selectionMode={selectionMode}
-        canvasState={appState}
         onMouseOver={onMouseOver}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onMouseMove={onMouseMove}
       />
       <Edit />
-      {SHOW_DEBUGGER && (
-        <Debugger
-          selectionCoordinates={selectionCoordinates}
-          selectionMode={selectionMode}
-          selectedElement={selectedElement}
-        />
-      )}
+      {SHOW_DEBUGGER && <Debugger />}
     </div>
   );
 }

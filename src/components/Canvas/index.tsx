@@ -1,11 +1,7 @@
 import { LegacyRef, MouseEventHandler } from "react";
 import "./Canvas.css";
-import {
-  CanvasState,
-  SelectionMode,
-  SelectionModes,
-  Element,
-} from "../../Types";
+import { AppState, SelectionMode, SelectionModes, Element } from "../../Types";
+import { useAppState } from "../../context/AppState";
 
 const CORNER_OFFSET = 8;
 const getCornerCoords = (e: Element) => {
@@ -34,27 +30,19 @@ const getCornerCoords = (e: Element) => {
 };
 
 const Canvas = ({
-  canvasState,
-  selectionMode,
-  selectedElement,
-  hoverElement,
-  containerRef,
   onMouseOver,
   onMouseDown,
   onMouseUp,
   onMouseMove,
 }: {
-  canvasState: CanvasState;
-  selectionMode: SelectionMode;
-  selectedElement: string | null;
-  hoverElement: string | null;
-  containerRef: LegacyRef<SVGSVGElement>;
   onMouseOver: MouseEventHandler<SVGSVGElement>;
   onMouseDown: MouseEventHandler<SVGSVGElement>;
   onMouseUp: MouseEventHandler<SVGSVGElement>;
   onMouseMove: MouseEventHandler<SVGSVGElement>;
 }) => {
-  const { elements } = canvasState;
+  const { appState, selectedElement, hoverElement, selectionMode } =
+    useAppState();
+  const { elements } = appState;
   const renderElements = Object.values(elements).map((e) => {
     const isSelected = e.id === selectedElement ? "isSelected" : "";
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
@@ -126,7 +114,6 @@ const Canvas = ({
   return (
     <svg
       className={`canvas ${isAdding ? "isAdding" : ""}`}
-      ref={containerRef}
       id="container"
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}

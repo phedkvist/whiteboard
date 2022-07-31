@@ -1,20 +1,14 @@
 import "./Toolbar.css";
 import { SelectionMode, SelectionModes, ElementType } from "../../Types";
+import { useAppState } from "../../context/AppState";
 /*
 Add element
 - Rect, Circle, Text, Arrow
 Delete element
 */
 
-const Toolbar = ({
-  setSelectedElement,
-  selectionMode,
-  setSelectionMode,
-}: {
-  setSelectedElement: React.Dispatch<React.SetStateAction<string | null>>;
-  selectionMode: SelectionMode;
-  setSelectionMode: React.Dispatch<React.SetStateAction<SelectionMode>>;
-}) => {
+const Toolbar = () => {
+  const { setSelectedElement, setSelectionMode } = useAppState();
   return (
     <div className="toolbar">
       <button

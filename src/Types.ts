@@ -77,13 +77,13 @@ export enum ElementType {
 }
 export type Element = Ellipse | Rect | Text;
 
-export interface CanvasState {
+export interface AppState {
   elements: {
     [id: string]: Element;
   };
 }
 
-export const initialState: CanvasState = {
+export const initialState: AppState = {
   elements: {
     "1": {
       id: "1",
@@ -111,4 +111,16 @@ export const initialState: CanvasState = {
       state: ElementState.Visible,
     },
   },
+};
+
+export const initialSelectionCoordinates = {
+  currentX: null,
+  currentY: null,
+  initialX: null,
+  initialY: null,
+  initialHeight: null,
+  initialWidth: null,
+  xOffset: 0,
+  yOffset: 0,
+  selectedCorner: null,
 };
