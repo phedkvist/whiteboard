@@ -180,7 +180,11 @@ function App() {
             initialHeight: height,
             selectedCorner,
           });
-          setSelectionMode({ ...selectionMode, type: SelectionModes.Resizing });
+          setSelectionMode({
+            ...selectionMode,
+            elementType: element.type,
+            type: SelectionModes.Resizing,
+          });
         } else {
           const id = e.target.id;
           if (selectedElement !== null && id !== selectedElement) {
@@ -259,7 +263,11 @@ function App() {
           Bottom left: calc diff and update width and height
           Others: update x,y and width and height
         */
+        e.preventDefault();
+
         const {
+          xOffset,
+          yOffset,
           initialX,
           initialY,
           initialWidth,
@@ -273,27 +281,113 @@ function App() {
           initialWidth &&
           initialHeight
         ) {
-          e.preventDefault();
-          if (selectedCorner === Corner.BottomRight) {
-            const newWidth = initialWidth + e.clientX - initialX;
-            const newHeight = initialHeight + e.clientY - initialY;
-            setElementSize(selectedElement, newWidth, newHeight, null, null);
-          } else if (selectedCorner === Corner.BottomLeft) {
-            const newWidth = initialWidth - (e.clientX - initialX);
-            const newHeight = initialHeight + e.clientY - initialY;
-            const newX = e.clientX;
-            setElementSize(selectedElement, newWidth, newHeight, newX, null);
-          } else if (selectedCorner === Corner.TopRight) {
-            const newWidth = initialWidth + e.clientX - initialX;
-            const newHeight = initialHeight - (e.clientY - initialY);
-            const newY = e.clientY;
-            setElementSize(selectedElement, newWidth, newHeight, null, newY);
-          } else if (selectedCorner === Corner.TopLeft) {
-            const newWidth = initialWidth - (e.clientX - initialX);
-            const newHeight = initialHeight - (e.clientY - initialY);
-            const newX = e.clientX;
-            const newY = e.clientY;
-            setElementSize(selectedElement, newWidth, newHeight, newX, newY);
+          switch (selectionMode.elementType) {
+            case ElementType.Rect: {
+              if (selectedCorner === Corner.BottomRight) {
+                const newWidth = initialWidth + e.clientX - initialX;
+                const newHeight = initialHeight + e.clientY - initialY;
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  null,
+                  null
+                );
+              } else if (selectedCorner === Corner.BottomLeft) {
+                const newWidth = initialWidth - (e.clientX - initialX);
+                const newHeight = initialHeight + e.clientY - initialY;
+                const newX = e.clientX;
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  newX,
+                  null
+                );
+              } else if (selectedCorner === Corner.TopRight) {
+                const newWidth = initialWidth + e.clientX - initialX;
+                const newHeight = initialHeight - (e.clientY - initialY);
+                const newY = e.clientY;
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  null,
+                  newY
+                );
+              } else if (selectedCorner === Corner.TopLeft) {
+                const newWidth = initialWidth - (e.clientX - initialX);
+                const newHeight = initialHeight - (e.clientY - initialY);
+                const newX = e.clientX;
+                const newY = e.clientY;
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  newX,
+                  newY
+                );
+              }
+              break;
+            }
+            case ElementType.Ellipse: {
+              const obj = appState.elements[selectedElement];
+              if (!obj || obj.type !== ElementType.Ellipse) return;
+              if (selectedCorner === Corner.BottomRight) {
+                console.log("X,Y Offset: ", xOffset, yOffset);
+                const newWidth = initialWidth + e.clientX - initialX;
+                const newHeight = initialHeight + e.clientY - initialY;
+                // Calc old topLeft corner. Then find new cx by adding the new rx to old topLeft corner.
+                const newCX = xOffset + newWidth / 2;
+                const newCY = yOffset + newHeight / 2;
+
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  newCX,
+                  newCY
+                );
+              } else if (selectedCorner === Corner.BottomLeft) {
+                const newWidth = initialWidth - (e.clientX - initialX);
+                const newHeight = initialHeight + e.clientY - initialY;
+                // Calc topRight corner by
+                const newCX = e.clientX + newWidth / 2;
+                const newCY = e.clientY - newHeight / 2;
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  newCX,
+                  newCY
+                );
+              } else if (selectedCorner === Corner.TopRight) {
+                const newWidth = initialWidth + e.clientX - initialX;
+                const newHeight = initialHeight - (e.clientY - initialY);
+                const newCX = xOffset + newWidth / 2;
+                const newCY = e.clientY + newHeight / 2;
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  newCX,
+                  newCY
+                );
+              } else if (selectedCorner === Corner.TopLeft) {
+                const newWidth = initialWidth - (e.clientX - initialX);
+                const newHeight = initialHeight - (e.clientY - initialY);
+                const newCX = e.clientX + newWidth / 2;
+                const newCY = e.clientY + newHeight / 2;
+                setElementSize(
+                  selectedElement,
+                  newWidth,
+                  newHeight,
+                  newCX,
+                  newCY
+                );
+              }
+              break;
+            }
           }
         }
 
@@ -399,8 +493,8 @@ function App() {
       obj.rx = width / 2;
       obj.ry = height / 2;
       // The cx and cy needs to updated
-      if (x) obj.cx = x + width / 2;
-      if (y) obj.cy = y + height / 2;
+      if (x) obj.cx = x;
+      if (y) obj.cy = y;
     } else if (obj.type === "rect") {
       obj.width = width;
       obj.height = height;
