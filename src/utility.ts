@@ -60,3 +60,74 @@ export const getClosestCorner = (
   });
   return closestCorner;
 };
+
+export const resizeRect = (
+  selectedCorner: Corner,
+  initialWidth: number,
+  initialHeight: number,
+  initialX: number,
+  initialY: number,
+  clientX: number,
+  clientY: number
+): [number, number, number | null, number | null] => {
+  if (selectedCorner === Corner.BottomRight) {
+    const newWidth = initialWidth + clientX - initialX;
+    const newHeight = initialHeight + clientY - initialY;
+    return [newWidth, newHeight, null, null];
+  } else if (selectedCorner === Corner.BottomLeft) {
+    const newWidth = initialWidth - (clientX - initialX);
+    const newHeight = initialHeight + clientY - initialY;
+    const newX = clientX;
+    return [newWidth, newHeight, newX, null];
+  } else if (selectedCorner === Corner.TopRight) {
+    const newWidth = initialWidth + clientX - initialX;
+    const newHeight = initialHeight - (clientY - initialY);
+    const newY = clientY;
+    return [newWidth, newHeight, null, newY];
+  } else {
+    // TOP LEFT
+    const newWidth = initialWidth - (clientX - initialX);
+    const newHeight = initialHeight - (clientY - initialY);
+    const newX = clientX;
+    const newY = clientY;
+    return [newWidth, newHeight, newX, newY];
+  }
+};
+
+export const resizeEllipse = (
+  selectedCorner: Corner,
+  xOffset: number,
+  yOffset: number,
+  initialWidth: number,
+  initialHeight: number,
+  initialX: number,
+  initialY: number,
+  clientX: number,
+  clientY: number
+): [number, number, number | null, number | null] => {
+  if (selectedCorner === Corner.BottomRight) {
+    const newWidth = initialWidth + clientX - initialX;
+    const newHeight = initialHeight + clientY - initialY;
+    const newCX = xOffset + newWidth / 2;
+    const newCY = yOffset + newHeight / 2;
+    return [newWidth, newHeight, newCX, newCY];
+  } else if (selectedCorner === Corner.BottomLeft) {
+    const newWidth = initialWidth - (clientX - initialX);
+    const newHeight = initialHeight + clientY - initialY;
+    const newCX = clientX + newWidth / 2;
+    const newCY = clientY - newHeight / 2;
+    return [newWidth, newHeight, newCX, newCY];
+  } else if (selectedCorner === Corner.TopRight) {
+    const newWidth = initialWidth + clientX - initialX;
+    const newHeight = initialHeight - (clientY - initialY);
+    const newCX = xOffset + newWidth / 2;
+    const newCY = clientY + newHeight / 2;
+    return [newWidth, newHeight, newCX, newCY];
+  } else {
+    const newWidth = initialWidth - (clientX - initialX);
+    const newHeight = initialHeight - (clientY - initialY);
+    const newCX = clientX + newWidth / 2;
+    const newCY = clientY + newHeight / 2;
+    return [newWidth, newHeight, newCX, newCY];
+  }
+};

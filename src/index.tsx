@@ -22,7 +22,6 @@ root.render(
 reportWebVitals();
 
 /*
-
   Basic
   ----
   ✅ Drag elements around
@@ -45,8 +44,6 @@ reportWebVitals();
 
   General improvements
   -----
-  Place the appState into a context, removes prop drilling.
+  ✅ Place the appState into a context, removes prop drilling.
   Make use of classes for different elements, should make it easier to have methods tied to the element.
-  
-
-  */
+*/

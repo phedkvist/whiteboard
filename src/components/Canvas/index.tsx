@@ -1,6 +1,6 @@
-import { LegacyRef, MouseEventHandler } from "react";
+import { MouseEventHandler } from "react";
 import "./Canvas.css";
-import { AppState, SelectionMode, SelectionModes, Element } from "../../Types";
+import { SelectionModes, Element } from "../../Types";
 import { useAppState } from "../../context/AppState";
 
 const CORNER_OFFSET = 8;

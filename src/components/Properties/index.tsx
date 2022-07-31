@@ -1,18 +1,6 @@
 import React from "react";
 import "./Properties.css";
-import {
-  initialState,
-  SelectionCoordinates,
-  SelectionModes,
-  SelectionMode,
-  AppState,
-  ElementType,
-  Rect,
-  ElementState,
-  Ellipse,
-  Element,
-  Text,
-} from "../../Types";
+import { ElementType, Rect, Element } from "../../Types";
 import { useAppState } from "../../context/AppState";
 
 // When there is a selected element.
@@ -20,18 +8,6 @@ import { useAppState } from "../../context/AppState";
 // Make it possible to change these properties.
 // Update state whenever the element has changed.
 // Different settings for different elements
-
-/*
-(e) => {
-      if (!selectedElement) return;
-      const fill = e.target.value;
-      const el = Object.assign({}, element);
-      el.style = { ...el.style, fill };
-      const newAppState = Object.assign({}, appState);
-      newAppState.elements[selectedElement] = el;
-      setAppState(newAppState);
-    }
-*/
 
 export const Properties = () => {
   const { appState, setAppState, selectedElement } = useAppState();

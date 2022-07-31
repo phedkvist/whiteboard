@@ -1,25 +1,20 @@
 import { v4 as uuid } from "uuid";
-import { MouseEventHandler, useRef, useState } from "react";
+import { MouseEventHandler } from "react";
 import "./App.css";
 import Canvas from "./components/Canvas";
 import Edit from "./components/Edit";
 import Toolbar from "./components/Toolbar";
 import {
-  initialState,
-  SelectionCoordinates,
   SelectionModes,
-  SelectionMode,
-  AppState,
   ElementType,
   Rect,
   ElementState,
   Ellipse,
   Text,
-  Corner,
 } from "./Types";
 import { Properties } from "./components/Properties";
-import { getClosestCorner } from "./utility";
-import { Debugger } from "./components/Debugger/Debugger";
+import { getClosestCorner, resizeEllipse, resizeRect } from "./utility";
+import { Debugger } from "./components/Debugger";
 import { useAppState } from "./context/AppState";
 
 const SHOW_DEBUGGER = true;
@@ -30,7 +25,6 @@ function App() {
     setAppState,
     selectedElement,
     setSelectedElement,
-    hoverElement,
     setHoverElement,
     selectionCoordinates,
     setSelectionCoordinates,
@@ -60,7 +54,6 @@ function App() {
         const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
 
         setSelectedElement(id);
-        // should get elementType here.
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
 
         const initialX = e.clientX - xOffset;
@@ -102,7 +95,6 @@ function App() {
             break;
           }
           case ElementType.Ellipse: {
-            // Implement
             const newCircle: Ellipse = {
               id,
               type: ElementType.Ellipse,
@@ -136,10 +128,6 @@ function App() {
         break;
       }
       case SelectionModes.Selected: {
-        // If pressing down on a resize element.
-        // start capturing the movements which should update the size
-        // Could set selection mode to resizing if this is the case.
-
         if (!(e.target instanceof Element) || e.target.id === "container") {
           setSelectionMode({ ...selectionMode, type: SelectionModes.None });
           setSelectedElement(null);
@@ -222,8 +210,6 @@ function App() {
         break;
       }
       case SelectionModes.Add: {
-        // Get the selection coordinates and add element
-        // If element size is too small, skip adding it
         if (!selectedElement) return;
         const newAppState = Object.assign({}, appState);
         const creationElement = Object.assign(
@@ -248,14 +234,6 @@ function App() {
         break;
       }
       case SelectionModes.Resizing: {
-        // Resize the given element according to how the mouse moves
-        // Need to know which corner we have selected.
-        // This will then be used to know how to resize the element.
-
-        /*
-          Bottom left: calc diff and update width and height
-          Others: update x,y and width and height
-        */
         e.preventDefault();
 
         const {
@@ -272,113 +250,44 @@ function App() {
           initialX &&
           initialY &&
           initialWidth &&
-          initialHeight
+          initialHeight &&
+          selectedCorner
         ) {
           switch (selectionMode.elementType) {
             case ElementType.Rect: {
-              if (selectedCorner === Corner.BottomRight) {
-                const newWidth = initialWidth + e.clientX - initialX;
-                const newHeight = initialHeight + e.clientY - initialY;
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  null,
-                  null
-                );
-              } else if (selectedCorner === Corner.BottomLeft) {
-                const newWidth = initialWidth - (e.clientX - initialX);
-                const newHeight = initialHeight + e.clientY - initialY;
-                const newX = e.clientX;
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  newX,
-                  null
-                );
-              } else if (selectedCorner === Corner.TopRight) {
-                const newWidth = initialWidth + e.clientX - initialX;
-                const newHeight = initialHeight - (e.clientY - initialY);
-                const newY = e.clientY;
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  null,
-                  newY
-                );
-              } else if (selectedCorner === Corner.TopLeft) {
-                const newWidth = initialWidth - (e.clientX - initialX);
-                const newHeight = initialHeight - (e.clientY - initialY);
-                const newX = e.clientX;
-                const newY = e.clientY;
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  newX,
-                  newY
-                );
-              }
+              const [newWidth, newHeight, newX, newY] = resizeRect(
+                selectedCorner,
+                initialWidth,
+                initialHeight,
+                initialX,
+                initialY,
+                e.clientX,
+                e.clientY
+              );
+              setElementSize(selectedElement, newWidth, newHeight, newX, newY);
               break;
             }
             case ElementType.Ellipse: {
               const obj = appState.elements[selectedElement];
               if (!obj || obj.type !== ElementType.Ellipse) return;
-              if (selectedCorner === Corner.BottomRight) {
-                console.log("X,Y Offset: ", xOffset, yOffset);
-                const newWidth = initialWidth + e.clientX - initialX;
-                const newHeight = initialHeight + e.clientY - initialY;
-                // Calc old topLeft corner. Then find new cx by adding the new rx to old topLeft corner.
-                const newCX = xOffset + newWidth / 2;
-                const newCY = yOffset + newHeight / 2;
-
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  newCX,
-                  newCY
-                );
-              } else if (selectedCorner === Corner.BottomLeft) {
-                const newWidth = initialWidth - (e.clientX - initialX);
-                const newHeight = initialHeight + e.clientY - initialY;
-                // Calc topRight corner by
-                const newCX = e.clientX + newWidth / 2;
-                const newCY = e.clientY - newHeight / 2;
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  newCX,
-                  newCY
-                );
-              } else if (selectedCorner === Corner.TopRight) {
-                const newWidth = initialWidth + e.clientX - initialX;
-                const newHeight = initialHeight - (e.clientY - initialY);
-                const newCX = xOffset + newWidth / 2;
-                const newCY = e.clientY + newHeight / 2;
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  newCX,
-                  newCY
-                );
-              } else if (selectedCorner === Corner.TopLeft) {
-                const newWidth = initialWidth - (e.clientX - initialX);
-                const newHeight = initialHeight - (e.clientY - initialY);
-                const newCX = e.clientX + newWidth / 2;
-                const newCY = e.clientY + newHeight / 2;
-                setElementSize(
-                  selectedElement,
-                  newWidth,
-                  newHeight,
-                  newCX,
-                  newCY
-                );
-              }
+              const [newWidth, newHeight, newCX, newCY] = resizeEllipse(
+                selectedCorner,
+                xOffset,
+                yOffset,
+                initialWidth,
+                initialHeight,
+                initialX,
+                initialY,
+                e.clientX,
+                e.clientY
+              );
+              setElementSize(
+                selectedElement,
+                newWidth,
+                newHeight,
+                newCX,
+                newCY
+              );
               break;
             }
           }
