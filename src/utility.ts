@@ -131,3 +131,14 @@ export const resizeEllipse = (
     return [newWidth, newHeight, newCX, newCY];
   }
 };
+
+export const getMidPoints = (element: Element): [number, number] => {
+  if (element.type === "rect") {
+    return [element.x + element.width / 2, element.y + element.height / 2];
+  } else if (element.type === "ellipse") {
+    return [element.cx, element.cy];
+  } else {
+    // TODO: Implement this
+    return [0, 0];
+  }
+};

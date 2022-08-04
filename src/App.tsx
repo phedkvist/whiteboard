@@ -13,7 +13,12 @@ import {
   Text,
 } from "./Types";
 import { Properties } from "./components/Properties";
-import { getClosestCorner, resizeEllipse, resizeRect } from "./utility";
+import {
+  getClosestCorner,
+  getMidPoints,
+  resizeEllipse,
+  resizeRect,
+} from "./utility";
 import { Debugger } from "./components/Debugger";
 import { useAppState } from "./context/AppState";
 
@@ -88,6 +93,7 @@ function App() {
               x: initialX,
               y: initialY,
               state: ElementState.Creation,
+              rotate: 0,
             };
             const newAppState = Object.assign({}, appState);
             newAppState.elements[id] = newRect;
@@ -103,6 +109,7 @@ function App() {
               cx: initialX,
               cy: initialY,
               state: ElementState.Creation,
+              rotate: 0,
             };
             const newAppState = Object.assign({}, appState);
             newAppState.elements[id] = newCircle;
@@ -118,6 +125,7 @@ function App() {
               text: "Text",
               state: ElementState.Creation,
               style: { fontSize: "14px", color: "black" },
+              rotate: 0,
             };
             const newAppState = Object.assign({}, appState);
             newAppState.elements[id] = newText;
@@ -165,6 +173,29 @@ function App() {
             ...selectionMode,
             elementType: element.type,
             type: SelectionModes.Resizing,
+          });
+        } else if (e.target.id.includes("rotate")) {
+          const { width, height } =
+            e.target?.parentElement?.children[0].getBoundingClientRect() || {
+              x: null,
+              y: null,
+            };
+          if (!(width && height)) return;
+          const initialX = e.clientX;
+          const initialY = e.clientY;
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            initialX,
+            initialY,
+            initialWidth: width,
+            initialHeight: height,
+          });
+          if (!selectedElement) return;
+          const element = appState.elements[selectedElement];
+          setSelectionMode({
+            ...selectionMode,
+            elementType: element.type,
+            type: SelectionModes.Rotating,
           });
         } else {
           const id = e.target.id;
@@ -295,6 +326,36 @@ function App() {
 
         break;
       }
+      case SelectionModes.Rotating: {
+        // Calc c from initialX & initialY with current client X,Y.
+        // Get middle point of figure. And get the lines between prev two points
+        // Set the radius accordingly
+        // Take into account different types of elements.
+        const { initialX, initialY, initialWidth, initialHeight } =
+          selectionCoordinates;
+        if (
+          !(
+            initialX &&
+            initialY &&
+            initialWidth &&
+            initialHeight &&
+            selectedElement
+          )
+        )
+          return;
+        const { clientX, clientY } = e;
+        const element = appState.elements[selectedElement];
+        const [midX, midY] = getMidPoints(element);
+        const deltaX = clientX - midX;
+        const deltaY = clientY - midY;
+        const theta = (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90;
+        console.log(theta);
+        const newElement = Object.assign({}, element);
+        newElement.rotate = theta;
+        const newAppState = Object.assign({}, appState);
+        newAppState.elements[selectedElement] = newElement;
+        setAppState(newAppState);
+      }
     }
   };
 
@@ -347,6 +408,7 @@ function App() {
         setSelectedElement(null);
         break;
       }
+      case SelectionModes.Rotating:
       case SelectionModes.Resizing: {
         // Size should already be set.
         // Change from resizing to selection mode.

@@ -24,6 +24,7 @@ export enum SelectionModes {
   Add = "Add",
   Selected = "Selected",
   Resizing = "Resizing",
+  Rotating = "Rotating",
   Turning = "Turning",
 }
 
@@ -42,6 +43,7 @@ interface ElementBase {
   id: string;
   style?: CSSProperties;
   state: ElementState;
+  rotate: number;
 }
 
 // TODO: Turn these into classes that can also contain rendering functions.
@@ -99,6 +101,7 @@ export const initialState: AppState = {
         stroke: "#f8a100",
       },
       state: ElementState.Visible,
+      rotate: 0,
     },
     "2": {
       id: "2",
@@ -109,6 +112,7 @@ export const initialState: AppState = {
       y: 200,
       style: { fill: "blue" },
       state: ElementState.Visible,
+      rotate: 0,
     },
   },
 };

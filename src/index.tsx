@@ -28,15 +28,15 @@ reportWebVitals();
   ✅ Add basic elements to canvas (rect, ellipse)
   ✅ Add hover cursor when mouse is over element
   ✅ Add text element to canvas
-  Add element property settings on the left handside
-  Change color of element on canvas
+  ✅ Add element property settings on the left handside
+  ✅ Change color of element on canvas
 
 
   Advanced
   ----
   Handle zooming in/out
-  Handle turning an element around
-  Handle resizing an element
+  ✅ Handle turning an element around
+  ✅ Handle resizing an element
   Add history logs
   Add undo/redo of operations
   Collaboration features
@@ -46,4 +46,5 @@ reportWebVitals();
   -----
   ✅ Place the appState into a context, removes prop drilling.
   Make use of classes for different elements, should make it easier to have methods tied to the element.
+  Update the resizing function to take the rotation into account.
 */

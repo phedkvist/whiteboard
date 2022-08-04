@@ -29,6 +29,70 @@ const getCornerCoords = (e: Element) => {
   }
 };
 
+const addDraggableCorners = (
+  renderElement: JSX.Element,
+  id: string,
+  midX: number,
+  midY: number,
+  tL: { x: number; y: number },
+  tR: { x: number; y: number },
+  bR: { x: number; y: number },
+  bL: { x: number; y: number },
+  rotate: number,
+  isSelected: boolean
+) => (
+  <g transform={`rotate(${rotate}, ${midX}, ${midY})`}>
+    {renderElement}
+    {isSelected && (
+      <>
+        <circle
+          id={`${id}-rotate`}
+          r={5}
+          cx={(tL.x + tR.x + CORNER_OFFSET) / 2}
+          cy={tL.y - CORNER_OFFSET}
+          style={{ cursor: "grabbing" }}
+        />
+        <rect
+          id={`${id}-resize-top-left`}
+          width={8}
+          height={8}
+          x={tL.x}
+          y={tL.y}
+          style={{ cursor: "nwse-resize" }}
+          fill={"darkblue"}
+        />
+        <rect
+          id={`${id}-resize-top-right`}
+          width={8}
+          height={8}
+          x={tR.x}
+          y={tR.y}
+          style={{ cursor: "nesw-resize" }}
+          fill={"darkblue"}
+        />
+        <rect
+          id={`${id}-resize-bottom-right`}
+          width={8}
+          height={8}
+          x={bR.x}
+          y={bR.y}
+          style={{ cursor: "nwse-resize" }}
+          fill={"darkblue"}
+        />
+        <rect
+          id={`${id}-resize-bottom-left`}
+          width={8}
+          height={8}
+          x={bL.x}
+          y={bL.y}
+          style={{ cursor: "nesw-resize" }}
+          fill={"darkblue"}
+        />
+      </>
+    )}
+  </g>
+);
+
 const Canvas = ({
   onMouseOver,
   onMouseDown,
@@ -44,69 +108,53 @@ const Canvas = ({
     useAppState();
   const { elements } = appState;
   const renderElements = Object.values(elements).map((e) => {
-    const isSelected = e.id === selectedElement ? "isSelected" : "";
+    const isSelected = e.id === selectedElement;
+    const isSelectedCss = isSelected ? "isSelected" : "";
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
-    const classes = `${e.state} ${isSelected} ${isHovering}`;
+    const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
     let renderElement;
     if (e.type === "rect") {
       const { type, ...props } = e;
+      const { x, y, width, height, rotate } = props;
       renderElement = <rect {...props} className={classes} />;
+      const { tL, tR, bR, bL } = getCornerCoords(e);
+      return addDraggableCorners(
+        renderElement,
+        e.id,
+        x + width / 2,
+        y + height / 2,
+        tL,
+        tR,
+        bR,
+        bL,
+        rotate,
+        isSelected
+      );
     } else if (e.type === "ellipse") {
       const { type, ...props } = e;
+      const { cx, cy, rotate } = props;
 
       renderElement = <ellipse {...props} className={classes} />;
-    } else if (e.type === "text") {
+      const { tL, tR, bR, bL } = getCornerCoords(e);
+      return addDraggableCorners(
+        renderElement,
+        e.id,
+        cx,
+        cy,
+        tL,
+        tR,
+        bR,
+        bL,
+        rotate,
+        isSelected
+      );
+    } else {
       const { type, text, ...props } = e;
       renderElement = (
         <text {...props} className={classes}>
           {text}
         </text>
       );
-    }
-    if (isSelected && ["rect", "ellipse"].includes(e.type)) {
-      const { tL, tR, bR, bL } = getCornerCoords(e);
-      return (
-        <g>
-          {renderElement}
-          <rect
-            id={`${e.id}-resize-top-left`}
-            x={tL.x}
-            y={tL.y}
-            width={8}
-            height={8}
-            style={{ cursor: "nwse-resize" }}
-            fill={"darkblue"}
-          />
-          <rect
-            id={`${e.id}-resize-top-right`}
-            x={tR.x}
-            y={tR.y}
-            width={8}
-            height={8}
-            style={{ cursor: "nesw-resize" }}
-            fill={"darkblue"}
-          />
-          <rect
-            id={`${e.id}-resize-bottom-right`}
-            x={bR.x}
-            y={bR.y}
-            width={8}
-            height={8}
-            style={{ cursor: "nwse-resize" }}
-            fill={"darkblue"}
-          />
-          <rect
-            id={`${e.id}-resize-bottom-left`}
-            x={bL.x}
-            y={bL.y}
-            width={8}
-            height={8}
-            style={{ cursor: "nesw-resize" }}
-            fill={"darkblue"}
-          />
-        </g>
-      );
-    } else {
       return renderElement;
     }
   });
