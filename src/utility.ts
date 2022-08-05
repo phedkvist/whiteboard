@@ -1,19 +1,55 @@
 import { Corner, Element, Ellipse, Rect } from "./Types";
 
-const getRectCorners = (rect: Rect) => {
-  const { x, y, width: w, height: h } = rect;
+const rotateVector = (xy: [number, number], theta: number) => {
+  const [x, y] = xy;
+  return [
+    Math.cos((theta * Math.PI) / 180) * x -
+      Math.sin((theta * Math.PI) / 180) * y,
+    Math.sin((theta * Math.PI) / 180) * x +
+      Math.cos((theta * Math.PI) / 180) * y,
+  ];
+};
 
-  const topLeft = { corner: Corner.TopLeft, x, y };
-  const topRight = { corner: Corner.TopRight, x: x + w, y };
+const getRectCorners = (rect: Rect) => {
+  const { x, y, width: w, height: h, rotate } = rect;
+  // Let mid point be the center
+  // Rotate each corner and treat as a vector.
+  // Get the rotated vector into the current coordinate system
+  // Should be able to get coordinates by adding the mid points to the rotated vector.
+
+  const [midPointX, midPointY] = [x + w / 2, y + h / 2];
+
+  const topLeftVector: [number, number] = [-w / 2, -h / 2];
+  const rotatedTl = rotateVector(topLeftVector, rotate);
+
+  const topRightVector: [number, number] = [w / 2, -h / 2];
+  const rotatedTr = rotateVector(topRightVector, rotate);
+
+  const bottomRightVector: [number, number] = [w / 2, h / 2];
+  const rotatedBr = rotateVector(bottomRightVector, rotate);
+
+  const bottomLeftVector: [number, number] = [-w / 2, h / 2];
+  const rotatedBl = rotateVector(bottomLeftVector, rotate);
+
+  const topLeft = {
+    corner: Corner.TopLeft,
+    x: rotatedTl[0] + midPointX,
+    y: rotatedTl[1] + midPointY,
+  };
+  const topRight = {
+    corner: Corner.TopRight,
+    x: rotatedTr[0] + midPointX,
+    y: rotatedTr[1] + midPointY,
+  };
   const bottomRight = {
     corner: Corner.BottomRight,
-    x: x + w,
-    y: y + h,
+    x: rotatedBr[0] + midPointX,
+    y: rotatedBr[1] + midPointY,
   };
   const bottomLeft = {
     corner: Corner.BottomLeft,
-    x,
-    y: y + h,
+    x: rotatedBl[0] + midPointX,
+    y: rotatedBl[1] + midPointY,
   };
   return {
     topLeft,
@@ -51,6 +87,7 @@ export const getClosestCorner = (
 
   let closestCorner = Corner.TopLeft;
   let dist = Infinity;
+  // TODO: Replace with reduce to get a functional pattern instead
   [topLeft, topRight, bottomLeft, bottomRight].forEach(({ x, y, corner }) => {
     const d = Math.sqrt(Math.pow(x - xPos, 2) + Math.pow(y - yPos, 2));
     if (d < dist) {
@@ -61,6 +98,24 @@ export const getClosestCorner = (
   return closestCorner;
 };
 
+function rotateCenter(
+  x: number,
+  y: number,
+  cx: number,
+  cy: number,
+  angle: number
+) {
+  return [
+    (x - cx) * Math.cos(angle * (Math.PI / 180)) -
+      (y - cy) * Math.sin(angle * (Math.PI / 180)) +
+      cx,
+    (x - cx) * Math.sin(angle * (Math.PI / 180)) +
+      (y - cy) * Math.cos(angle * (Math.PI / 180)) +
+      cy,
+  ];
+}
+
+// https://shihn.ca/posts/2020/resizing-rotated-elements/
 export const resizeRect = (
   selectedCorner: Corner,
   initialWidth: number,
@@ -68,12 +123,44 @@ export const resizeRect = (
   initialX: number,
   initialY: number,
   clientX: number,
-  clientY: number
+  clientY: number,
+  rect: Rect
 ): [number, number, number | null, number | null] => {
+  // TODO: TAKE ROTATION INTO ACCOUNT FOR INITIAL X,Y AND CLIENT X,Y
+  // THESE POINTS NEED TO BE TREATED AS VECTORS THEN CONVERTED BACK TO POINTS.
+  const { x, y, width, height, rotate } = rect;
+
+  const cx = x + width / 2;
+  const cy = y + height / 2;
+  const rotatedA = rotateCenter(x, y, cx, cy, rotate); // calculate A'
+  const rotatedB = rotateCenter(x + width, y, cx, cy, rotate); // calculate A'
+
   if (selectedCorner === Corner.BottomRight) {
-    const newWidth = initialWidth + clientX - initialX;
-    const newHeight = initialHeight + clientY - initialY;
-    return [newWidth, newHeight, null, null];
+    const newCenter = [
+      (rotatedA[0] + clientX) / 2,
+      (rotatedA[1] + clientY) / 2,
+    ];
+
+    const newTopLeft = rotateCenter(
+      rotatedA[0],
+      rotatedA[1],
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+    const newBottomRight = rotateCenter(
+      clientX,
+      clientY,
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+    console.log(newTopLeft);
+    const newX = newTopLeft[0];
+    const newY = newTopLeft[1];
+    const newWidth = newBottomRight[0] - newTopLeft[0];
+    const newHeight = newBottomRight[1] - newTopLeft[1];
+    return [newWidth, newHeight, newX, newY];
   } else if (selectedCorner === Corner.BottomLeft) {
     const newWidth = initialWidth - (clientX - initialX);
     const newHeight = initialHeight + clientY - initialY;

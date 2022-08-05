@@ -114,6 +114,17 @@ export const initialState: AppState = {
       state: ElementState.Visible,
       rotate: 0,
     },
+    "3": {
+      id: "3",
+      type: ElementType.Rect,
+      width: 100,
+      height: 100,
+      x: 0,
+      y: 0,
+      style: { fill: "blue" },
+      state: ElementState.Visible,
+      rotate: 0,
+    },
   },
 };
 

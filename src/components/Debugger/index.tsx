@@ -3,11 +3,20 @@ import { useAppState } from "../../context/AppState";
 import "./Debugger.css";
 
 export const Debugger = () => {
-  const { selectedElement, selectionCoordinates, selectionMode } =
+  const { selectedElement, appState, selectionCoordinates, selectionMode } =
     useAppState();
+  const element = selectedElement && appState.elements[selectedElement];
   return (
     <div className="debugger">
-      <p>Selected element: {selectedElement}</p>
+      <p>
+        Selected element:{" "}
+        {element &&
+          Object.keys(element).map((key) => (
+            <p>
+              {key}: <b>{(element as any)[key].toString()}</b>
+            </p>
+          ))}
+      </p>
       <p>
         Selection mode:{" "}
         <b>

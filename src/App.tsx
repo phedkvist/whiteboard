@@ -158,6 +158,7 @@ function App() {
           if (!selectedElement) return;
           const element = appState.elements[selectedElement];
           const selectedCorner = getClosestCorner(element, initialX, initialY);
+          console.log("SELECTED CORNER: ", selectedCorner);
           if (!selectedCorner) return;
           setSelectionCoordinates({
             ...selectionCoordinates,
@@ -286,6 +287,8 @@ function App() {
         ) {
           switch (selectionMode.elementType) {
             case ElementType.Rect: {
+              const el = appState.elements[selectedElement];
+              if (el.type !== "rect") return;
               const [newWidth, newHeight, newX, newY] = resizeRect(
                 selectedCorner,
                 initialWidth,
@@ -293,7 +296,8 @@ function App() {
                 initialX,
                 initialY,
                 e.clientX,
-                e.clientY
+                e.clientY,
+                el
               );
               setElementSize(selectedElement, newWidth, newHeight, newX, newY);
               break;
@@ -349,7 +353,6 @@ function App() {
         const deltaX = clientX - midX;
         const deltaY = clientY - midY;
         const theta = (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90;
-        console.log(theta);
         const newElement = Object.assign({}, element);
         newElement.rotate = theta;
         const newAppState = Object.assign({}, appState);
