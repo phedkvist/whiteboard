@@ -135,6 +135,8 @@ export const resizeRect = (
   const rotatedA = rotateCenter(x, y, cx, cy, rotate); // calculate A'
   const rotatedB = rotateCenter(x + width, y, cx, cy, rotate); // calculate A'
 
+  // console.log("ROTATED B: ", rotatedB);
+
   if (selectedCorner === Corner.BottomRight) {
     const newCenter = [
       (rotatedA[0] + clientX) / 2,
@@ -155,17 +157,37 @@ export const resizeRect = (
       newCenter[1],
       -rotate
     );
-    console.log(newTopLeft);
     const newX = newTopLeft[0];
     const newY = newTopLeft[1];
     const newWidth = newBottomRight[0] - newTopLeft[0];
     const newHeight = newBottomRight[1] - newTopLeft[1];
     return [newWidth, newHeight, newX, newY];
   } else if (selectedCorner === Corner.BottomLeft) {
-    const newWidth = initialWidth - (clientX - initialX);
-    const newHeight = initialHeight + clientY - initialY;
-    const newX = clientX;
-    return [newWidth, newHeight, newX, null];
+    const newCenter = [
+      (rotatedB[0] + clientX) / 2,
+      (rotatedB[1] + clientY) / 2,
+    ];
+
+    const newTopRight = rotateCenter(
+      rotatedB[0],
+      rotatedB[1],
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+    const newBottomLeft = rotateCenter(
+      clientX,
+      clientY,
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+    const newWidth = newTopRight[0] - newBottomLeft[0];
+    const newHeight = newBottomLeft[1] - newTopRight[1];
+    const newX = newBottomLeft[0];
+    const newY = newTopRight[1];
+
+    return [newWidth, newHeight, newX, newY];
   } else if (selectedCorner === Corner.TopRight) {
     const newWidth = initialWidth + clientX - initialX;
     const newHeight = initialHeight - (clientY - initialY);
