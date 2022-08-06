@@ -18,6 +18,7 @@ import {
   getMidPoints,
   resizeEllipse,
   resizeRect,
+  rotateCenter,
 } from "./utility";
 import { Debugger } from "./components/Debugger";
 import { useAppState } from "./context/AppState";
@@ -227,6 +228,7 @@ function App() {
         if (selectedElement && initialX && initialY) {
           e.preventDefault();
 
+          // TODO: Take the rotation into account
           const currentX = e.clientX - initialX;
           const currentY = e.clientY - initialY;
           const xOffset = currentX;
@@ -255,8 +257,8 @@ function App() {
           // const radius =
           const { initialX, initialY } = selectionCoordinates;
           if (!(initialX && initialY)) return;
-          creationElement.rx = e.clientX - initialX;
-          creationElement.ry = e.clientY - initialY;
+          creationElement.rx = (e.clientX - initialX) / 2;
+          creationElement.ry = (e.clientY - initialY) / 2;
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
         }
@@ -268,23 +270,8 @@ function App() {
       case SelectionModes.Resizing: {
         e.preventDefault();
 
-        const {
-          xOffset,
-          yOffset,
-          initialX,
-          initialY,
-          initialWidth,
-          initialHeight,
-          selectedCorner,
-        } = selectionCoordinates;
-        if (
-          selectedElement &&
-          initialX &&
-          initialY &&
-          initialWidth &&
-          initialHeight &&
-          selectedCorner
-        ) {
+        const { selectedCorner } = selectionCoordinates;
+        if (selectedElement && selectedCorner) {
           switch (selectionMode.elementType) {
             case ElementType.Rect: {
               const el = appState.elements[selectedElement];
@@ -303,14 +290,9 @@ function App() {
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [newWidth, newHeight, newCX, newCY] = resizeEllipse(
                 selectedCorner,
-                xOffset,
-                yOffset,
-                initialWidth,
-                initialHeight,
-                initialX,
-                initialY,
                 e.clientX,
-                e.clientY
+                e.clientY,
+                obj
               );
               setElementSize(
                 selectedElement,
@@ -348,7 +330,9 @@ function App() {
         const [midX, midY] = getMidPoints(element);
         const deltaX = clientX - midX;
         const deltaY = clientY - midY;
-        const theta = (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90;
+        const theta = Math.round(
+          (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90
+        );
         const newElement = Object.assign({}, element);
         newElement.rotate = theta;
         const newAppState = Object.assign({}, appState);
@@ -388,8 +372,8 @@ function App() {
           // initialY = e.clientY - 2 * creationElement.cy;
           const { initialX, initialY } = selectionCoordinates;
           if (!(initialX && initialY)) return;
-          creationElement.rx = e.clientX - initialX;
-          creationElement.ry = e.clientY - initialY;
+          creationElement.rx = (e.clientX - initialX) / 2;
+          creationElement.ry = (e.clientY - initialY) / 2;
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
         } else if (creationElement.type === "text") {

@@ -177,7 +177,14 @@ const Canvas = ({
           <text x={x - 10} y={14} fontSize={8}>
             {x}
           </text>
-          <line x1={x} y1={0} x2={x} y2={1400} stroke="lightgray" />
+          <line
+            x1={x}
+            y1={0}
+            x2={x}
+            y2={1400}
+            stroke="lightgray"
+            strokeDasharray={5}
+          />
         </g>
       ))}
       {[
@@ -188,7 +195,14 @@ const Canvas = ({
           <text x={14} y={y} fontSize={8}>
             {y}
           </text>
-          <line x1={0} y1={y} x2={1600} y2={y} stroke="lightgray" />
+          <line
+            x1={0}
+            y1={y}
+            x2={1600}
+            y2={y}
+            stroke="lightgray"
+            strokeDasharray={5}
+          />
         </g>
       ))}
     </svg>
