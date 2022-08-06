@@ -118,24 +118,25 @@ function rotateCenter(
 // https://shihn.ca/posts/2020/resizing-rotated-elements/
 export const resizeRect = (
   selectedCorner: Corner,
-  initialWidth: number,
-  initialHeight: number,
-  initialX: number,
-  initialY: number,
   clientX: number,
   clientY: number,
   rect: Rect
 ): [number, number, number | null, number | null] => {
-  // TODO: TAKE ROTATION INTO ACCOUNT FOR INITIAL X,Y AND CLIENT X,Y
-  // THESE POINTS NEED TO BE TREATED AS VECTORS THEN CONVERTED BACK TO POINTS.
   const { x, y, width, height, rotate } = rect;
 
   const cx = x + width / 2;
   const cy = y + height / 2;
-  const rotatedA = rotateCenter(x, y, cx, cy, rotate); // calculate A'
-  const rotatedB = rotateCenter(x + width, y, cx, cy, rotate); // calculate A'
+  /*
+  A = top left corner
+  B = top right corner
+  C = bottom right corner
+  D = bottom left corner
+  */
 
-  // console.log("ROTATED B: ", rotatedB);
+  const rotatedA = rotateCenter(x, y, cx, cy, rotate);
+  const rotatedB = rotateCenter(x + width, y, cx, cy, rotate);
+  const rotatedC = rotateCenter(x + width, y + height, cx, cy, rotate);
+  const rotatedD = rotateCenter(x, y + height, cx, cy, rotate);
 
   if (selectedCorner === Corner.BottomRight) {
     const newCenter = [
@@ -189,16 +190,59 @@ export const resizeRect = (
 
     return [newWidth, newHeight, newX, newY];
   } else if (selectedCorner === Corner.TopRight) {
-    const newWidth = initialWidth + clientX - initialX;
-    const newHeight = initialHeight - (clientY - initialY);
-    const newY = clientY;
-    return [newWidth, newHeight, null, newY];
+    const newCenter = [
+      (rotatedD[0] + clientX) / 2,
+      (rotatedD[1] + clientY) / 2,
+    ];
+
+    const newBottomLeft = rotateCenter(
+      rotatedD[0],
+      rotatedD[1],
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+
+    const newTopRight = rotateCenter(
+      clientX,
+      clientY,
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+
+    const newX = newBottomLeft[0];
+    const newY = newTopRight[1];
+    const newWidth = newTopRight[0] - newBottomLeft[0];
+    const newHeight = newBottomLeft[1] - newTopRight[1];
+    return [newWidth, newHeight, newX, newY];
   } else {
     // TOP LEFT
-    const newWidth = initialWidth - (clientX - initialX);
-    const newHeight = initialHeight - (clientY - initialY);
-    const newX = clientX;
-    const newY = clientY;
+    const newCenter = [
+      (rotatedC[0] + clientX) / 2,
+      (rotatedC[1] + clientY) / 2,
+    ];
+
+    const newBottomRight = rotateCenter(
+      rotatedC[0],
+      rotatedC[1],
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+
+    const newTopLeft = rotateCenter(
+      clientX,
+      clientY,
+      newCenter[0],
+      newCenter[1],
+      -rotate
+    );
+
+    const newX = newTopLeft[0];
+    const newY = newTopLeft[1];
+    const newWidth = newBottomRight[0] - newTopLeft[0];
+    const newHeight = newBottomRight[1] - newTopLeft[1];
     return [newWidth, newHeight, newX, newY];
   }
 };

@@ -291,10 +291,6 @@ function App() {
               if (el.type !== "rect") return;
               const [newWidth, newHeight, newX, newY] = resizeRect(
                 selectedCorner,
-                initialWidth,
-                initialHeight,
-                initialX,
-                initialY,
                 e.clientX,
                 e.clientY,
                 el
