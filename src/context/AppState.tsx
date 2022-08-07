@@ -21,6 +21,7 @@ interface IAppStateContext {
   >;
   selectionMode: SelectionMode;
   setSelectionMode: React.Dispatch<React.SetStateAction<SelectionMode>>;
+  showDebugger: boolean;
 }
 
 export const AppStateContext = createContext<IAppStateContext>({
@@ -36,6 +37,7 @@ export const AppStateContext = createContext<IAppStateContext>({
     type: SelectionModes.None,
   },
   setSelectionMode: () => {},
+  showDebugger: false,
 });
 
 export const useAppState = () => useContext(AppStateContext);
@@ -57,6 +59,7 @@ export const AppStateProvider = (props: {
   const [selectionMode, setSelectionMode] = useState<SelectionMode>({
     type: SelectionModes.None,
   });
+  const [showDebugger, setShowDebugger] = useState(false);
 
   return (
     <AppStateContext.Provider
@@ -71,6 +74,7 @@ export const AppStateProvider = (props: {
         setSelectionCoordinates,
         selectionMode,
         setSelectionMode,
+        showDebugger,
       }}
     >
       {props.children}

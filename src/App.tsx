@@ -23,8 +23,6 @@ import {
 import { Debugger } from "./components/Debugger";
 import { useAppState } from "./context/AppState";
 
-const SHOW_DEBUGGER = true;
-
 function App() {
   const {
     appState,
@@ -36,6 +34,7 @@ function App() {
     setSelectionCoordinates,
     selectionMode,
     setSelectionMode,
+    showDebugger,
   } = useAppState();
 
   const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {
@@ -436,6 +435,10 @@ function App() {
     if (!obj) {
       throw new Error(`Can't find element with id: ${id} on the screen.`);
     }
+    if (width < 5 || height < 5) {
+      console.warn(`Height or width can't be lower than 5`);
+      return;
+    }
     if (obj.type === "ellipse") {
       obj.rx = width / 2;
       obj.ry = height / 2;
@@ -467,7 +470,7 @@ function App() {
         onMouseMove={onMouseMove}
       />
       <Edit />
-      {SHOW_DEBUGGER && <Debugger />}
+      {showDebugger && <Debugger />}
     </div>
   );
 }

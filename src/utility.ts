@@ -10,14 +10,18 @@ const rotateVector = (xy: [number, number], theta: number) => {
   ];
 };
 
-const getRectCorners = (rect: Rect) => {
-  const { x, y, width: w, height: h, rotate } = rect;
+const getElementCorners = (
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  rotate: number
+) => {
   // Let mid point be the center
   // Rotate each corner and treat as a vector.
   // Get the rotated vector into the current coordinate system
   // Should be able to get coordinates by adding the mid points to the rotated vector.
-
-  const [midPointX, midPointY] = [x + w / 2, y + h / 2];
+  const [cx, cy] = [x + w / 2, y + h / 2];
 
   const topLeftVector: [number, number] = [-w / 2, -h / 2];
   const rotatedTl = rotateVector(topLeftVector, rotate);
@@ -33,41 +37,24 @@ const getRectCorners = (rect: Rect) => {
 
   const topLeft = {
     corner: Corner.TopLeft,
-    x: rotatedTl[0] + midPointX,
-    y: rotatedTl[1] + midPointY,
+    x: rotatedTl[0] + cx,
+    y: rotatedTl[1] + cy,
   };
   const topRight = {
     corner: Corner.TopRight,
-    x: rotatedTr[0] + midPointX,
-    y: rotatedTr[1] + midPointY,
+    x: rotatedTr[0] + cx,
+    y: rotatedTr[1] + cy,
   };
   const bottomRight = {
     corner: Corner.BottomRight,
-    x: rotatedBr[0] + midPointX,
-    y: rotatedBr[1] + midPointY,
+    x: rotatedBr[0] + cx,
+    y: rotatedBr[1] + cy,
   };
   const bottomLeft = {
     corner: Corner.BottomLeft,
-    x: rotatedBl[0] + midPointX,
-    y: rotatedBl[1] + midPointY,
+    x: rotatedBl[0] + cx,
+    y: rotatedBl[1] + cy,
   };
-  return {
-    topLeft,
-    topRight,
-    bottomRight,
-    bottomLeft,
-  };
-};
-
-const getEllipseCorners = (ellipse: Ellipse) => {
-  const { cx, cy, rx, ry } = ellipse;
-
-  // TODO: Update this to take rotation into account
-
-  const topLeft = { corner: Corner.TopLeft, x: cx - rx, y: cy - ry };
-  const topRight = { corner: Corner.TopRight, x: cx + rx, y: cy - ry };
-  const bottomLeft = { corner: Corner.BottomLeft, x: cx - rx, y: cy + ry };
-  const bottomRight = { corner: Corner.BottomRight, x: cx + rx, y: cy + ry };
   return {
     topLeft,
     topRight,
@@ -77,15 +64,21 @@ const getEllipseCorners = (ellipse: Ellipse) => {
 };
 
 export const getClosestCorner = (
-  element: Element | null,
+  e: Element | null,
   xPos: number,
   yPos: number
 ) => {
-  if (!element || element.type === "text") return;
+  if (!e || e.type === "text") return;
   const { topLeft, topRight, bottomRight, bottomLeft } =
-    element.type === "rect"
-      ? getRectCorners(element)
-      : getEllipseCorners(element);
+    e.type === "rect"
+      ? getElementCorners(e.x, e.y, e.width, e.height, e.rotate)
+      : getElementCorners(
+          e.cx - e.rx,
+          e.cy - e.ry,
+          2 * e.rx,
+          2 * e.ry,
+          e.rotate
+        );
 
   let closestCorner = Corner.TopLeft;
   let dist = Infinity;

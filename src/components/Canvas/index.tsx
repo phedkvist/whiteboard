@@ -29,6 +29,47 @@ const getCornerCoords = (e: Element) => {
   }
 };
 
+const DrawBackgroundLines = () => (
+  <>
+    {[
+      0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300,
+      1400, 1500, 1600,
+    ].map((x) => (
+      <g>
+        <text x={x - 10} y={14} fontSize={8}>
+          {x}
+        </text>
+        <line
+          x1={x}
+          y1={0}
+          x2={x}
+          y2={1400}
+          stroke="lightgray"
+          strokeDasharray={5}
+        />
+      </g>
+    ))}
+    {[
+      0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300,
+      1400,
+    ].map((y) => (
+      <g>
+        <text x={14} y={y} fontSize={8}>
+          {y}
+        </text>
+        <line
+          x1={0}
+          y1={y}
+          x2={1600}
+          y2={y}
+          stroke="lightgray"
+          strokeDasharray={5}
+        />
+      </g>
+    ))}
+  </>
+);
+
 const addDraggableCorners = (
   renderElement: JSX.Element,
   id: string,
@@ -104,8 +145,13 @@ const Canvas = ({
   onMouseUp: MouseEventHandler<SVGSVGElement>;
   onMouseMove: MouseEventHandler<SVGSVGElement>;
 }) => {
-  const { appState, selectedElement, hoverElement, selectionMode } =
-    useAppState();
+  const {
+    appState,
+    selectedElement,
+    hoverElement,
+    selectionMode,
+    showDebugger,
+  } = useAppState();
   const { elements } = appState;
   const renderElements = Object.values(elements).map((e) => {
     const isSelected = e.id === selectedElement;
@@ -169,42 +215,8 @@ const Canvas = ({
       onMouseOver={onMouseOver}
     >
       {renderElements}
-      {[
-        0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300,
-        1400, 1500, 1600,
-      ].map((x) => (
-        <g>
-          <text x={x - 10} y={14} fontSize={8}>
-            {x}
-          </text>
-          <line
-            x1={x}
-            y1={0}
-            x2={x}
-            y2={1400}
-            stroke="lightgray"
-            strokeDasharray={5}
-          />
-        </g>
-      ))}
-      {[
-        0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300,
-        1400,
-      ].map((y) => (
-        <g>
-          <text x={14} y={y} fontSize={8}>
-            {y}
-          </text>
-          <line
-            x1={0}
-            y1={y}
-            x2={1600}
-            y2={y}
-            stroke="lightgray"
-            strokeDasharray={5}
-          />
-        </g>
-      ))}
+      {}
+      {showDebugger && <DrawBackgroundLines />}
     </svg>
   );
 };

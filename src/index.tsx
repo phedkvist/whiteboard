@@ -43,6 +43,10 @@ reportWebVitals();
   Snap lines. When moving an element
   ----
 
+  Super advanced
+  ----
+  Import elements from an image of a real whiteboard
+
   General improvements
   -----
   ✅ Place the appState into a context, removes prop drilling.
