@@ -40,6 +40,7 @@ reportWebVitals();
   Add history logs
   Add undo/redo of operations
   Collaboration features
+  Snap lines. When moving an element
   ----
 
   General improvements

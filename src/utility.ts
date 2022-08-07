@@ -62,6 +62,8 @@ const getRectCorners = (rect: Rect) => {
 const getEllipseCorners = (ellipse: Ellipse) => {
   const { cx, cy, rx, ry } = ellipse;
 
+  // TODO: Update this to take rotation into account
+
   const topLeft = { corner: Corner.TopLeft, x: cx - rx, y: cy - ry };
   const topRight = { corner: Corner.TopRight, x: cx + rx, y: cy - ry };
   const bottomLeft = { corner: Corner.BottomLeft, x: cx - rx, y: cy + ry };
@@ -115,136 +117,31 @@ export function rotateCenter(
   ];
 }
 
-// https://shihn.ca/posts/2020/resizing-rotated-elements/
 export const resizeRect = (
   selectedCorner: Corner,
   clientX: number,
   clientY: number,
   rect: Rect
-): [number, number, number | null, number | null] => {
-  const { x, y, width, height, rotate } = rect;
+) => {
+  const { x, y, width: w, height: h, rotate } = rect;
 
-  const cx = x + width / 2;
-  const cy = y + height / 2;
-  /*
-  A = top left corner
-  B = top right corner
-  C = bottom right corner
-  D = bottom left corner
-  */
+  const cx = x + w / 2;
+  const cy = y + h / 2;
 
-  const rotatedA = rotateCenter(x, y, cx, cy, rotate);
-  const rotatedB = rotateCenter(x + width, y, cx, cy, rotate);
-  const rotatedC = rotateCenter(x + width, y + height, cx, cy, rotate);
-  const rotatedD = rotateCenter(x, y + height, cx, cy, rotate);
-
-  if (selectedCorner === Corner.BottomRight) {
-    const newCenter = [
-      (rotatedA[0] + clientX) / 2,
-      (rotatedA[1] + clientY) / 2,
-    ];
-
-    const newTopLeft = rotateCenter(
-      rotatedA[0],
-      rotatedA[1],
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-    const newBottomRight = rotateCenter(
+  const [newWidth, newHeight, newX, newY, _newCX, _newCY] =
+    resizeRotatedRectangle({
+      x,
+      y,
+      cx,
+      cy,
+      w,
+      h,
+      rotate,
+      selectedCorner,
       clientX,
       clientY,
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-    const newX = newTopLeft[0];
-    const newY = newTopLeft[1];
-    const newWidth = newBottomRight[0] - newTopLeft[0];
-    const newHeight = newBottomRight[1] - newTopLeft[1];
-    return [newWidth, newHeight, newX, newY];
-  } else if (selectedCorner === Corner.BottomLeft) {
-    const newCenter = [
-      (rotatedB[0] + clientX) / 2,
-      (rotatedB[1] + clientY) / 2,
-    ];
-
-    const newTopRight = rotateCenter(
-      rotatedB[0],
-      rotatedB[1],
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-    const newBottomLeft = rotateCenter(
-      clientX,
-      clientY,
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-    const newWidth = newTopRight[0] - newBottomLeft[0];
-    const newHeight = newBottomLeft[1] - newTopRight[1];
-    const newX = newBottomLeft[0];
-    const newY = newTopRight[1];
-
-    return [newWidth, newHeight, newX, newY];
-  } else if (selectedCorner === Corner.TopRight) {
-    const newCenter = [
-      (rotatedD[0] + clientX) / 2,
-      (rotatedD[1] + clientY) / 2,
-    ];
-
-    const newBottomLeft = rotateCenter(
-      rotatedD[0],
-      rotatedD[1],
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-
-    const newTopRight = rotateCenter(
-      clientX,
-      clientY,
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-
-    const newX = newBottomLeft[0];
-    const newY = newTopRight[1];
-    const newWidth = newTopRight[0] - newBottomLeft[0];
-    const newHeight = newBottomLeft[1] - newTopRight[1];
-    return [newWidth, newHeight, newX, newY];
-  } else {
-    // TOP LEFT
-    const newCenter = [
-      (rotatedC[0] + clientX) / 2,
-      (rotatedC[1] + clientY) / 2,
-    ];
-
-    const newBottomRight = rotateCenter(
-      rotatedC[0],
-      rotatedC[1],
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-
-    const newTopLeft = rotateCenter(
-      clientX,
-      clientY,
-      newCenter[0],
-      newCenter[1],
-      -rotate
-    );
-
-    const newX = newTopLeft[0];
-    const newY = newTopLeft[1];
-    const newWidth = newBottomRight[0] - newTopLeft[0];
-    const newHeight = newBottomRight[1] - newTopLeft[1];
-    return [newWidth, newHeight, newX, newY];
-  }
+    });
+  return [newWidth, newHeight, newX, newY];
 };
 
 export const resizeEllipse = (
@@ -252,16 +149,64 @@ export const resizeEllipse = (
   clientX: number,
   clientY: number,
   ellipse: Ellipse
-): [number, number, number | null, number | null] => {
+) => {
   const { cx, cy, rx, ry, rotate } = ellipse;
 
   const x = cx - rx;
   const y = cy - ry;
+  const w = 2 * rx;
+  const h = 2 * ry;
+  const [newWidth, newHeight, _newX, _newY, newCX, newCY] =
+    resizeRotatedRectangle({
+      x,
+      y,
+      cx,
+      cy,
+      w,
+      h,
+      rotate,
+      selectedCorner,
+      clientX,
+      clientY,
+    });
+  return [newWidth, newHeight, newCX, newCY];
+};
 
+const resizeRotatedRectangle = ({
+  x,
+  y,
+  cx,
+  cy,
+  w,
+  h,
+  rotate,
+  selectedCorner,
+  clientX,
+  clientY,
+}: {
+  x: number;
+  y: number;
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
+  rotate: number;
+  selectedCorner: Corner;
+  clientX: number;
+  clientY: number;
+}) => {
+  // https://shihn.ca/posts/2020/resizing-rotated-elements/
+
+  /*
+  A = top left corner
+  B = top right corner
+  C = bottom right corner
+  D = bottom left corner
+  */
   const rotatedA = rotateCenter(x, y, cx, cy, rotate);
-  const rotatedB = rotateCenter(x + 2 * rx, y, cx, cy, rotate);
-  const rotatedC = rotateCenter(x + 2 * rx, y + 2 * ry, cx, cy, rotate);
-  const rotatedD = rotateCenter(x, y + 2 * ry, cx, cy, rotate);
+  const rotatedB = rotateCenter(x + w, y, cx, cy, rotate);
+  const rotatedC = rotateCenter(x + w, y + h, cx, cy, rotate);
+  const rotatedD = rotateCenter(x, y + h, cx, cy, rotate);
 
   if (selectedCorner === Corner.BottomRight) {
     const newCenter = [
@@ -283,11 +228,13 @@ export const resizeEllipse = (
       newCenter[1],
       -rotate
     );
+    const newX = newTopLeft[0];
+    const newY = newTopLeft[1];
     const newCX = newCenter[0];
     const newCY = newCenter[1];
-    const newRX = newBottomRight[0] - newTopLeft[0];
-    const newRY = newBottomRight[1] - newTopLeft[1];
-    return [newRX, newRY, newCX, newCY];
+    const newWidth = newBottomRight[0] - newTopLeft[0];
+    const newHeight = newBottomRight[1] - newTopLeft[1];
+    return [newWidth, newHeight, newX, newY, newCX, newCY];
   } else if (selectedCorner === Corner.BottomLeft) {
     const newCenter = [
       (rotatedB[0] + clientX) / 2,
@@ -308,12 +255,14 @@ export const resizeEllipse = (
       newCenter[1],
       -rotate
     );
-    const newRX = newTopRight[0] - newBottomLeft[0];
-    const newRY = newBottomLeft[1] - newTopRight[1];
+    const newWidth = newTopRight[0] - newBottomLeft[0];
+    const newHeight = newBottomLeft[1] - newTopRight[1];
+    const newX = newBottomLeft[0];
+    const newY = newTopRight[1];
     const newCX = newCenter[0];
     const newCY = newCenter[1];
 
-    return [newRX, newRY, newCX, newCY];
+    return [newWidth, newHeight, newX, newY, newCX, newCY];
   } else if (selectedCorner === Corner.TopRight) {
     const newCenter = [
       (rotatedD[0] + clientX) / 2,
@@ -335,12 +284,13 @@ export const resizeEllipse = (
       newCenter[1],
       -rotate
     );
-
+    const newX = newBottomLeft[0];
+    const newY = newTopRight[1];
     const newCX = newCenter[0];
     const newCY = newCenter[1];
-    const newRX = newTopRight[0] - newBottomLeft[0];
-    const newRY = newBottomLeft[1] - newTopRight[1];
-    return [newRX, newRY, newCX, newCY];
+    const newWidth = newTopRight[0] - newBottomLeft[0];
+    const newHeight = newBottomLeft[1] - newTopRight[1];
+    return [newWidth, newHeight, newX, newY, newCX, newCY];
   } else {
     // TOP LEFT
     const newCenter = [
@@ -364,11 +314,13 @@ export const resizeEllipse = (
       -rotate
     );
 
+    const newX = newTopLeft[0];
+    const newY = newTopLeft[1];
     const newCX = newCenter[0];
     const newCY = newCenter[1];
-    const newRX = newBottomRight[0] - newTopLeft[0];
-    const newRY = newBottomRight[1] - newTopLeft[1];
-    return [newRX, newRY, newCX, newCY];
+    const newWidth = newBottomRight[0] - newTopLeft[0];
+    const newHeight = newBottomRight[1] - newTopLeft[1];
+    return [newWidth, newHeight, newX, newY, newCX, newCY];
   }
 };
 

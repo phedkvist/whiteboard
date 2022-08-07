@@ -428,8 +428,8 @@ function App() {
     id: string,
     width: number,
     height: number,
-    x: number | null,
-    y: number | null
+    x: number,
+    y: number
   ) => {
     const newAppState = Object.assign({}, appState);
     const obj = newAppState.elements[id];
