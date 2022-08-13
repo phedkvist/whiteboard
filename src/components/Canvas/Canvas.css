@@ -12,7 +12,13 @@
   opacity: 40%;
 }
 
-.isSelected {
+rect.isSelected,
+ellipse.isSelected,
+text.isSelected {
+  outline: 2px dashed lightblue;
+}
+
+polyline.isSelected {
   outline: 2px dashed lightblue;
 }
 

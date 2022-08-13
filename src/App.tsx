@@ -11,6 +11,7 @@ import {
   ElementState,
   Ellipse,
   Text,
+  Polyline,
 } from "./Types";
 import { Properties } from "./components/Properties";
 import {
@@ -129,6 +130,42 @@ function App() {
             };
             const newAppState = Object.assign({}, appState);
             newAppState.elements[id] = newText;
+            setAppState(newAppState);
+            break;
+          }
+          case ElementType.Polyline: {
+            // We start and end the polyline creation here.
+            const newAppState = Object.assign({}, appState);
+
+            if (selectedElement) {
+              const creationElement = appState.elements[selectedElement];
+              if (creationElement.type !== ElementType.Polyline) {
+                throw new Error(
+                  "Expected selected element to be a polyline element"
+                );
+              }
+              creationElement.state = ElementState.Visible;
+              newAppState.elements[id] = creationElement;
+
+              setAppState(newAppState);
+              // Need to handle it being selected but not in selection mode which drags elements around?
+              setSelectionMode({
+                ...selectionMode,
+                type: SelectionModes.None,
+              });
+              setSelectedElement(null);
+            } else {
+              const newPolyline: Polyline = {
+                id,
+                type: ElementType.Polyline,
+                points: [initialX, initialY],
+                rotate: 0,
+                stroke: "black",
+                state: ElementState.Creation,
+                strokeWidth: "4px",
+              };
+              newAppState.elements[id] = newPolyline;
+            }
             setAppState(newAppState);
             break;
           }
@@ -260,6 +297,14 @@ function App() {
           creationElement.ry = (e.clientY - initialY) / 2;
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
+        } else if (creationElement.type === "polyline") {
+          const newPoints = [
+            creationElement.points[0],
+            creationElement.points[1],
+            e.clientX,
+            e.clientY,
+          ];
+          creationElement.points = newPoints;
         }
         creationElement.state = ElementState.Creation;
         newAppState.elements[selectedElement] = creationElement;
@@ -378,6 +423,8 @@ function App() {
         } else if (creationElement.type === "text") {
           creationElement.x = e.clientX;
           creationElement.y = e.clientY;
+        } else if (creationElement.type === "polyline") {
+          break;
         }
         creationElement.state = ElementState.Visible;
         newAppState.elements[selectedElement] = creationElement;

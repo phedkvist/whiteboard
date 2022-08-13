@@ -72,12 +72,21 @@ export interface Text extends ElementBase {
   y: number;
 }
 
+export interface Polyline extends ElementBase {
+  type: ElementType.Polyline;
+  points: number[];
+  fill?: string;
+  stroke: string;
+  strokeWidth: string;
+}
+
 export enum ElementType {
   Rect = "rect",
   Ellipse = "ellipse",
   Text = "text",
+  Polyline = "polyline",
 }
-export type Element = Ellipse | Rect | Text;
+export type Element = Ellipse | Rect | Text | Polyline;
 
 export interface AppState {
   elements: {

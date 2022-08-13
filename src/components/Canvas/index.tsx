@@ -194,6 +194,16 @@ const Canvas = ({
         rotate,
         isSelected
       );
+    } else if (e.type === "polyline") {
+      const { type, points, ...props } = e;
+      renderElement = (
+        <polyline
+          {...props}
+          points={points.toString()}
+          className={classes}
+        ></polyline>
+      );
+      return renderElement;
     } else {
       const { type, text, ...props } = e;
       renderElement = (

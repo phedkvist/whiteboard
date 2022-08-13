@@ -56,6 +56,17 @@ const Toolbar = () => {
       >
         Text
       </button>
+      <button
+        onClick={() => {
+          setSelectedElement(null);
+          setSelectionMode({
+            type: SelectionModes.Add,
+            elementType: ElementType.Polyline,
+          });
+        }}
+      >
+        Line
+      </button>
     </div>
   );
 };

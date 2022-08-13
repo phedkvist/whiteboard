@@ -68,7 +68,7 @@ export const getClosestCorner = (
   xPos: number,
   yPos: number
 ) => {
-  if (!e || e.type === "text") return;
+  if (!e || e.type === "text" || e.type === "polyline") return;
   const { topLeft, topRight, bottomRight, bottomLeft } =
     e.type === "rect"
       ? getElementCorners(e.x, e.y, e.width, e.height, e.rotate)
