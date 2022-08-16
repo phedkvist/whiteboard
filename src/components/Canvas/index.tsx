@@ -2,6 +2,7 @@ import { MouseEventHandler } from "react";
 import "./Canvas.css";
 import { SelectionModes, Element } from "../../Types";
 import { useAppState } from "../../context/AppState";
+import { useMouseEvents } from "../../context/MouseEvents";
 
 const CORNER_OFFSET = 8;
 const getCornerCoords = (e: Element) => {
@@ -134,17 +135,7 @@ const addDraggableCorners = (
   </g>
 );
 
-const Canvas = ({
-  onMouseOver,
-  onMouseDown,
-  onMouseUp,
-  onMouseMove,
-}: {
-  onMouseOver: MouseEventHandler<SVGSVGElement>;
-  onMouseDown: MouseEventHandler<SVGSVGElement>;
-  onMouseUp: MouseEventHandler<SVGSVGElement>;
-  onMouseMove: MouseEventHandler<SVGSVGElement>;
-}) => {
+const Canvas = ({}: {}) => {
   const {
     appState,
     selectedElement,
@@ -152,6 +143,8 @@ const Canvas = ({
     selectionMode,
     showDebugger,
   } = useAppState();
+  const { onMouseOver, onMouseDown, onMouseMove, onMouseUp } = useMouseEvents();
+
   const { elements } = appState;
   const renderElements = Object.values(elements).map((e) => {
     const isSelected = e.id === selectedElement;
