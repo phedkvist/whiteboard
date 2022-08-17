@@ -44,6 +44,7 @@ interface ElementBase {
   style?: CSSProperties;
   state: ElementState;
   rotate: number;
+  renderingOrder: number;
 }
 
 // TODO: Turn these into classes that can also contain rendering functions.
@@ -88,10 +89,27 @@ export enum ElementType {
 }
 export type Element = Ellipse | Rect | Text | Polyline;
 
+/*
+  Alternative 1: Have everything in an array. Need to keep updating how where elements exists in the array.
+  Alternative 2: Sort before rendering based on some numeric value. This will be more expensive as the whiteboard grows.
+  Alternative 3: Keep a separate sorting array with the ids, this way, its at least easier to just shuffle around the ids, but we still need to update the element with sort order.
+
+  Flow of incoming elements.
+  Flow 1: New elements gets added to the top.
+  Flow 2: Sometimes we bring some elements to the top.
+  
+  The only time something can get out of hand is if an item is removed from the sorting array, but still exists.
+
+  Its easier to move around ids in an array, then to store all elements in an array. Since we get the O(1) lookup with the object storage.
+  Re-ordering happens rarely. If we could have an object s
+  
+*/
 export interface AppState {
   elements: {
     [id: string]: Element;
   };
+  renderingOrder: string[];
+  elementsCount: number;
 }
 
 export const initialState: AppState = {
@@ -111,6 +129,7 @@ export const initialState: AppState = {
       },
       state: ElementState.Visible,
       rotate: 0,
+      renderingOrder: 1,
     },
     "2": {
       id: "2",
@@ -127,8 +146,11 @@ export const initialState: AppState = {
       },
       state: ElementState.Visible,
       rotate: 0,
+      renderingOrder: 2,
     },
   },
+  renderingOrder: ["1", "2"],
+  elementsCount: 2,
 };
 
 export const initialSelectionCoordinates = {

@@ -83,7 +83,7 @@ const addDraggableCorners = (
   rotate: number,
   isSelected: boolean
 ) => (
-  <g transform={`rotate(${rotate}, ${midX}, ${midY})`}>
+  <g key={`g-${id}`} transform={`rotate(${rotate}, ${midX}, ${midY})`}>
     {renderElement}
     {isSelected && (
       <>
@@ -145,68 +145,77 @@ const Canvas = ({}: {}) => {
   } = useAppState();
   const { onMouseOver, onMouseDown, onMouseMove, onMouseUp } = useMouseEvents();
 
-  const { elements } = appState;
-  const renderElements = Object.values(elements).map((e) => {
-    const isSelected = e.id === selectedElement;
-    const isSelectedCss = isSelected ? "isSelected" : "";
-    const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
-    const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
-    let renderElement;
-    if (e.type === "rect") {
-      const { type, ...props } = e;
-      const { x, y, width, height, rotate } = props;
-      renderElement = <rect {...props} className={classes} />;
-      const { tL, tR, bR, bL } = getCornerCoords(e);
-      return addDraggableCorners(
-        renderElement,
-        e.id,
-        x + width / 2,
-        y + height / 2,
-        tL,
-        tR,
-        bR,
-        bL,
-        rotate,
-        isSelected
-      );
-    } else if (e.type === "ellipse") {
-      const { type, ...props } = e;
-      const { cx, cy, rotate } = props;
+  const { elements, renderingOrder } = appState;
+  const renderElements = renderingOrder
+    .map((id) => {
+      const e = elements[id];
+      if (!e) {
+        throw new Error("Missing element with id: " + id);
+      }
+      return e;
+    })
+    .map((e) => {
+      const isSelected = e.id === selectedElement;
+      const isSelectedCss = isSelected ? "isSelected" : "";
+      const isHovering =
+        !isSelected && e.id === hoverElement ? "isHovering" : "";
+      const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
+      let renderElement;
+      if (e.type === "rect") {
+        const { type, ...props } = e;
+        const { x, y, width, height, rotate } = props;
+        renderElement = <rect {...props} className={classes} />;
+        const { tL, tR, bR, bL } = getCornerCoords(e);
+        return addDraggableCorners(
+          renderElement,
+          e.id,
+          x + width / 2,
+          y + height / 2,
+          tL,
+          tR,
+          bR,
+          bL,
+          rotate,
+          isSelected
+        );
+      } else if (e.type === "ellipse") {
+        const { type, ...props } = e;
+        const { cx, cy, rotate } = props;
 
-      renderElement = <ellipse {...props} className={classes} />;
-      const { tL, tR, bR, bL } = getCornerCoords(e);
-      return addDraggableCorners(
-        renderElement,
-        e.id,
-        cx,
-        cy,
-        tL,
-        tR,
-        bR,
-        bL,
-        rotate,
-        isSelected
-      );
-    } else if (e.type === "polyline") {
-      const { type, points, ...props } = e;
-      renderElement = (
-        <polyline
-          {...props}
-          points={points.toString()}
-          className={classes}
-        ></polyline>
-      );
-      return renderElement;
-    } else {
-      const { type, text, ...props } = e;
-      renderElement = (
-        <text {...props} className={classes}>
-          {text}
-        </text>
-      );
-      return renderElement;
-    }
-  });
+        renderElement = <ellipse {...props} className={classes} />;
+        const { tL, tR, bR, bL } = getCornerCoords(e);
+        return addDraggableCorners(
+          renderElement,
+          e.id,
+          cx,
+          cy,
+          tL,
+          tR,
+          bR,
+          bL,
+          rotate,
+          isSelected
+        );
+      } else if (e.type === "polyline") {
+        const { type, points, ...props } = e;
+        renderElement = (
+          <polyline
+            {...props}
+            points={points.toString()}
+            className={classes}
+          ></polyline>
+        );
+        return renderElement;
+      } else {
+        const { type, text, ...props } = e;
+        renderElement = (
+          <text {...props} className={classes}>
+            {text}
+          </text>
+        );
+        return renderElement;
+      }
+    });
   const isAdding = selectionMode.type === SelectionModes.Add;
   return (
     <svg
@@ -218,7 +227,6 @@ const Canvas = ({}: {}) => {
       onMouseOver={onMouseOver}
     >
       {renderElements}
-      {}
       {showDebugger && <DrawBackgroundLines />}
     </svg>
   );

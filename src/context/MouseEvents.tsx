@@ -94,6 +94,10 @@ export const MouseEventsProvider = ({
 
         switch (selectionMode.elementType) {
           case ElementType.Rect: {
+            const newAppState = Object.assign({}, appState);
+            const elementsCount = newAppState.elementsCount + 1;
+            const renderingOrder = [...newAppState.renderingOrder, id];
+
             const newRect: Rect = {
               id,
               type: ElementType.Rect,
@@ -103,13 +107,17 @@ export const MouseEventsProvider = ({
               y: initialY,
               state: ElementState.Creation,
               rotate: 0,
+              renderingOrder: elementsCount,
             };
-            const newAppState = Object.assign({}, appState);
             newAppState.elements[id] = newRect;
-            setAppState(newAppState);
+            setAppState({ ...newAppState, elementsCount, renderingOrder });
             break;
           }
           case ElementType.Ellipse: {
+            const newAppState = Object.assign({}, appState);
+            const elementsCount = newAppState.elementsCount + 1;
+            const renderingOrder = [...newAppState.renderingOrder, id];
+
             const newCircle: Ellipse = {
               id,
               type: ElementType.Ellipse,
@@ -119,13 +127,17 @@ export const MouseEventsProvider = ({
               cy: initialY,
               state: ElementState.Creation,
               rotate: 0,
+              renderingOrder: elementsCount,
             };
-            const newAppState = Object.assign({}, appState);
             newAppState.elements[id] = newCircle;
-            setAppState(newAppState);
+            setAppState({ ...newAppState, elementsCount, renderingOrder });
             break;
           }
           case ElementType.Text: {
+            const newAppState = Object.assign({}, appState);
+            const elementsCount = newAppState.elementsCount + 1;
+            const renderingOrder = [...newAppState.renderingOrder, id];
+
             const newText: Text = {
               id,
               type: ElementType.Text,
@@ -135,10 +147,10 @@ export const MouseEventsProvider = ({
               state: ElementState.Creation,
               style: { fontSize: "14px", color: "black" },
               rotate: 0,
+              renderingOrder: elementsCount,
             };
-            const newAppState = Object.assign({}, appState);
             newAppState.elements[id] = newText;
-            setAppState(newAppState);
+            setAppState({ ...newAppState, elementsCount, renderingOrder });
             break;
           }
           case ElementType.Polyline: {
@@ -146,6 +158,7 @@ export const MouseEventsProvider = ({
             const newAppState = Object.assign({}, appState);
 
             if (selectedElement) {
+              // Second part of drawing the line.
               const creationElement = appState.elements[selectedElement];
               if (creationElement.type !== ElementType.Polyline) {
                 throw new Error(
@@ -162,7 +175,11 @@ export const MouseEventsProvider = ({
                 type: SelectionModes.None,
               });
               setSelectedElement(null);
+              setAppState(newAppState);
             } else {
+              const elementsCount = newAppState.elementsCount + 1;
+              const renderingOrder = [...newAppState.renderingOrder, id];
+
               const newPolyline: Polyline = {
                 id,
                 type: ElementType.Polyline,
@@ -171,10 +188,11 @@ export const MouseEventsProvider = ({
                 stroke: "black",
                 state: ElementState.Creation,
                 strokeWidth: "4px",
+                renderingOrder: elementsCount,
               };
               newAppState.elements[id] = newPolyline;
+              setAppState({ ...newAppState, elementsCount, renderingOrder });
             }
-            setAppState(newAppState);
             break;
           }
         }
