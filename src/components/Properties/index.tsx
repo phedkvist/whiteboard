@@ -89,7 +89,7 @@ export const Properties = () => {
   };
 
   return (
-    <div className="properties">
+    <div className="properties" id="properties">
       Properties {element?.type} {properties(element)}
     </div>
   );

@@ -30,6 +30,7 @@ reportWebVitals();
   ✅ Add text element to canvas
   ✅ Add element property settings on the left handside
   ✅ Change color of element on canvas
+  Add the ability to place elements above or below other elements
 
 
   Advanced
@@ -51,5 +52,5 @@ reportWebVitals();
   -----
   ✅ Place the appState into a context, removes prop drilling.
   Make use of classes for different elements, should make it easier to have methods tied to the element.
-  Update the resizing function to take the rotation into account.
+  ✅ Update the resizing function to take the rotation into account.
 */

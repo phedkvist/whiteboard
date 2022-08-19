@@ -10,8 +10,9 @@ Delete element
 const Toolbar = () => {
   const { setSelectedElement, setSelectionMode } = useAppState();
   return (
-    <div className="toolbar">
+    <div className="toolbar" id="toolbar">
       <button
+        id="toolbar_select"
         onClick={() => {
           setSelectedElement(null);
           setSelectionMode({
@@ -23,6 +24,7 @@ const Toolbar = () => {
         Pointer
       </button>
       <button
+        id="toolbar_rect"
         onClick={() => {
           setSelectedElement(null);
 
@@ -35,6 +37,7 @@ const Toolbar = () => {
         Rect
       </button>
       <button
+        id="toolbar_ellipse"
         onClick={() => {
           setSelectedElement(null);
           setSelectionMode({
@@ -46,6 +49,7 @@ const Toolbar = () => {
         Circle
       </button>
       <button
+        id="toolbar_text"
         onClick={() => {
           setSelectedElement(null);
           setSelectionMode({
@@ -57,6 +61,7 @@ const Toolbar = () => {
         Text
       </button>
       <button
+        id="toolbar_polyline"
         onClick={() => {
           setSelectedElement(null);
           setSelectionMode({

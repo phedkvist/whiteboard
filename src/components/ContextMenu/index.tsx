@@ -7,12 +7,10 @@ const ContextMenu = () => {
   if (show) {
     return (
       <ul className="menu" style={{ top: anchorPoint.y, left: anchorPoint.x }}>
-        <li className="menu_item">Share</li>
-        <li className="menu_item">Cut</li>
-        <li className="menu_item">Copy to</li>
-        <li className="menu_item">Download</li>
+        <li className="menu_item">Copy</li>
+        <li className="menu_item">Bring to top</li>
+        <li className="menu_item">Bring to bottom</li>
         <hr />
-        <li className="menu_item">Refresh</li>
         <li className="menu_item">Delete</li>
       </ul>
     );

@@ -16,7 +16,7 @@ export const Debugger = () => {
     return null;
   }
   return (
-    <div className="debugger">
+    <div className="debugger" id="debugger">
       <p>
         Selected element:{" "}
         {element &&
