@@ -13,6 +13,7 @@ import {
   resizeRect,
   resizeEllipse,
   getMidPoints,
+  MouseButtons,
 } from "../utility";
 import { useAppState } from "./AppState";
 import { v4 as uuid } from "uuid";
@@ -55,6 +56,8 @@ export const MouseEventsProvider = ({
   };
 
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
+    if (e.button !== MouseButtons.LEFT) return;
+
     switch (selectionMode.type) {
       case SelectionModes.None: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
@@ -283,6 +286,8 @@ export const MouseEventsProvider = ({
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
+    if (e.button !== MouseButtons.LEFT) return;
+
     switch (selectionMode.type) {
       case SelectionModes.Selected: {
         const { initialX, initialY } = selectionCoordinates;
@@ -412,6 +417,8 @@ export const MouseEventsProvider = ({
   };
 
   const onMouseUp: MouseEventHandler<SVGSVGElement> = (e) => {
+    if (e.button !== MouseButtons.LEFT) return;
+
     // On mouse up add the element to the screen
     switch (selectionMode.type) {
       case SelectionModes.Selected: {

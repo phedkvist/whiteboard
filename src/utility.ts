@@ -1,5 +1,11 @@
 import { Corner, Element, Ellipse, Rect } from "./Types";
 
+export enum MouseButtons {
+  LEFT = 0,
+  MIDDLE = 1,
+  RIGHT = 2,
+}
+
 const rotateVector = (xy: [number, number], theta: number) => {
   const [x, y] = xy;
   return [

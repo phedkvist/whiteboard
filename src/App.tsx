@@ -5,6 +5,7 @@ import Toolbar from "./components/Toolbar";
 import { Properties } from "./components/Properties";
 import { Debugger } from "./components/Debugger";
 import { MouseEventsProvider } from "./context/MouseEvents";
+import ContextMenu from "./components/ContextMenu";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       </MouseEventsProvider>
       <Edit />
       <Debugger />
+      <ContextMenu />
     </div>
   );
 }
