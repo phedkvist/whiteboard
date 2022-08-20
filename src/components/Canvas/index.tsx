@@ -36,8 +36,8 @@ const DrawBackgroundLines = () => (
       0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300,
       1400, 1500, 1600,
     ].map((x) => (
-      <g>
-        <text x={x - 10} y={14} fontSize={8}>
+      <g key={`g x-${x - 10}`}>
+        <text x={x - 10} y={14} fontSize={8} key={`x-${x - 10}`}>
           {x}
         </text>
         <line
@@ -54,7 +54,7 @@ const DrawBackgroundLines = () => (
       0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300,
       1400,
     ].map((y) => (
-      <g>
+      <g key={`g y-${y - 10}`}>
         <text x={14} y={y} fontSize={8}>
           {y}
         </text>
@@ -159,7 +159,7 @@ const Canvas = ({}: {}) => {
     const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
     let renderElement;
     if (e.type === "rect") {
-      const { type, ...props } = e;
+      const { type, renderingOrder, ...props } = e;
       const { x, y, width, height, rotate } = props;
       renderElement = <rect {...props} className={classes} />;
       const { tL, tR, bR, bL } = getCornerCoords(e);
@@ -176,7 +176,7 @@ const Canvas = ({}: {}) => {
         isSelected
       );
     } else if (e.type === "ellipse") {
-      const { type, ...props } = e;
+      const { type, renderingOrder, ...props } = e;
       const { cx, cy, rotate } = props;
 
       renderElement = <ellipse {...props} className={classes} />;
@@ -194,7 +194,7 @@ const Canvas = ({}: {}) => {
         isSelected
       );
     } else if (e.type === "polyline") {
-      const { type, points, ...props } = e;
+      const { type, renderingOrder, points, ...props } = e;
       renderElement = (
         <polyline
           {...props}
@@ -204,7 +204,7 @@ const Canvas = ({}: {}) => {
       );
       return renderElement;
     } else {
-      const { type, text, ...props } = e;
+      const { type, renderingOrder, text, ...props } = e;
       renderElement = (
         <text {...props} className={classes}>
           {text}
@@ -223,8 +223,8 @@ const Canvas = ({}: {}) => {
       onMouseMove={onMouseMove}
       onMouseOver={onMouseOver}
     >
-      {renderElements}
       {showDebugger && <DrawBackgroundLines />}
+      {renderElements}
     </svg>
   );
 };

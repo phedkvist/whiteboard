@@ -17,15 +17,13 @@ export const Debugger = () => {
   }
   return (
     <div className="debugger" id="debugger">
-      <p>
-        Selected element:{" "}
-        {element &&
-          Object.keys(element).map((key) => (
-            <p>
-              {key}: <b>{(element as any)[key].toString()}</b>
-            </p>
-          ))}
-      </p>
+      <p>Selected element: </p>
+      {element &&
+        Object.keys(element).map((key) => (
+          <p key={key}>
+            {key}: <b>{(element as any)[key].toString()}</b>
+          </p>
+        ))}
       <p>
         Selection mode:{" "}
         <b>
@@ -33,7 +31,7 @@ export const Debugger = () => {
         </b>
       </p>
       {Object.keys(selectionCoordinates).map((key) => (
-        <p>
+        <p key={key}>
           {key}: <b>{(selectionCoordinates as any)[key]}</b>
         </p>
       ))}
