@@ -1,18 +1,7 @@
 import React from "react";
 import "./Properties.css";
-import { ElementType, Rect, Element } from "../../Types";
+import { ElementType, Rect, Element, COLORS } from "../../Types";
 import { useAppState } from "../../context/AppState";
-
-enum COLORS {
-  transparent = "transparent",
-  white = "#ffffff",
-  black = "#000000",
-  gray = "#D3D3D3",
-  blue = "#0087BD",
-  red = "#C40233",
-  yellow = "#FFD300",
-  green = "#009F6B",
-}
 
 // When there is a selected element.
 // Find its state and respective properties.
@@ -76,7 +65,9 @@ export const Properties = () => {
             {Object.values(COLORS).map((color) => (
               <button
                 key={color}
-                className={`color-btn ${color}`}
+                className={`color-btn ${
+                  color === "transparent" ? "transparent" : ""
+                } ${element?.style?.fill === color ? "active" : ""}`}
                 // @ts-ignore
                 style={
                   color === "transparent" ? {} : { backgroundColor: color }
@@ -95,7 +86,9 @@ export const Properties = () => {
             {Object.values(COLORS).map((color) => (
               <button
                 key={color}
-                className={`color-btn ${color}`}
+                className={`color-btn ${
+                  color === "transparent" ? "transparent" : ""
+                } ${element?.style?.stroke === color ? "active" : ""}`}
                 // @ts-ignore
                 style={
                   color === "transparent" ? {} : { backgroundColor: color }

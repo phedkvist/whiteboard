@@ -31,6 +31,7 @@ reportWebVitals();
   ✅ Add element property settings on the left handside
   ✅ Change color of element on canvas
   ✅ Add the ability to place elements above or below other elements
+  Select multiple elements with the mouse
 
 
   Advanced

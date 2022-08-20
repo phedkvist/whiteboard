@@ -89,6 +89,17 @@ export enum ElementType {
 }
 export type Element = Ellipse | Rect | Text | Polyline;
 
+export enum COLORS {
+  transparent = "transparent",
+  white = "#ffffff",
+  black = "#000000",
+  gray = "#D3D3D3",
+  blue = "#0087BD",
+  red = "#C40233",
+  yellow = "#FFD300",
+  green = "#009F6B",
+}
+
 /*
   Alternative 1: Have everything in an array. Need to keep updating how where elements exists in the array.
   Alternative 2: Sort before rendering based on some numeric value. This will be more expensive as the whiteboard grows.
@@ -122,10 +133,10 @@ export const initialState: AppState = {
       rx: 50,
       ry: 50,
       style: {
-        fill: "red",
-        strokeWidth: 5,
-        strokeDasharray: 5,
-        stroke: "#f8a100",
+        fill: COLORS.red,
+        strokeWidth: 4,
+        strokeDasharray: 4,
+        stroke: COLORS.gray,
       },
       state: ElementState.Visible,
       rotate: 0,
@@ -139,10 +150,10 @@ export const initialState: AppState = {
       x: 200,
       y: 200,
       style: {
-        fill: "salmon",
-        strokeWidth: 5,
-        strokeDasharray: 5,
-        stroke: "gray",
+        fill: COLORS.blue,
+        strokeWidth: 2,
+        strokeDasharray: 2,
+        stroke: COLORS.gray,
       },
       state: ElementState.Visible,
       rotate: 0,
