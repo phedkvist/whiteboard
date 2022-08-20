@@ -30,7 +30,7 @@ reportWebVitals();
   ✅ Add text element to canvas
   ✅ Add element property settings on the left handside
   ✅ Change color of element on canvas
-  Add the ability to place elements above or below other elements
+  ✅ Add the ability to place elements above or below other elements
 
 
   Advanced

@@ -1,17 +1,57 @@
+import { MouseEventHandler } from "react";
+import { useAppState } from "../../context/AppState";
+import { Element } from "../../Types";
 import useContextMenu from "../../hooks/useContextMenu";
 import "./ContextMenu.css";
 
 const ContextMenu = () => {
   const { anchorPoint, show } = useContextMenu();
+  const { selectedElement, appState, setAppState } = useAppState();
+
+  // re-order the elements by adding or removing from the renderingOrder number,
+  // in case of equal elements, the tie-braker is the id of the element.
+  // bring to top brings it to the new highest renderingOrder
+  // bring to bottom brings it to the new lowest renderingOrder
+  // at some point this needs to be stored as an operation
+
+  const changeRenderingOrder = (change: number) => {
+    if (!selectedElement) {
+      console.warn("No selected element on bring up callback");
+      return;
+    }
+    const element = appState.elements[selectedElement];
+    if (!element) {
+      throw new Error(
+        "No element with id in selectedElement, on bring up callback"
+      );
+    }
+    const renderingOrder = element.renderingOrder + change;
+    setAppState({
+      ...appState,
+      elements: {
+        ...appState.elements,
+        [element.id]: { ...element, renderingOrder },
+      },
+    });
+  };
+
+  const onBringUp = () => changeRenderingOrder(+1);
+  const onBringDown = () => changeRenderingOrder(-1);
+
+  const style = selectedElement ? "menu_item" : "menu_item shade";
 
   if (show) {
     return (
       <ul className="menu" style={{ top: anchorPoint.y, left: anchorPoint.x }}>
-        <li className="menu_item">Copy</li>
-        <li className="menu_item">Bring to top</li>
-        <li className="menu_item">Bring to bottom</li>
+        <li className={style}>Copy</li>
+        <li className={style} onClick={onBringUp}>
+          Bring up
+        </li>
+        <li className={style} onClick={onBringDown}>
+          Bring down
+        </li>
         <hr />
-        <li className="menu_item">Delete</li>
+        <li className={style}>Delete</li>
       </ul>
     );
   }

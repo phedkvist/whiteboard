@@ -27,3 +27,7 @@
 .menu_icon {
   margin-right: 8px;
 }
+
+.shade {
+  opacity: 0.2;
+}
