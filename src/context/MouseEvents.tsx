@@ -4,6 +4,7 @@ import {
   ElementType,
   Rect,
   ElementState,
+  Element as WhiteboardElement,
   Ellipse,
   Polyline,
   Text,
@@ -169,7 +170,7 @@ export const MouseEventsProvider = ({
                 );
               }
               creationElement.state = ElementState.Visible;
-              newAppState.elements[id] = creationElement;
+              newAppState.elements[selectedElement] = creationElement;
 
               setAppState(newAppState);
               // Need to handle it being selected but not in selection mode which drags elements around?
@@ -272,12 +273,18 @@ export const MouseEventsProvider = ({
           setSelectedElement(id);
           const initialX = e.clientX - xOffset;
           const initialY = e.clientY - yOffset;
+          const originElement = JSON.parse(
+            JSON.stringify(appState.elements[id])
+          );
           setSelectionCoordinates({
             ...selectionCoordinates,
             xOffset,
             yOffset,
             initialX,
             initialY,
+            startX: e.clientX,
+            startY: e.clientY,
+            originElement,
           });
         }
         break;
@@ -290,8 +297,16 @@ export const MouseEventsProvider = ({
 
     switch (selectionMode.type) {
       case SelectionModes.Selected: {
-        const { initialX, initialY } = selectionCoordinates;
-        if (selectedElement && initialX && initialY) {
+        const { initialX, initialY, startX, startY, originElement } =
+          selectionCoordinates;
+        if (
+          selectedElement &&
+          initialX &&
+          initialY &&
+          startX &&
+          startY &&
+          originElement
+        ) {
           e.preventDefault();
 
           // TODO: Take the rotation into account
@@ -299,8 +314,17 @@ export const MouseEventsProvider = ({
           const currentY = e.clientY - initialY;
           const xOffset = currentX;
           const yOffset = currentY;
+          const diffX = e.clientX - startX;
+          const diffY = e.clientY - startY;
 
-          setElementCoords(selectedElement, currentX, currentY);
+          setElementCoords(
+            selectedElement,
+            currentX,
+            currentY,
+            diffX,
+            diffY,
+            originElement
+          );
           setSelectionCoordinates({
             ...selectionCoordinates,
             xOffset,
@@ -481,7 +505,14 @@ export const MouseEventsProvider = ({
     }
   };
 
-  const setElementCoords = (id: string, x: number, y: number) => {
+  const setElementCoords = (
+    id: string,
+    x: number,
+    y: number,
+    diffX: number,
+    diffY: number,
+    originElement: WhiteboardElement
+  ) => {
     const newAppState = Object.assign({}, appState);
     const obj = newAppState.elements[id];
     if (!obj) {
@@ -494,6 +525,13 @@ export const MouseEventsProvider = ({
     } else if (obj.type === "rect" || obj.type === "text") {
       obj.x = x;
       obj.y = y;
+    } else if (obj.type === "polyline" && originElement.type === "polyline") {
+      const newPoints = originElement.points.map((v, i) =>
+        i % 2 === 0 || i === 0 ? v + diffX : v + diffY
+      );
+      obj.points = newPoints;
+    } else {
+      throw new Error("Something went wrong in set element coords");
     }
     newAppState.elements = { ...newAppState.elements, [id]: obj };
     setAppState(newAppState);

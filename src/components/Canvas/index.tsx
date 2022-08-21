@@ -161,7 +161,7 @@ const Canvas = ({}: {}) => {
     if (e.type === "rect") {
       const { type, renderingOrder, ...props } = e;
       const { x, y, width, height, rotate } = props;
-      renderElement = <rect {...props} className={classes} />;
+      renderElement = <rect key={e.id} {...props} className={classes} />;
       const { tL, tR, bR, bL } = getCornerCoords(e);
       return addDraggableCorners(
         renderElement,
@@ -179,7 +179,7 @@ const Canvas = ({}: {}) => {
       const { type, renderingOrder, ...props } = e;
       const { cx, cy, rotate } = props;
 
-      renderElement = <ellipse {...props} className={classes} />;
+      renderElement = <ellipse key={e.id} {...props} className={classes} />;
       const { tL, tR, bR, bL } = getCornerCoords(e);
       return addDraggableCorners(
         renderElement,
@@ -197,6 +197,7 @@ const Canvas = ({}: {}) => {
       const { type, renderingOrder, points, ...props } = e;
       renderElement = (
         <polyline
+          key={e.id}
           {...props}
           points={points.toString()}
           className={classes}
@@ -206,7 +207,7 @@ const Canvas = ({}: {}) => {
     } else {
       const { type, renderingOrder, text, ...props } = e;
       renderElement = (
-        <text {...props} className={classes}>
+        <text key={e.id} {...props} className={classes}>
           {text}
         </text>
       );

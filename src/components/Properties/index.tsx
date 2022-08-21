@@ -13,50 +13,11 @@ export const Properties = () => {
   const { appState, setAppState, selectedElement } = useAppState();
   const element = selectedElement ? appState.elements[selectedElement] : null;
 
-  const property = (
-    value: string | number,
-    id: string,
-    inputType: React.HTMLInputTypeAttribute,
-    onChange: (value: string, element: Rect) => Rect
-  ) => {
-    if (!element || element.type !== "rect") return;
-
-    return (
-      <div>
-        <input
-          type={inputType}
-          id={id}
-          name={id}
-          value={value}
-          onChange={(e) => {
-            if (!selectedElement) return;
-            const newAppState = Object.assign({}, appState);
-            newAppState.elements[selectedElement] = onChange(
-              e.target.value,
-              element
-            );
-            setAppState(newAppState);
-          }}
-        />
-        <label htmlFor={id}>{id.toUpperCase()}</label>
-      </div>
-    );
-  };
-
-  // const updateProperty = (value: string, onChange: (value: string, element: Rect) => Rect) => {
-  //   if (!selectedElement || !element || !(element.type === 'rect')) return;
-  //   const newAppState = Object.assign({}, appState);
-  //   newAppState.elements[selectedElement] = onChange(
-  //     value,
-  //     element
-  //   );
-  //   setAppState(newAppState);
-  // }
-
   const properties = (element: Element | null) => {
     if (!element) return;
     let settings;
     switch (element.type) {
+      case ElementType.Polyline:
       case ElementType.Ellipse:
       case ElementType.Rect: {
         settings = (

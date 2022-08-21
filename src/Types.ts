@@ -5,8 +5,11 @@ export interface SelectionCoordinates {
   currentY: null | number;
   initialX: null | number;
   initialY: null | number;
+  startX: null | number;
+  startY: null | number;
   initialWidth: null | number;
   initialHeight: null | number;
+  originElement: null | Element;
   xOffset: number;
   yOffset: number;
   selectedCorner: null | Corner;
@@ -87,8 +90,10 @@ export enum ElementType {
   Text = "text",
   Polyline = "polyline",
 }
+
 export type Element = Ellipse | Rect | Text | Polyline;
 
+// https://en.wikipedia.org/wiki/Natural_Color_System
 export enum COLORS {
   transparent = "transparent",
   white = "#ffffff",
@@ -169,8 +174,11 @@ export const initialSelectionCoordinates = {
   currentY: null,
   initialX: null,
   initialY: null,
+  startY: null,
+  startX: null,
   initialHeight: null,
   initialWidth: null,
+  originElement: null,
   xOffset: 0,
   yOffset: 0,
   selectedCorner: null,
