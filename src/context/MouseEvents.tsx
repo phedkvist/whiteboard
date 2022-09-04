@@ -62,21 +62,21 @@ export const MouseEventsProvider = ({
   const onMouseWheel: WheelEventHandler<SVGSVGElement> = (e) => {
     // https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
     // e.preventDefault();
-    const w = viewBox.w;
-    const h = viewBox.h;
-    const mx = e.movementX; //mouse x
-    const my = e.movementY;
-    const dw = w * Math.sign(e.deltaY) * 0.05;
-    const dh = h * Math.sign(e.deltaY) * 0.05;
-    const dx = (dw * mx) / width;
-    const dy = (dh * my) / height;
-    const newViewBox = {
-      x: viewBox.x + dx,
-      y: viewBox.y + dy,
-      w: viewBox.w - dw,
-      h: viewBox.h - dh,
-    };
-    const scale = width / viewBox.w;
+    // const w = viewBox.w;
+    // const h = viewBox.h;
+    // const mx = e.movementX; //mouse x
+    // const my = e.movementY;
+    // const dw = w * Math.sign(e.deltaY) * 0.05;
+    // const dh = h * Math.sign(e.deltaY) * 0.05;
+    // const dx = (dw * mx) / width;
+    // const dy = (dh * my) / height;
+    // const newViewBox = {
+    //   x: viewBox.x + dx,
+    //   y: viewBox.y + dy,
+    //   w: viewBox.w - dw,
+    //   h: viewBox.h - dh,
+    // };
+    // const scale = width / viewBox.w;
     // zoomValue.innerText = `${Math.round(scale * 100) / 100}`;
     // svgImage.setAttribute(
     //   "viewBox",
@@ -84,8 +84,8 @@ export const MouseEventsProvider = ({
     // );
     // console.log("SCALE: ", scale);
     // console.log("VIEWBOX: ", viewBox);
-    setViewBox({ ...viewBox, ...newViewBox, scale });
-    e.stopPropagation();
+    // setViewBox({ ...viewBox, ...newViewBox, scale });
+    // e.stopPropagation();
   };
 
   const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {
@@ -114,20 +114,9 @@ export const MouseEventsProvider = ({
         if (selectedElement !== null && id !== selectedElement) {
           removeSelection();
         }
-        const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-
-        setSelectedElement(id);
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
-
-        const initialX = e.clientX - xOffset;
-        const initialY = e.clientY - yOffset;
-        setSelectionCoordinates({
-          ...selectionCoordinates,
-          xOffset,
-          yOffset,
-          initialX,
-          initialY,
-        });
+        // DRAGGING ELEMENT
+        setupMovingElement(e);
         break;
       }
       case SelectionModes.Add: {
@@ -310,34 +299,39 @@ export const MouseEventsProvider = ({
             type: SelectionModes.Rotating,
           });
         } else {
-          const id = e.target.id;
-          if (selectedElement !== null && id !== selectedElement) {
-            removeSelection();
-          }
-          const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-          setSelectedElement(id);
-          const { scale } = viewBox;
-
-          console.log(e.clientX, e.clientY);
-          const initialX = (e.clientX - xOffset) / scale;
-          const initialY = (e.clientY - yOffset) / scale;
-          const originElement = JSON.parse(
-            JSON.stringify(appState.elements[id])
-          );
-          setSelectionCoordinates({
-            ...selectionCoordinates,
-            xOffset: xOffset / scale,
-            yOffset: yOffset / scale,
-            initialX,
-            initialY,
-            startX: e.clientX / scale,
-            startY: e.clientY / scale,
-            originElement,
-          });
+          // DRAGGING ELEMENT
+          setupMovingElement(e);
         }
         break;
       }
     }
+  };
+
+  const setupMovingElement: MouseEventHandler<SVGSVGElement> = (e) => {
+    if (!(e.target instanceof Element)) return;
+    const id = e.target.id;
+    if (selectedElement !== null && id !== selectedElement) {
+      removeSelection();
+    }
+    // TODO: Make sure the setup for moving an element is equal from the 2 starting points
+    const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
+    setSelectedElement(id);
+    const { scale } = viewBox;
+
+    console.log(e.clientX, e.clientY);
+    const initialX = e.clientX - xOffset;
+    const initialY = e.clientY - yOffset;
+    const originElement = JSON.parse(JSON.stringify(appState.elements[id]));
+    setSelectionCoordinates({
+      ...selectionCoordinates,
+      xOffset: xOffset,
+      yOffset: yOffset,
+      initialX,
+      initialY,
+      startX: e.clientX,
+      startY: e.clientY,
+      originElement,
+    });
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
@@ -372,12 +366,12 @@ export const MouseEventsProvider = ({
           e.preventDefault();
           const { scale } = viewBox;
 
-          const currentX = e.clientX / scale - initialX;
-          const currentY = e.clientY / scale - initialY;
+          const currentX = e.clientX - initialX;
+          const currentY = e.clientY - initialY;
           const xOffset = currentX;
           const yOffset = currentY;
-          const diffX = e.clientX / scale - startX;
-          const diffY = e.clientY / scale - startY;
+          const diffX = e.clientX - startX;
+          const diffY = e.clientY - startY;
 
           setElementCoords(
             selectedElement,
