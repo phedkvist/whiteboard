@@ -142,8 +142,10 @@ const Canvas = ({}: {}) => {
     hoverElement,
     selectionMode,
     showDebugger,
+    viewBox,
   } = useAppState();
-  const { onMouseOver, onMouseDown, onMouseMove, onMouseUp } = useMouseEvents();
+  const { onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel } =
+    useMouseEvents();
 
   const { elements, renderingOrder } = appState;
   const sortedElements = Object.values(elements).sort((a, b) => {
@@ -223,6 +225,8 @@ const Canvas = ({}: {}) => {
       onMouseUp={onMouseUp}
       onMouseMove={onMouseMove}
       onMouseOver={onMouseOver}
+      onWheel={onMouseWheel}
+      viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
     >
       {showDebugger && <DrawBackgroundLines />}
       {renderElements}
