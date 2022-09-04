@@ -130,8 +130,8 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Add: {
-        const initialX = e.clientX;
-        const initialY = e.clientY;
+        const initialX = e.clientX + viewBox.x;
+        const initialY = e.clientY + viewBox.y;
         setSelectionCoordinates({
           ...selectionCoordinates,
           initialX,
@@ -387,22 +387,21 @@ export const MouseEventsProvider = ({
           newAppState.elements[selectedElement]
         );
         if (creationElement.type === "rect") {
-          creationElement.width = e.clientX - creationElement.x;
-          creationElement.height = e.clientY - creationElement.y;
+          creationElement.width = e.clientX + viewBox.x - creationElement.x;
+          creationElement.height = e.clientY + viewBox.y - creationElement.y;
         } else if (creationElement.type === "ellipse") {
-          // const radius =
           const { initialX, initialY } = selectionCoordinates;
           if (!(initialX && initialY)) return;
-          creationElement.rx = (e.clientX - initialX) / 2;
-          creationElement.ry = (e.clientY - initialY) / 2;
+          creationElement.rx = (e.clientX + viewBox.x - initialX) / 2;
+          creationElement.ry = (e.clientY + viewBox.y - initialY) / 2;
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
         } else if (creationElement.type === "polyline") {
           const newPoints = [
             creationElement.points[0],
             creationElement.points[1],
-            e.clientX,
-            e.clientY,
+            e.clientX + viewBox.x,
+            e.clientY + viewBox.y,
           ];
           creationElement.points = newPoints;
         }
@@ -493,20 +492,7 @@ export const MouseEventsProvider = ({
           {},
           newAppState.elements[selectedElement]
         );
-        if (creationElement.type === "rect") {
-          creationElement.width = e.clientX - creationElement.x;
-          creationElement.height = e.clientY - creationElement.y;
-        } else if (creationElement.type === "ellipse") {
-          const { initialX, initialY } = selectionCoordinates;
-          if (!(initialX && initialY)) return;
-          creationElement.rx = (e.clientX - initialX) / 2;
-          creationElement.ry = (e.clientY - initialY) / 2;
-          creationElement.cx = initialX + creationElement.rx;
-          creationElement.cy = initialY + creationElement.ry;
-        } else if (creationElement.type === "text") {
-          creationElement.x = e.clientX;
-          creationElement.y = e.clientY;
-        } else if (creationElement.type === "polyline") {
+        if (creationElement.type === "polyline") {
           break;
         }
         creationElement.state = ElementState.Visible;
