@@ -103,6 +103,11 @@ export const MouseEventsProvider = ({
       case SelectionModes.None: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
           removeSelection();
+          setSelectionMode({ ...selectionMode, type: SelectionModes.Panning });
+          setViewBox({
+            ...viewBox,
+            startPoint: { x: e.movementX, y: e.movementY },
+          });
           return;
         }
         const id = e.target.id;
@@ -339,6 +344,20 @@ export const MouseEventsProvider = ({
     if (e.button !== MouseButtons.LEFT) return;
 
     switch (selectionMode.type) {
+      case SelectionModes.Panning: {
+        const { startPoint, scale } = viewBox;
+        const endPoint = { x: e.movementX, y: e.movementY };
+        const dx = (startPoint.x - endPoint.x) / scale;
+        const dy = (startPoint.y - endPoint.y) / scale;
+        const movedViewBox = {
+          x: viewBox.x + dx,
+          y: viewBox.y + dy,
+          w: viewBox.w,
+          h: viewBox.h,
+        };
+        setViewBox({ ...viewBox, ...movedViewBox });
+        break;
+      }
       case SelectionModes.Selected: {
         const { initialX, initialY, startX, startY, originElement } =
           selectionCoordinates;
@@ -488,6 +507,21 @@ export const MouseEventsProvider = ({
 
     // On mouse up add the element to the screen
     switch (selectionMode.type) {
+      case SelectionModes.Panning: {
+        const { startPoint, scale } = viewBox;
+        const endPoint = { x: e.movementX, y: e.movementY };
+        const dx = (startPoint.x - endPoint.x) / scale;
+        const dy = (startPoint.y - endPoint.y) / scale;
+        const movedViewBox = {
+          x: viewBox.x + dx,
+          y: viewBox.y + dy,
+          w: viewBox.w,
+          h: viewBox.h,
+        };
+        setViewBox({ ...viewBox, ...movedViewBox });
+        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+        break;
+      }
       case SelectionModes.Selected: {
         const initialX = selectionCoordinates.currentX;
         const initialY = selectionCoordinates.currentY;
@@ -547,6 +581,8 @@ export const MouseEventsProvider = ({
       }
     }
   };
+
+  const onMouseLeave: MouseEventHandler<SVGSVGElement> = (e) => {};
 
   const setElementCoords = (
     id: string,
