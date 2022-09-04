@@ -114,65 +114,10 @@ export const MouseEventsProvider = ({
 
         if (id.includes("resize")) {
           // TODO: Might need to add elementType below as well :)
-          const {
-            x: xOffset,
-            y: yOffset,
-            width,
-            height,
-          } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
-            x: null,
-            y: null,
-          };
-          if (!xOffset || !yOffset) return;
-          const initialX = e.clientX;
-          const initialY = e.clientY;
-          if (!selectedElement) return;
-          const element = appState.elements[selectedElement];
-          const selectedCorner = getClosestCorner(
-            element,
-            initialX + viewBox.x,
-            initialY + viewBox.y
-          );
-          if (!selectedCorner) return;
-          setSelectionCoordinates({
-            ...selectionCoordinates,
-            xOffset,
-            yOffset,
-            initialX,
-            initialY,
-            initialWidth: width,
-            initialHeight: height,
-            selectedCorner,
-          });
-          setSelectionMode({
-            ...selectionMode,
-            elementType: element.type,
-            type: SelectionModes.Resizing,
-          });
+          setupResizeElement(e);
           break;
         } else if (id.includes("rotate")) {
-          const { width, height } =
-            e.target?.parentElement?.children[0].getBoundingClientRect() || {
-              x: null,
-              y: null,
-            };
-          if (!(width && height)) return;
-          const initialX = e.clientX;
-          const initialY = e.clientY;
-          setSelectionCoordinates({
-            ...selectionCoordinates,
-            initialX,
-            initialY,
-            initialWidth: width,
-            initialHeight: height,
-          });
-          if (!selectedElement) return;
-          const element = appState.elements[selectedElement];
-          setSelectionMode({
-            ...selectionMode,
-            elementType: element.type,
-            type: SelectionModes.Rotating,
-          });
+          setupRotateElement(e);
           break;
         }
 
@@ -315,18 +260,79 @@ export const MouseEventsProvider = ({
     }
   };
 
+  const setupResizeElement: MouseEventHandler<SVGSVGElement> = (e) => {
+    if (!(e.target instanceof Element)) return;
+    const {
+      x: xOffset,
+      y: yOffset,
+      width,
+      height,
+    } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
+      x: null,
+      y: null,
+    };
+    if (!xOffset || !yOffset) return;
+    const initialX = e.clientX;
+    const initialY = e.clientY;
+    if (!selectedElement) return;
+    const element = appState.elements[selectedElement];
+    const selectedCorner = getClosestCorner(
+      element,
+      initialX + viewBox.x,
+      initialY + viewBox.y
+    );
+    if (!selectedCorner) return;
+    setSelectionCoordinates({
+      ...selectionCoordinates,
+      xOffset,
+      yOffset,
+      initialX,
+      initialY,
+      initialWidth: width,
+      initialHeight: height,
+      selectedCorner,
+    });
+    setSelectionMode({
+      ...selectionMode,
+      elementType: element.type,
+      type: SelectionModes.Resizing,
+    });
+  };
+
+  const setupRotateElement: MouseEventHandler<SVGSVGElement> = (e) => {
+    if (!(e.target instanceof Element)) return;
+    const { width, height } =
+      e.target?.parentElement?.children[0].getBoundingClientRect() || {
+        x: null,
+        y: null,
+      };
+    if (!(width && height)) return;
+    const initialX = e.clientX;
+    const initialY = e.clientY;
+    setSelectionCoordinates({
+      ...selectionCoordinates,
+      initialX,
+      initialY,
+      initialWidth: width,
+      initialHeight: height,
+    });
+    if (!selectedElement) return;
+    const element = appState.elements[selectedElement];
+    setSelectionMode({
+      ...selectionMode,
+      elementType: element.type,
+      type: SelectionModes.Rotating,
+    });
+  };
+
   const setupMovingElement: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element)) return;
     const id = e.target.id;
     if (selectedElement !== null && id !== selectedElement) {
       removeSelection();
     }
-    // TODO: Make sure the setup for moving an element is equal from the 2 starting points
     const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
     setSelectedElement(id);
-    const { scale } = viewBox;
-
-    console.log(e.clientX, e.clientY);
     const initialX = e.clientX - xOffset;
     const initialY = e.clientY - yOffset;
     const originElement = JSON.parse(JSON.stringify(appState.elements[id]));
