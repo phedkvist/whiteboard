@@ -111,6 +111,71 @@ export const MouseEventsProvider = ({
           return;
         }
         const id = e.target.id;
+
+        if (id.includes("resize")) {
+          // TODO: Might need to add elementType below as well :)
+          const {
+            x: xOffset,
+            y: yOffset,
+            width,
+            height,
+          } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
+            x: null,
+            y: null,
+          };
+          if (!xOffset || !yOffset) return;
+          const initialX = e.clientX;
+          const initialY = e.clientY;
+          if (!selectedElement) return;
+          const element = appState.elements[selectedElement];
+          const selectedCorner = getClosestCorner(
+            element,
+            initialX + viewBox.x,
+            initialY + viewBox.y
+          );
+          if (!selectedCorner) return;
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            xOffset,
+            yOffset,
+            initialX,
+            initialY,
+            initialWidth: width,
+            initialHeight: height,
+            selectedCorner,
+          });
+          setSelectionMode({
+            ...selectionMode,
+            elementType: element.type,
+            type: SelectionModes.Resizing,
+          });
+          break;
+        } else if (id.includes("rotate")) {
+          const { width, height } =
+            e.target?.parentElement?.children[0].getBoundingClientRect() || {
+              x: null,
+              y: null,
+            };
+          if (!(width && height)) return;
+          const initialX = e.clientX;
+          const initialY = e.clientY;
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            initialX,
+            initialY,
+            initialWidth: width,
+            initialHeight: height,
+          });
+          if (!selectedElement) return;
+          const element = appState.elements[selectedElement];
+          setSelectionMode({
+            ...selectionMode,
+            elementType: element.type,
+            type: SelectionModes.Rotating,
+          });
+          break;
+        }
+
         if (selectedElement !== null && id !== selectedElement) {
           removeSelection();
         }
@@ -242,66 +307,9 @@ export const MouseEventsProvider = ({
           setSelectedElement(null);
           return;
         }
-        if (e.target.id.includes("resize")) {
-          // TODO: Might need to add elementType below as well :)
-          const {
-            x: xOffset,
-            y: yOffset,
-            width,
-            height,
-          } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
-            x: null,
-            y: null,
-          };
-          if (!xOffset || !yOffset) return;
-          const initialX = e.clientX;
-          const initialY = e.clientY;
-          if (!selectedElement) return;
-          const element = appState.elements[selectedElement];
-          const selectedCorner = getClosestCorner(element, initialX, initialY);
-          if (!selectedCorner) return;
-          setSelectionCoordinates({
-            ...selectionCoordinates,
-            xOffset,
-            yOffset,
-            initialX,
-            initialY,
-            initialWidth: width,
-            initialHeight: height,
-            selectedCorner,
-          });
-          setSelectionMode({
-            ...selectionMode,
-            elementType: element.type,
-            type: SelectionModes.Resizing,
-          });
-        } else if (e.target.id.includes("rotate")) {
-          const { width, height } =
-            e.target?.parentElement?.children[0].getBoundingClientRect() || {
-              x: null,
-              y: null,
-            };
-          if (!(width && height)) return;
-          const initialX = e.clientX;
-          const initialY = e.clientY;
-          setSelectionCoordinates({
-            ...selectionCoordinates,
-            initialX,
-            initialY,
-            initialWidth: width,
-            initialHeight: height,
-          });
-          if (!selectedElement) return;
-          const element = appState.elements[selectedElement];
-          setSelectionMode({
-            ...selectionMode,
-            elementType: element.type,
-            type: SelectionModes.Rotating,
-          });
-        } else {
-          // DRAGGING ELEMENT
-          setupMovingElement(e);
-        }
+        // DRAGGING ELEMENT
+        setupMovingElement(e);
+
         break;
       }
     }
@@ -324,8 +332,6 @@ export const MouseEventsProvider = ({
     const originElement = JSON.parse(JSON.stringify(appState.elements[id]));
     setSelectionCoordinates({
       ...selectionCoordinates,
-      xOffset: xOffset,
-      yOffset: yOffset,
       initialX,
       initialY,
       startX: e.clientX,
@@ -353,38 +359,15 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Selected: {
-        const { initialX, initialY, startX, startY, originElement } =
-          selectionCoordinates;
-        if (
-          selectedElement &&
-          initialX &&
-          initialY &&
-          startX &&
-          startY &&
-          originElement
-        ) {
+        const { startX, startY, originElement } = selectionCoordinates;
+        if (selectedElement && startX && startY && originElement) {
           e.preventDefault();
-          const { scale } = viewBox;
-
-          const currentX = e.clientX - initialX;
-          const currentY = e.clientY - initialY;
-          const xOffset = currentX;
-          const yOffset = currentY;
           const diffX = e.clientX - startX;
           const diffY = e.clientY - startY;
 
-          setElementCoords(
-            selectedElement,
-            currentX,
-            currentY,
-            diffX,
-            diffY,
-            originElement
-          );
+          setElementCoords(selectedElement, diffX, diffY, originElement);
           setSelectionCoordinates({
             ...selectionCoordinates,
-            xOffset,
-            yOffset,
           });
         }
         break;
@@ -432,8 +415,8 @@ export const MouseEventsProvider = ({
               if (el.type !== "rect") return;
               const [newWidth, newHeight, newX, newY] = resizeRect(
                 selectedCorner,
-                e.clientX,
-                e.clientY,
+                e.clientX + viewBox.x,
+                e.clientY + viewBox.y,
                 el
               );
               setElementSize(selectedElement, newWidth, newHeight, newX, newY);
@@ -444,8 +427,8 @@ export const MouseEventsProvider = ({
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [newWidth, newHeight, newCX, newCY] = resizeEllipse(
                 selectedCorner,
-                e.clientX,
-                e.clientY,
+                e.clientX + viewBox.x,
+                e.clientY + viewBox.y,
                 obj
               );
               setElementSize(
@@ -467,23 +450,13 @@ export const MouseEventsProvider = ({
         // Get middle point of figure. And get the lines between prev two points
         // Set the radius accordingly
         // Take into account different types of elements.
-        const { initialX, initialY, initialWidth, initialHeight } =
-          selectionCoordinates;
-        if (
-          !(
-            initialX &&
-            initialY &&
-            initialWidth &&
-            initialHeight &&
-            selectedElement
-          )
-        )
-          return;
+
+        if (!selectedElement) return;
         const { clientX, clientY } = e;
         const element = appState.elements[selectedElement];
         const [midX, midY] = getMidPoints(element);
-        const deltaX = clientX - midX;
-        const deltaY = clientY - midY;
+        const deltaX = clientX + viewBox.x - midX;
+        const deltaY = clientY + viewBox.y - midY;
         const theta = Math.round(
           (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90
         );
@@ -517,13 +490,7 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Selected: {
-        const initialX = selectionCoordinates.currentX;
-        const initialY = selectionCoordinates.currentY;
-        setSelectionCoordinates({
-          ...selectionCoordinates,
-          initialX,
-          initialY,
-        });
+        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
         break;
       }
       case SelectionModes.Add: {
@@ -580,8 +547,6 @@ export const MouseEventsProvider = ({
 
   const setElementCoords = (
     id: string,
-    x: number,
-    y: number,
     diffX: number,
     diffY: number,
     originElement: WhiteboardElement
@@ -591,13 +556,14 @@ export const MouseEventsProvider = ({
     if (!obj) {
       throw new Error(`Can't find element with id: ${id} on the screen.`);
     }
-    if (obj.type === "ellipse") {
-      // CX is center of circle, hence add radius since incoming xy coords are top left
-      obj.cx = x + obj.rx;
-      obj.cy = y + obj.ry;
+    if (obj.type === "ellipse" && originElement.type === "ellipse") {
+      obj.cx = diffX + originElement.cx;
+      obj.cy = diffY + originElement.cy;
     } else if (obj.type === "rect" || obj.type === "text") {
-      obj.x = x;
-      obj.y = y;
+      if (originElement.type === "rect" || originElement.type === "text") {
+        obj.x = originElement.x + diffX;
+        obj.y = originElement.y + diffY;
+      }
     } else if (obj.type === "polyline" && originElement.type === "polyline") {
       const newPoints = originElement.points.map((v, i) =>
         i % 2 === 0 || i === 0 ? v + diffX : v + diffY
