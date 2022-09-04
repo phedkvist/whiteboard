@@ -141,6 +141,7 @@ export const MouseEventsProvider = ({
         setSelectedElement(id);
 
         switch (selectionMode.elementType) {
+          // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
           case ElementType.Rect: {
             const newAppState = Object.assign({}, appState);
             const elementsCount = newAppState.elementsCount + 1;
@@ -480,21 +481,6 @@ export const MouseEventsProvider = ({
 
     // On mouse up add the element to the screen
     switch (selectionMode.type) {
-      case SelectionModes.Panning: {
-        const { startPoint, scale } = viewBox;
-        const endPoint = { x: e.movementX, y: e.movementY };
-        const dx = (startPoint.x - endPoint.x) / scale;
-        const dy = (startPoint.y - endPoint.y) / scale;
-        const movedViewBox = {
-          x: viewBox.x + dx,
-          y: viewBox.y + dy,
-          w: viewBox.w,
-          h: viewBox.h,
-        };
-        setViewBox({ ...viewBox, ...movedViewBox });
-        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
-        break;
-      }
       case SelectionModes.Selected: {
         setSelectionMode({ ...selectionMode, type: SelectionModes.None });
         break;
@@ -534,6 +520,7 @@ export const MouseEventsProvider = ({
         setSelectedElement(null);
         break;
       }
+      case SelectionModes.Panning:
       case SelectionModes.Rotating:
       case SelectionModes.Resizing: {
         // Size should already be set.
