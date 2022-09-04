@@ -37,6 +37,7 @@ reportWebVitals();
   Advanced
   ----
   Handle zooming in/out
+  ✅ Handle panning around the canvas 
   ✅ Handle turning an element around
   ✅ Handle resizing an element
   Add history logs
