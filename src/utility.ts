@@ -96,6 +96,7 @@ export const getClosestCorner = (
       closestCorner = corner;
     }
   });
+  console.log("CLOSEST CORNER: ", closestCorner);
   return closestCorner;
 };
 

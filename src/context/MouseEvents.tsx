@@ -39,6 +39,7 @@ export const MouseEventsContext = createContext<IMouseEvents | null>(null);
 
 const width = 2000;
 const height = 1000;
+const ZOOM_SENSITIVITY = 0.05;
 
 export const MouseEventsProvider = ({
   children,
@@ -61,13 +62,14 @@ export const MouseEventsProvider = ({
 
   const onMouseWheel: WheelEventHandler<SVGSVGElement> = (e) => {
     // https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
+    // if (selectionMode.type !== SelectionModes.None) return;
     // e.preventDefault();
     // const w = viewBox.w;
     // const h = viewBox.h;
-    // const mx = e.movementX; //mouse x
-    // const my = e.movementY;
-    // const dw = w * Math.sign(e.deltaY) * 0.05;
-    // const dh = h * Math.sign(e.deltaY) * 0.05;
+    // const mx = e.pageX; //mouse x
+    // const my = e.pageY;
+    // const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
+    // const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
     // const dx = (dw * mx) / width;
     // const dy = (dh * my) / height;
     // const newViewBox = {
@@ -273,15 +275,12 @@ export const MouseEventsProvider = ({
       y: null,
     };
     if (!xOffset || !yOffset) return;
-    const initialX = e.clientX;
-    const initialY = e.clientY;
+    const initialX = e.clientX / viewBox.scale + viewBox.x;
+    const initialY = e.clientY / viewBox.scale + viewBox.y;
+    console.log("INITIAL XY:", initialX, initialY);
     if (!selectedElement) return;
     const element = appState.elements[selectedElement];
-    const selectedCorner = getClosestCorner(
-      element,
-      initialX + viewBox.x,
-      initialY + viewBox.y
-    );
+    const selectedCorner = getClosestCorner(element, initialX, initialY);
     if (!selectedCorner) return;
     setSelectionCoordinates({
       ...selectionCoordinates,
@@ -372,7 +371,12 @@ export const MouseEventsProvider = ({
           const diffX = e.clientX - startX;
           const diffY = e.clientY - startY;
 
-          setElementCoords(selectedElement, diffX, diffY, originElement);
+          setElementCoords(
+            selectedElement,
+            diffX / viewBox.scale,
+            diffY / viewBox.scale,
+            originElement
+          );
           setSelectionCoordinates({
             ...selectionCoordinates,
           });
