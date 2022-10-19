@@ -6,6 +6,8 @@ import {
   AppState,
   SelectionMode,
   initialSelectionCoordinates,
+  ViewBox,
+  initialViewBox,
 } from "../Types";
 
 interface IAppStateContext {
@@ -22,6 +24,8 @@ interface IAppStateContext {
   selectionMode: SelectionMode;
   setSelectionMode: React.Dispatch<React.SetStateAction<SelectionMode>>;
   showDebugger: boolean;
+  viewBox: ViewBox;
+  setViewBox: React.Dispatch<React.SetStateAction<ViewBox>>;
 }
 
 export const AppStateContext = createContext<IAppStateContext>({
@@ -38,6 +42,8 @@ export const AppStateContext = createContext<IAppStateContext>({
   },
   setSelectionMode: () => {},
   showDebugger: false,
+  viewBox: initialViewBox,
+  setViewBox: () => {},
 });
 
 export const useAppState = () => useContext(AppStateContext);
@@ -59,8 +65,8 @@ export const AppStateProvider = (props: {
   const [selectionMode, setSelectionMode] = useState<SelectionMode>({
     type: SelectionModes.None,
   });
-  const [showDebugger] = useState(false);
-
+  const [showDebugger] = useState(true);
+  const [viewBox, setViewBox] = useState(initialViewBox);
   return (
     <AppStateContext.Provider
       value={{
@@ -75,6 +81,8 @@ export const AppStateProvider = (props: {
         selectionMode,
         setSelectionMode,
         showDebugger,
+        viewBox,
+        setViewBox,
       }}
     >
       {props.children}

@@ -29,6 +29,7 @@ export enum SelectionModes {
   Resizing = "Resizing",
   Rotating = "Rotating",
   Turning = "Turning",
+  Panning = "Panning",
 }
 
 export interface SelectionMode {
@@ -120,6 +121,16 @@ export enum COLORS {
   Re-ordering happens rarely. If we could have an object s
   
 */
+
+export interface ViewBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  scale: number;
+  startPoint: { x: number; y: number };
+  endPoint: { x: number; y: number };
+}
 export interface AppState {
   elements: {
     [id: string]: Element;
@@ -167,6 +178,16 @@ export const initialState: AppState = {
   },
   renderingOrder: ["1", "2"],
   elementsCount: 2,
+};
+
+export const initialViewBox: ViewBox = {
+  x: 0,
+  y: 0,
+  w: 2000,
+  h: 1000,
+  startPoint: { x: 0, y: 0 },
+  endPoint: { x: 0, y: 0 },
+  scale: 1,
 };
 
 export const initialSelectionCoordinates = {
