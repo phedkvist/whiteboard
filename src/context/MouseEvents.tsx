@@ -37,9 +37,9 @@ interface IMouseEvents {
 
 export const MouseEventsContext = createContext<IMouseEvents | null>(null);
 
-const width = 2000;
-const height = 1000;
-const ZOOM_SENSITIVITY = 0.05;
+// const width = 2000;
+// const height = 1000;
+// const ZOOM_SENSITIVITY = 0.05;
 
 export const MouseEventsProvider = ({
   children,
@@ -390,17 +390,17 @@ export const MouseEventsProvider = ({
           {},
           newAppState.elements[selectedElement]
         );
-        if (creationElement.type === "rect") {
+        if (creationElement.type === ElementType.Rect) {
           creationElement.width = e.clientX + viewBox.x - creationElement.x;
           creationElement.height = e.clientY + viewBox.y - creationElement.y;
-        } else if (creationElement.type === "ellipse") {
+        } else if (creationElement.type === ElementType.Ellipse) {
           const { initialX, initialY } = selectionCoordinates;
           if (!(initialX && initialY)) return;
           creationElement.rx = (e.clientX + viewBox.x - initialX) / 2;
           creationElement.ry = (e.clientY + viewBox.y - initialY) / 2;
           creationElement.cx = initialX + creationElement.rx;
           creationElement.cy = initialY + creationElement.ry;
-        } else if (creationElement.type === "polyline") {
+        } else if (creationElement.type === ElementType.Polyline) {
           const newPoints = [
             creationElement.points[0],
             creationElement.points[1],
@@ -422,7 +422,7 @@ export const MouseEventsProvider = ({
           switch (selectionMode.elementType) {
             case ElementType.Rect: {
               const el = appState.elements[selectedElement];
-              if (el.type !== "rect") return;
+              if (el.type !== ElementType.Rect) return;
               const [newWidth, newHeight, newX, newY] = resizeRect(
                 selectedCorner,
                 e.clientX + viewBox.x,
@@ -496,7 +496,7 @@ export const MouseEventsProvider = ({
           {},
           newAppState.elements[selectedElement]
         );
-        if (creationElement.type === "polyline") {
+        if (creationElement.type === ElementType.Polyline) {
           break;
         }
         creationElement.state = ElementState.Visible;
@@ -526,7 +526,7 @@ export const MouseEventsProvider = ({
     }
   };
 
-  const onMouseLeave: MouseEventHandler<SVGSVGElement> = (e) => {};
+  // const onMouseLeave: MouseEventHandler<SVGSVGElement> = (e) => {};
 
   const setElementCoords = (
     id: string,
@@ -539,15 +539,24 @@ export const MouseEventsProvider = ({
     if (!obj) {
       throw new Error(`Can't find element with id: ${id} on the screen.`);
     }
-    if (obj.type === "ellipse" && originElement.type === "ellipse") {
+    if (
+      obj.type === ElementType.Ellipse &&
+      originElement.type === ElementType.Ellipse
+    ) {
       obj.cx = diffX + originElement.cx;
       obj.cy = diffY + originElement.cy;
-    } else if (obj.type === "rect" || obj.type === "text") {
-      if (originElement.type === "rect" || originElement.type === "text") {
+    } else if (obj.type === ElementType.Rect || obj.type === ElementType.Text) {
+      if (
+        originElement.type === ElementType.Rect ||
+        originElement.type === ElementType.Text
+      ) {
         obj.x = originElement.x + diffX;
         obj.y = originElement.y + diffY;
       }
-    } else if (obj.type === "polyline" && originElement.type === "polyline") {
+    } else if (
+      obj.type === ElementType.Polyline &&
+      originElement.type === ElementType.Polyline
+    ) {
       const newPoints = originElement.points.map((v, i) =>
         i % 2 === 0 || i === 0 ? v + diffX : v + diffY
       );
@@ -575,13 +584,13 @@ export const MouseEventsProvider = ({
       console.warn(`Height or width can't be lower than 5`);
       return;
     }
-    if (obj.type === "ellipse") {
+    if (obj.type === ElementType.Ellipse) {
       obj.rx = width / 2;
       obj.ry = height / 2;
       // The cx and cy needs to updated
       if (x) obj.cx = x;
       if (y) obj.cy = y;
-    } else if (obj.type === "rect") {
+    } else if (obj.type === ElementType.Rect) {
       obj.width = width;
       obj.height = height;
       if (x) obj.x = x;

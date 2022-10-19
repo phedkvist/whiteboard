@@ -1,19 +1,18 @@
-import { MouseEventHandler } from "react";
 import "./Canvas.css";
-import { SelectionModes, Element } from "../../Types";
+import { SelectionModes, Element, ElementType } from "../../Types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents";
 
 const CORNER_OFFSET = 8;
 const getCornerCoords = (e: Element) => {
-  if (e.type === "rect") {
+  if (e.type === ElementType.Rect) {
     return {
       tL: { x: e.x - CORNER_OFFSET, y: e.y - CORNER_OFFSET },
       tR: { x: e.x + e.width, y: e.y - CORNER_OFFSET },
       bR: { x: e.x + e.width, y: e.y + e.height },
       bL: { x: e.x - CORNER_OFFSET, y: e.y + e.height },
     };
-  } else if (e.type === "ellipse") {
+  } else if (e.type === ElementType.Ellipse) {
     return {
       tL: { x: e.cx - e.rx - CORNER_OFFSET, y: e.cy - e.ry - CORNER_OFFSET },
       tR: { x: e.cx + e.rx, y: e.cy - e.ry - CORNER_OFFSET },
@@ -135,7 +134,7 @@ const addDraggableCorners = (
   </g>
 );
 
-const Canvas = ({}: {}) => {
+const Canvas = () => {
   const {
     appState,
     selectedElement,
@@ -147,7 +146,7 @@ const Canvas = ({}: {}) => {
   const { onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel } =
     useMouseEvents();
 
-  const { elements, renderingOrder } = appState;
+  const { elements } = appState;
   const sortedElements = Object.values(elements).sort((a, b) => {
     const val = a.renderingOrder - b.renderingOrder;
 
@@ -160,7 +159,7 @@ const Canvas = ({}: {}) => {
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
     const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
     let renderElement;
-    if (e.type === "rect") {
+    if (e.type === ElementType.Rect) {
       const { type, renderingOrder, ...props } = e;
       const { x, y, width, height, rotate } = props;
       renderElement = <rect key={e.id} {...props} className={classes} />;
@@ -177,7 +176,7 @@ const Canvas = ({}: {}) => {
         rotate,
         isSelected
       );
-    } else if (e.type === "ellipse") {
+    } else if (e.type === ElementType.Ellipse) {
       const { type, renderingOrder, ...props } = e;
       const { cx, cy, rotate } = props;
 
@@ -195,7 +194,7 @@ const Canvas = ({}: {}) => {
         rotate,
         isSelected
       );
-    } else if (e.type === "polyline") {
+    } else if (e.type === ElementType.Polyline) {
       const { type, renderingOrder, points, ...props } = e;
       renderElement = (
         <polyline

@@ -1,4 +1,4 @@
-import { Corner, Element, Ellipse, Rect } from "./Types";
+import { Corner, Element, ElementType, Ellipse, Rect } from "./Types";
 
 export enum MouseButtons {
   LEFT = 0,
@@ -74,9 +74,10 @@ export const getClosestCorner = (
   xPos: number,
   yPos: number
 ) => {
-  if (!e || e.type === "text" || e.type === "polyline") return;
+  if (!e || e.type === ElementType.Text || e.type === ElementType.Polyline)
+    return;
   const { topLeft, topRight, bottomRight, bottomLeft } =
-    e.type === "rect"
+    e.type === ElementType.Rect
       ? getElementCorners(e.x, e.y, e.width, e.height, e.rotate)
       : getElementCorners(
           e.cx - e.rx,
@@ -127,7 +128,7 @@ export const resizeRect = (
 
   const cx = x + w / 2;
   const cy = y + h / 2;
-
+  // eslint-disable-next-line
   const [newWidth, newHeight, newX, newY, _newCX, _newCY] =
     resizeRotatedRectangle({
       x,
@@ -156,6 +157,7 @@ export const resizeEllipse = (
   const y = cy - ry;
   const w = 2 * rx;
   const h = 2 * ry;
+  // eslint-disable-next-line
   const [newWidth, newHeight, _newX, _newY, newCX, newCY] =
     resizeRotatedRectangle({
       x,
@@ -325,7 +327,7 @@ const resizeRotatedRectangle = ({
 };
 
 export const getMidPoints = (element: Element): [number, number] => {
-  if (element.type === "rect") {
+  if (element.type === ElementType.Rect) {
     return [element.x + element.width / 2, element.y + element.height / 2];
   } else if (element.type === "ellipse") {
     return [element.cx, element.cy];
