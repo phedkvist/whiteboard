@@ -32,7 +32,7 @@ reportWebVitals();
   ✅ Change color of element on canvas
   ✅ Add the ability to place elements above or below other elements
   Select multiple elements with the mouse
-
+  ✅ Viewbox should be updated to be of the same width and height of current screen.
 
   Advanced
   ----
@@ -40,6 +40,7 @@ reportWebVitals();
   ✅ Handle panning around the canvas 
   ✅ Handle turning an element around
   ✅ Handle resizing an element
+  ✅ Add ability to add image 
   Add history logs
   Add undo/redo of operations
   Collaboration features
