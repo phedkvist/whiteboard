@@ -54,6 +54,6 @@ reportWebVitals();
   General improvements
   -----
   ✅ Place the appState into a context, removes prop drilling.
-  Make use of classes for different elements, should make it easier to have methods tied to the element.
   ✅ Update the resizing function to take the rotation into account.
+  Use some kind of reducer pattern to improve how the state changes between updates
 */
