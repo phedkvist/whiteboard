@@ -1,4 +1,4 @@
-import { ElementType, Ellipse, Polyline, Rect } from "../Types";
+import { ElementType, Ellipse, Polyline, Rect, Text } from "../Types";
 
 export enum ChangeType {
   Create = "create",
@@ -59,6 +59,16 @@ export interface UpdatePolylineAction extends PolylineAction, Update {}
 export interface MovePolylineAction extends PolylineAction, Move {}
 export interface DeletePolylineAction extends PolylineAction, Delete {}
 
+// Text Actions
+interface TextAction extends ChangeAction {
+  elementType: ElementType.Text;
+  object: Text;
+}
+export interface CreateTextAction extends TextAction, Create {}
+export interface UpdateTextAction extends TextAction, Update {}
+export interface MoveTextAction extends TextAction, Move {}
+export interface DeleteTextAction extends TextAction, Delete {}
+
 export type ChangeActions =
   | CreateRectAction
   | UpdateRectAction
@@ -71,7 +81,12 @@ export type ChangeActions =
   | CreatePolylineAction
   | UpdatePolylineAction
   | MovePolylineAction
-  | DeletePolylineAction;
+  | DeletePolylineAction
+  | CreateTextAction
+  | UpdateTextAction
+  | MoveTextAction
+  | UpdateTextAction
+  | DeleteTextAction;
 
 export interface UserVersion {
   userId: string;

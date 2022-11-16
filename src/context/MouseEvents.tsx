@@ -25,6 +25,8 @@ import { useAppState } from "./AppState";
 import { v4 as uuid } from "uuid";
 import { createRectAction } from "../service/Actions/Rect";
 import { createEllipseAction } from "../service/Actions/Ellipse";
+import { createTextAction } from "../service/Actions/Text";
+import { createPolylineAction } from "../service/Actions/Polyline";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -161,23 +163,9 @@ export const MouseEventsProvider = ({
             break;
           }
           case ElementType.Text: {
-            const newAppState = Object.assign({}, appState);
-            const elementsCount = newAppState.elementsCount + 1;
-            const renderingOrder = [...newAppState.renderingOrder, id];
-
-            const newText: Text = {
-              id,
-              type: ElementType.Text,
-              x: initialX,
-              y: initialY,
-              text: "Text",
-              state: ElementState.Creation,
-              style: { fontSize: "14px", color: "black" },
-              rotate: 0,
-              renderingOrder: elementsCount,
-            };
-            newAppState.elements[id] = newText;
-            setAppState({ ...newAppState, elementsCount, renderingOrder });
+            history?.addLocalChange(
+              createTextAction(initialX, initialY, renderingOrder, id)
+            );
             break;
           }
           case ElementType.Polyline: {
@@ -204,21 +192,10 @@ export const MouseEventsProvider = ({
               setSelectedElement(null);
               setAppState(newAppState);
             } else {
-              const elementsCount = newAppState.elementsCount + 1;
-              const renderingOrder = [...newAppState.renderingOrder, id];
-
-              const newPolyline: Polyline = {
-                id,
-                type: ElementType.Polyline,
-                points: [initialX, initialY],
-                rotate: 0,
-                stroke: "black",
-                state: ElementState.Creation,
-                strokeWidth: "4px",
-                renderingOrder: elementsCount,
-              };
-              newAppState.elements[id] = newPolyline;
-              setAppState({ ...newAppState, elementsCount, renderingOrder });
+              history?.addLocalChange(
+                createPolylineAction(initialX, initialY, renderingOrder, id)
+              );
+              break;
             }
             break;
           }
