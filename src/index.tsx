@@ -32,7 +32,7 @@ reportWebVitals();
   ✅ Change color of element on canvas
   ✅ Add the ability to place elements above or below other elements
   Select multiple elements with the mouse
-  ✅ Viewbox should be updated to be of the same width and height of current screen.
+  ✅ View-box should be updated to be of the same width and height of current screen.
 
   Advanced
   ----

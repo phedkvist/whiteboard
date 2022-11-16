@@ -9,10 +9,12 @@ import {
   ViewBox,
   initialViewBox,
 } from "../Types";
+import History from "../service/History";
 
 interface IAppStateContext {
   appState: AppState;
   setAppState: React.Dispatch<React.SetStateAction<AppState>>;
+  history: History | null;
   selectedElement: string | null;
   setSelectedElement: React.Dispatch<React.SetStateAction<string | null>>;
   hoverElement: string | null;
@@ -31,6 +33,7 @@ interface IAppStateContext {
 export const AppStateContext = createContext<IAppStateContext>({
   appState: initialState,
   setAppState: () => {},
+  history: null,
   selectedElement: null,
   setSelectedElement: () => {},
   hoverElement: null,
@@ -58,6 +61,9 @@ export const AppStateProvider = (props: {
     | undefined;
 }) => {
   const [appState, setAppState] = useState<AppState>(initialState);
+  const [history] = useState(() => new History(appState, setAppState));
+  // TODO: All changes must go trough the history class
+
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [hoverElement, setHoverElement] = useState<string | null>(null);
   const [selectionCoordinates, setSelectionCoordinates] =
@@ -67,11 +73,13 @@ export const AppStateProvider = (props: {
   });
   const [showDebugger] = useState(true);
   const [viewBox, setViewBox] = useState(initialViewBox);
+  // console.log(history);
   return (
     <AppStateContext.Provider
       value={{
         appState,
         setAppState,
+        history,
         selectedElement,
         setSelectedElement,
         hoverElement,

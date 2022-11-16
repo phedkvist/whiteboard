@@ -23,6 +23,7 @@ import {
 } from "../utility";
 import { useAppState } from "./AppState";
 import { v4 as uuid } from "uuid";
+import { createRectAction } from "../service/Actions/Rect";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -49,6 +50,7 @@ export const MouseEventsProvider = ({
   const {
     appState,
     setAppState,
+    history,
     selectedElement,
     setSelectedElement,
     setHoverElement,
@@ -145,23 +147,28 @@ export const MouseEventsProvider = ({
         switch (selectionMode.elementType) {
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
           case ElementType.Rect: {
-            const newAppState = Object.assign({}, appState);
-            const elementsCount = newAppState.elementsCount + 1;
-            const renderingOrder = [...newAppState.renderingOrder, id];
+            //const newAppState = Object.assign({}, appState);
+            const renderingOrder = appState.elementsCount + 1;
+            // const renderingOrder = [...newAppState.renderingOrder, id];
 
-            const newRect: Rect = {
-              id,
-              type: ElementType.Rect,
-              width: 0,
-              height: 0,
-              x: initialX,
-              y: initialY,
-              state: ElementState.Creation,
-              rotate: 0,
-              renderingOrder: elementsCount,
-            };
-            newAppState.elements[id] = newRect;
-            setAppState({ ...newAppState, elementsCount, renderingOrder });
+            // const newRect: Rect = {
+            //   id,
+            //   type: ElementType.Rect,
+            //   width: 0,
+            //   height: 0,
+            //   x: initialX,
+            //   y: initialY,
+            //   state: ElementState.Creation,
+            //   rotate: 0,
+            //   renderingOrder: elementsCount,
+            // };
+            // DISPATCH THIS AS A CHANGE EVENT INSTEAD.
+            //newAppState.elements[id] = newRect;
+            //setAppState({ ...newAppState, elementsCount, renderingOrder });
+            history?.addLocalChange(
+              createRectAction(initialX, initialY, renderingOrder, id)
+            );
+
             break;
           }
           case ElementType.Ellipse: {
