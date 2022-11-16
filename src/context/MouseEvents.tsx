@@ -24,6 +24,7 @@ import {
 import { useAppState } from "./AppState";
 import { v4 as uuid } from "uuid";
 import { createRectAction } from "../service/Actions/Rect";
+import { createEllipseAction } from "../service/Actions/Ellipse";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -143,52 +144,20 @@ export const MouseEventsProvider = ({
         });
         const id = uuid();
         setSelectedElement(id);
+        const renderingOrder = appState.elementsCount + 1;
 
         switch (selectionMode.elementType) {
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
           case ElementType.Rect: {
-            //const newAppState = Object.assign({}, appState);
-            const renderingOrder = appState.elementsCount + 1;
-            // const renderingOrder = [...newAppState.renderingOrder, id];
-
-            // const newRect: Rect = {
-            //   id,
-            //   type: ElementType.Rect,
-            //   width: 0,
-            //   height: 0,
-            //   x: initialX,
-            //   y: initialY,
-            //   state: ElementState.Creation,
-            //   rotate: 0,
-            //   renderingOrder: elementsCount,
-            // };
-            // DISPATCH THIS AS A CHANGE EVENT INSTEAD.
-            //newAppState.elements[id] = newRect;
-            //setAppState({ ...newAppState, elementsCount, renderingOrder });
             history?.addLocalChange(
               createRectAction(initialX, initialY, renderingOrder, id)
             );
-
             break;
           }
           case ElementType.Ellipse: {
-            const newAppState = Object.assign({}, appState);
-            const elementsCount = newAppState.elementsCount + 1;
-            const renderingOrder = [...newAppState.renderingOrder, id];
-
-            const newCircle: Ellipse = {
-              id,
-              type: ElementType.Ellipse,
-              rx: 0,
-              ry: 0,
-              cx: initialX,
-              cy: initialY,
-              state: ElementState.Creation,
-              rotate: 0,
-              renderingOrder: elementsCount,
-            };
-            newAppState.elements[id] = newCircle;
-            setAppState({ ...newAppState, elementsCount, renderingOrder });
+            history?.addLocalChange(
+              createEllipseAction(initialX, initialY, renderingOrder, id)
+            );
             break;
           }
           case ElementType.Text: {

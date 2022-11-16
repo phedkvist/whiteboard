@@ -5,9 +5,8 @@ export const createRectAction = (
   initialX: number,
   initialY: number,
   renderingOrder: number,
-  id: string,
+  id: string
 ): CreateRectAction => {
-
   const rect: Rect = {
     id,
     type: ElementType.Rect,
@@ -19,10 +18,7 @@ export const createRectAction = (
     rotate: 0,
     renderingOrder,
   };
-  // DISPATCH THIS AS A CHANGE EVENT INSTEAD.
-  // newAppState.elements[id] = newRect;
-  //setAppState({ ...newAppState, elementsCount, renderingOrder });
-  console.log("HELLO", rect);
+
   return {
     elementType: ElementType.Rect,
     object: rect,
