@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   MouseEventHandler,
   useContext,
@@ -7,12 +7,9 @@ import React, {
 import {
   SelectionModes,
   ElementType,
-  Rect,
   ElementState,
   Element as WhiteboardElement,
-  Ellipse,
-  Polyline,
-  Text,
+  Corner,
 } from "../Types";
 import {
   getClosestCorner,
@@ -369,16 +366,18 @@ export const MouseEventsProvider = ({
         } else if (creationElement.type === ElementType.Ellipse) {
           const { initialX, initialY } = selectionCoordinates;
           if (!(initialX && initialY)) return;
-          const rx = (e.clientX + viewBox.x - initialX) / 2;
-          const ry = (e.clientY + viewBox.y - initialY) / 2;
-          const cx = initialX + creationElement.rx;
-          const cy = initialY + creationElement.ry;
+          const [width, height, cx, cy] = resizeEllipse(
+            Corner.BottomRight,
+            e.clientX + viewBox.x,
+            e.clientY + viewBox.y,
+            creationElement
+          );
           history?.addLocalChange(
             updateEllipseAction(
               {
                 ...creationElement,
-                rx,
-                ry,
+                rx: width / 2,
+                ry: height / 2,
                 cx,
                 cy,
                 state: ElementState.Creation,
