@@ -35,7 +35,8 @@ export const createPolylineAction = (
 };
 
 export const updatePolylineAction = (
-  object: Polyline
+  object: Polyline,
+  ephemeral: boolean
 ): UpdatePolylineAction => {
   return {
     elementType: ElementType.Polyline,
@@ -45,7 +46,7 @@ export const updatePolylineAction = (
       userId: "test",
       clock: 1,
     },
-    ephemeral: false,
+    ephemeral,
   };
 };
 

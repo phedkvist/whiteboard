@@ -1,5 +1,9 @@
 import { ElementState, ElementType, Ellipse } from "../../Types";
-import { ChangeType, CreateEllipseAction } from "../ChangeTypes";
+import {
+  ChangeType,
+  CreateEllipseAction,
+  UpdateEllipseAction,
+} from "../ChangeTypes";
 
 export const createEllipseAction = (
   initialX: number,
@@ -31,6 +35,18 @@ export const createEllipseAction = (
   };
 };
 
-export {};
-
-export {};
+export const updateEllipseAction = (
+  object: Ellipse,
+  ephemeral: boolean
+): UpdateEllipseAction => {
+  return {
+    elementType: ElementType.Ellipse,
+    object,
+    changeType: ChangeType.Update,
+    userVersion: {
+      userId: "test",
+      clock: 1,
+    },
+    ephemeral,
+  };
+};

@@ -23,8 +23,11 @@ import {
 } from "../utility";
 import { useAppState } from "./AppState";
 import { v4 as uuid } from "uuid";
-import { createRectAction } from "../service/Actions/Rect";
-import { createEllipseAction } from "../service/Actions/Ellipse";
+import { createRectAction, updateRectAction } from "../service/Actions/Rect";
+import {
+  createEllipseAction,
+  updateEllipseAction,
+} from "../service/Actions/Ellipse";
 import { createTextAction } from "../service/Actions/Text";
 import {
   createPolylineAction,
@@ -181,10 +184,13 @@ export const MouseEventsProvider = ({
                 );
               }
               history?.addLocalChange(
-                updatePolylineAction({
-                  ...creationElement,
-                  state: ElementState.Visible,
-                })
+                updatePolylineAction(
+                  {
+                    ...creationElement,
+                    state: ElementState.Visible,
+                  },
+                  false
+                )
               );
 
               // Need to handle it being selected but not in selection mode which drags elements around?
@@ -341,32 +347,59 @@ export const MouseEventsProvider = ({
       case SelectionModes.Add: {
         if (!selectedElement) return;
         const newAppState = Object.assign({}, appState);
+        // Update actions with ephemeral set to true.
         const creationElement = Object.assign(
           {},
           newAppState.elements[selectedElement]
         );
         if (creationElement.type === ElementType.Rect) {
-          creationElement.width = e.clientX + viewBox.x - creationElement.x;
-          creationElement.height = e.clientY + viewBox.y - creationElement.y;
+          const width = e.clientX + viewBox.x - creationElement.x;
+          const height = e.clientY + viewBox.y - creationElement.y;
+          history?.addLocalChange(
+            updateRectAction(
+              {
+                ...creationElement,
+                width,
+                height,
+                state: ElementState.Creation,
+              },
+              true
+            )
+          );
         } else if (creationElement.type === ElementType.Ellipse) {
           const { initialX, initialY } = selectionCoordinates;
           if (!(initialX && initialY)) return;
-          creationElement.rx = (e.clientX + viewBox.x - initialX) / 2;
-          creationElement.ry = (e.clientY + viewBox.y - initialY) / 2;
-          creationElement.cx = initialX + creationElement.rx;
-          creationElement.cy = initialY + creationElement.ry;
+          const rx = (e.clientX + viewBox.x - initialX) / 2;
+          const ry = (e.clientY + viewBox.y - initialY) / 2;
+          const cx = initialX + creationElement.rx;
+          const cy = initialY + creationElement.ry;
+          history?.addLocalChange(
+            updateEllipseAction(
+              {
+                ...creationElement,
+                rx,
+                ry,
+                cx,
+                cy,
+                state: ElementState.Creation,
+              },
+              true
+            )
+          );
         } else if (creationElement.type === ElementType.Polyline) {
-          const newPoints = [
+          const points = [
             creationElement.points[0],
             creationElement.points[1],
             e.clientX + viewBox.x,
             e.clientY + viewBox.y,
           ];
-          creationElement.points = newPoints;
+          history?.addLocalChange(
+            updatePolylineAction(
+              { ...creationElement, points, state: ElementState.Creation },
+              true
+            )
+          );
         }
-        creationElement.state = ElementState.Creation;
-        newAppState.elements[selectedElement] = creationElement;
-        setAppState(newAppState);
         break;
       }
       case SelectionModes.Resizing: {
@@ -470,7 +503,7 @@ export const MouseEventsProvider = ({
       case SelectionModes.Resizing: {
         // Size should already be set.
         // Change from resizing to selection mode.
-
+        // TODO: Make sure every ephemeral change ends up with non ephemeral change at some point.
         setSelectionMode({
           ...selectionMode,
           type: SelectionModes.None,
