@@ -49,6 +49,9 @@ interface ElementBase {
   state: ElementState;
   rotate: number;
   renderingOrder: number;
+  // TODO: Add this version number, maybe add as a separate object
+  // version: number;
+  // updateByUser: string;
 }
 
 // TODO: Turn these into classes that can also contain rendering functions.

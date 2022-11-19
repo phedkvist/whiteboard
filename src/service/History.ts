@@ -38,6 +38,7 @@ export default class History {
 
     const { object } = change;
 
+    // TODO: Before applying, check that this version is the "most recent" using versions.
     newAppState.elements[object.id] = object;
     const elementsCount = object.renderingOrder;
     const renderingOrder = [...newAppState.renderingOrder, object.id];

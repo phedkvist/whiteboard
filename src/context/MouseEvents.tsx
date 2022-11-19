@@ -26,7 +26,10 @@ import { v4 as uuid } from "uuid";
 import { createRectAction } from "../service/Actions/Rect";
 import { createEllipseAction } from "../service/Actions/Ellipse";
 import { createTextAction } from "../service/Actions/Text";
-import { createPolylineAction } from "../service/Actions/Polyline";
+import {
+  createPolylineAction,
+  updatePolylineAction,
+} from "../service/Actions/Polyline";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -169,9 +172,6 @@ export const MouseEventsProvider = ({
             break;
           }
           case ElementType.Polyline: {
-            // We start and end the polyline creation here.
-            const newAppState = Object.assign({}, appState);
-
             if (selectedElement) {
               // Second part of drawing the line.
               const creationElement = appState.elements[selectedElement];
@@ -180,17 +180,19 @@ export const MouseEventsProvider = ({
                   "Expected selected element to be a polyline element"
                 );
               }
-              creationElement.state = ElementState.Visible;
-              newAppState.elements[selectedElement] = creationElement;
+              history?.addLocalChange(
+                updatePolylineAction({
+                  ...creationElement,
+                  state: ElementState.Visible,
+                })
+              );
 
-              setAppState(newAppState);
               // Need to handle it being selected but not in selection mode which drags elements around?
               setSelectionMode({
                 ...selectionMode,
                 type: SelectionModes.None,
               });
               setSelectedElement(null);
-              setAppState(newAppState);
             } else {
               history?.addLocalChange(
                 createPolylineAction(initialX, initialY, renderingOrder, id)

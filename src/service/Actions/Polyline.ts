@@ -1,5 +1,9 @@
 import { ElementState, ElementType, Polyline } from "../../Types";
-import { ChangeType, CreatePolylineAction } from "../ChangeTypes";
+import {
+  ChangeType,
+  CreatePolylineAction,
+  UpdatePolylineAction,
+} from "../ChangeTypes";
 
 export const createPolylineAction = (
   initialX: number,
@@ -22,6 +26,21 @@ export const createPolylineAction = (
     elementType: ElementType.Polyline,
     object,
     changeType: ChangeType.Create,
+    userVersion: {
+      userId: "test",
+      clock: 1,
+    },
+    ephemeral: true,
+  };
+};
+
+export const updatePolylineAction = (
+  object: Polyline
+): UpdatePolylineAction => {
+  return {
+    elementType: ElementType.Polyline,
+    object,
+    changeType: ChangeType.Update,
     userVersion: {
       userId: "test",
       clock: 1,
