@@ -447,7 +447,6 @@ export const MouseEventsProvider = ({
                     ry: height / 2,
                     cx,
                     cy,
-                    state: ElementState.Creation,
                   },
                   true
                 )
