@@ -410,30 +410,47 @@ export const MouseEventsProvider = ({
             case ElementType.Rect: {
               const el = appState.elements[selectedElement];
               if (el.type !== ElementType.Rect) return;
-              const [newWidth, newHeight, newX, newY] = resizeRect(
+              const [width, height, x, y] = resizeRect(
                 selectedCorner,
                 e.clientX + viewBox.x,
                 e.clientY + viewBox.y,
                 el
               );
-              setElementSize(selectedElement, newWidth, newHeight, newX, newY);
+              history?.addLocalChange(
+                updateRectAction(
+                  {
+                    ...el,
+                    width,
+                    height,
+                    x,
+                    y,
+                  },
+                  true
+                )
+              );
               break;
             }
             case ElementType.Ellipse: {
               const obj = appState.elements[selectedElement];
               if (!obj || obj.type !== ElementType.Ellipse) return;
-              const [newWidth, newHeight, newCX, newCY] = resizeEllipse(
+              const [width, height, cx, cy] = resizeEllipse(
                 selectedCorner,
                 e.clientX + viewBox.x,
                 e.clientY + viewBox.y,
                 obj
               );
-              setElementSize(
-                selectedElement,
-                newWidth,
-                newHeight,
-                newCX,
-                newCY
+              history?.addLocalChange(
+                updateEllipseAction(
+                  {
+                    ...obj,
+                    rx: width / 2,
+                    ry: height / 2,
+                    cx,
+                    cy,
+                    state: ElementState.Creation,
+                  },
+                  true
+                )
               );
               break;
             }
@@ -550,38 +567,6 @@ export const MouseEventsProvider = ({
       obj.points = newPoints;
     } else {
       throw new Error("Something went wrong in set element coords");
-    }
-    newAppState.elements = { ...newAppState.elements, [id]: obj };
-    setAppState(newAppState);
-  };
-
-  const setElementSize = (
-    id: string,
-    width: number,
-    height: number,
-    x: number,
-    y: number
-  ) => {
-    const newAppState = Object.assign({}, appState);
-    const obj = newAppState.elements[id];
-    if (!obj) {
-      throw new Error(`Can't find element with id: ${id} on the screen.`);
-    }
-    if (width < 5 || height < 5) {
-      console.warn(`Height or width can't be lower than 5`);
-      return;
-    }
-    if (obj.type === ElementType.Ellipse) {
-      obj.rx = width / 2;
-      obj.ry = height / 2;
-      // The cx and cy needs to updated
-      if (x) obj.cx = x;
-      if (y) obj.cy = y;
-    } else if (obj.type === ElementType.Rect) {
-      obj.width = width;
-      obj.height = height;
-      if (x) obj.x = x;
-      if (y) obj.y = y;
     }
     newAppState.elements = { ...newAppState.elements, [id]: obj };
     setAppState(newAppState);
