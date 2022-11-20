@@ -3,10 +3,12 @@ import { useAppState } from "../../context/AppState";
 import { Element } from "../../Types";
 import useContextMenu from "../../hooks/useContextMenu";
 import "./ContextMenu.css";
+import { copy } from "../../utility";
+import { createUpdateChangeAction } from "../../service/ChangeTypes";
 
 const ContextMenu = () => {
   const { anchorPoint, show } = useContextMenu();
-  const { selectedElement, appState, setAppState } = useAppState();
+  const { selectedElement, appState, history } = useAppState();
 
   // re-order the elements by adding or removing from the renderingOrder number,
   // in case of equal elements, the tie-braker is the id of the element.
@@ -19,20 +21,14 @@ const ContextMenu = () => {
       console.warn("No selected element on bring up callback");
       return;
     }
-    const element = appState.elements[selectedElement];
+    const element = copy(appState.elements[selectedElement]);
     if (!element) {
       throw new Error(
         "No element with id in selectedElement, on bring up callback"
       );
     }
     const renderingOrder = element.renderingOrder + change;
-    setAppState({
-      ...appState,
-      elements: {
-        ...appState.elements,
-        [element.id]: { ...element, renderingOrder },
-      },
-    });
+    createUpdateChangeAction({ ...element, renderingOrder }, false, history);
   };
 
   const onBringUp = () => changeRenderingOrder(+1);

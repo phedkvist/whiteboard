@@ -1,4 +1,8 @@
-import { ElementType, Ellipse, Polyline, Rect, Text } from "../Types";
+import { Element, ElementType, Ellipse, Polyline, Rect, Text } from "../Types";
+import { updateEllipseAction } from "./Actions/Ellipse";
+import { updatePolylineAction } from "./Actions/Polyline";
+import { updateRectAction } from "./Actions/Rect";
+import History from "./History";
 
 export enum ChangeType {
   Create = "create",
@@ -96,3 +100,18 @@ export interface UserVersion {
 export interface VersionVector {
   [id: string]: UserVersion;
 }
+
+export const createUpdateChangeAction = (
+  element: Element,
+  ephemeral: boolean,
+  history: History | null
+) => {
+  const { type } = element;
+  if (type === ElementType.Ellipse) {
+    return history?.addLocalChange(updateEllipseAction(element, ephemeral));
+  } else if (type === ElementType.Polyline) {
+    return history?.addLocalChange(updatePolylineAction(element, ephemeral));
+  } else if (type === ElementType.Rect) {
+    return history?.addLocalChange(updateRectAction(element, ephemeral));
+  }
+};

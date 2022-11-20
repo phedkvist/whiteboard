@@ -1,7 +1,14 @@
 import React from "react";
 import "./Properties.css";
 import { ElementType, Rect, Element, COLORS } from "../../Types";
+import History from "../../service/History";
 import { useAppState } from "../../context/AppState";
+import { updateEllipseAction } from "../../service/Actions/Ellipse";
+import { updateTextAction } from "../../service/Actions/Text";
+import { updatePolylineAction } from "../../service/Actions/Polyline";
+import { updateRectAction } from "../../service/Actions/Rect";
+import { copy } from "../../utility";
+import { createUpdateChangeAction } from "../../service/ChangeTypes";
 
 // When there is a selected element.
 // Find its state and respective properties.
@@ -10,7 +17,7 @@ import { useAppState } from "../../context/AppState";
 // Different settings for different elements
 
 export const Properties = () => {
-  const { appState, setAppState, selectedElement } = useAppState();
+  const { appState, selectedElement, history } = useAppState();
   const element = selectedElement ? appState.elements[selectedElement] : null;
 
   const properties = (element: Element | null) => {
@@ -35,11 +42,9 @@ export const Properties = () => {
                 }
                 onClick={() => {
                   if (!selectedElement) return;
-                  const newElement = JSON.parse(JSON.stringify(element));
+                  const newElement = copy(element);
                   newElement.style = { ...newElement.style, fill: color };
-                  const newState = { ...appState };
-                  newState.elements[selectedElement] = newElement;
-                  setAppState(newState);
+                  createUpdateChangeAction(newElement, false, history);
                 }}
               />
             ))}
@@ -56,11 +61,9 @@ export const Properties = () => {
                 }
                 onClick={() => {
                   if (!selectedElement) return;
-                  const newElement = JSON.parse(JSON.stringify(element));
+                  const newElement = copy(element);
                   newElement.style = { ...newElement.style, stroke: color };
-                  const newState = { ...appState };
-                  newState.elements[selectedElement] = newElement;
-                  setAppState(newState);
+                  createUpdateChangeAction(newElement, false, history);
                 }}
               />
             ))}
@@ -77,11 +80,9 @@ export const Properties = () => {
               onChange={(e) => {
                 const strokeWidth = Number(e.target.value);
                 if (!selectedElement) return;
-                const newElement = JSON.parse(JSON.stringify(element));
+                const newElement = copy(element);
                 newElement.style = { ...newElement.style, strokeWidth };
-                const newState = { ...appState };
-                newState.elements[selectedElement] = newElement;
-                setAppState(newState);
+                createUpdateChangeAction(newElement, false, history);
               }}
             />
             <p>Stroke dasharray</p>
@@ -97,11 +98,9 @@ export const Properties = () => {
               onChange={(e) => {
                 const strokeDasharray = Number(e.target.value);
                 if (!selectedElement) return;
-                const newElement = JSON.parse(JSON.stringify(element));
+                const newElement = copy(element);
                 newElement.style = { ...newElement.style, strokeDasharray };
-                const newState = { ...appState };
-                newState.elements[selectedElement] = newElement;
-                setAppState(newState);
+                createUpdateChangeAction(newElement, false, history);
               }}
             />
           </>
