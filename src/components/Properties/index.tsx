@@ -2,7 +2,7 @@ import "./Properties.css";
 import { ElementType, Element, COLORS } from "../../Types";
 import { useAppState } from "../../context/AppState";
 import { copy } from "../../utility";
-import { createUpdateChangeAction } from "../../service/ChangeTypes";
+import { createUpdateChangeAction } from "../../services/ChangeTypes";
 
 // When there is a selected element.
 // Find its state and respective properties.

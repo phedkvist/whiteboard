@@ -21,16 +21,16 @@ import {
 } from "../utility";
 import { useAppState } from "./AppState";
 import { v4 as uuid } from "uuid";
-import { createRectAction, updateRectAction } from "../service/Actions/Rect";
+import { createRectAction, updateRectAction } from "../services/Actions/Rect";
 import {
   createEllipseAction,
   updateEllipseAction,
-} from "../service/Actions/Ellipse";
-import { createTextAction, updateTextAction } from "../service/Actions/Text";
+} from "../services/Actions/Ellipse";
+import { createTextAction, updateTextAction } from "../services/Actions/Text";
 import {
   createPolylineAction,
   updatePolylineAction,
-} from "../service/Actions/Polyline";
+} from "../services/Actions/Polyline";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.

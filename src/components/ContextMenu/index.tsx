@@ -2,7 +2,7 @@ import { useAppState } from "../../context/AppState";
 import useContextMenu from "../../hooks/useContextMenu";
 import "./ContextMenu.css";
 import { copy } from "../../utility";
-import { createUpdateChangeAction } from "../../service/ChangeTypes";
+import { createUpdateChangeAction } from "../../services/ChangeTypes";
 
 const ContextMenu = () => {
   const { anchorPoint, show } = useContextMenu();

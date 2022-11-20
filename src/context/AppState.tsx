@@ -9,7 +9,7 @@ import {
   ViewBox,
   initialViewBox,
 } from "../Types";
-import History from "../service/History";
+import History from "../services/History";
 
 interface IAppStateContext {
   appState: AppState;
