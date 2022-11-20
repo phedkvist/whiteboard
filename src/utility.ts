@@ -171,7 +171,9 @@ export const resizeEllipse = (
       clientX,
       clientY,
     });
-  return [newWidth, newHeight, newCX, newCY];
+  const newRx = newWidth / 2;
+  const newRy = newHeight / 2;
+  return [newRx, newRy, newCX, newCY];
 };
 
 const resizeRotatedRectangle = ({

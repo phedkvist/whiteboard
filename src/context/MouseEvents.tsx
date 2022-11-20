@@ -366,7 +366,7 @@ export const MouseEventsProvider = ({
         } else if (creationElement.type === ElementType.Ellipse) {
           const { initialX, initialY } = selectionCoordinates;
           if (!(initialX && initialY)) return;
-          const [width, height, cx, cy] = resizeEllipse(
+          const [rx, ry, cx, cy] = resizeEllipse(
             Corner.BottomRight,
             e.clientX + viewBox.x,
             e.clientY + viewBox.y,
@@ -376,8 +376,8 @@ export const MouseEventsProvider = ({
             updateEllipseAction(
               {
                 ...creationElement,
-                rx: width / 2,
-                ry: height / 2,
+                rx,
+                ry,
                 cx,
                 cy,
                 state: ElementState.Creation,
@@ -433,7 +433,7 @@ export const MouseEventsProvider = ({
             case ElementType.Ellipse: {
               const obj = copy(appState.elements[selectedElement]);
               if (!obj || obj.type !== ElementType.Ellipse) return;
-              const [width, height, cx, cy] = resizeEllipse(
+              const [rx, ry, cx, cy] = resizeEllipse(
                 selectedCorner,
                 e.clientX + viewBox.x,
                 e.clientY + viewBox.y,
@@ -443,8 +443,8 @@ export const MouseEventsProvider = ({
                 updateEllipseAction(
                   {
                     ...obj,
-                    rx: width / 2,
-                    ry: height / 2,
+                    rx,
+                    ry,
                     cx,
                     cy,
                   },
@@ -496,7 +496,6 @@ export const MouseEventsProvider = ({
         const creationElement = copy(appState.elements[selectedElement]);
         let changeAction;
         if (creationElement.type === ElementType.Rect) {
-          console.log("ON UP rect");
           changeAction = updateRectAction(creationElement, false);
         } else if (creationElement.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(creationElement, false);
