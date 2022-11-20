@@ -336,3 +336,7 @@ export const getMidPoints = (element: Element): [number, number] => {
     return [0, 0];
   }
 };
+
+export function copy<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}

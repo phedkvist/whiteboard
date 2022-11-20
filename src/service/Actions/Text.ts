@@ -1,5 +1,5 @@
 import { ElementState, ElementType, Text } from "../../Types";
-import { ChangeType, CreateTextAction } from "../ChangeTypes";
+import { ChangeType, CreateTextAction, UpdateTextAction } from "../ChangeTypes";
 
 export const createTextAction = (
   initialX: number,
@@ -27,6 +27,22 @@ export const createTextAction = (
       clock: 1,
     },
     ephemeral: false,
+  };
+};
+
+export const updateTextAction = (
+  object: Text,
+  ephemeral: boolean
+): UpdateTextAction => {
+  return {
+    elementType: ElementType.Text,
+    object,
+    changeType: ChangeType.Update,
+    userVersion: {
+      userId: "test",
+      clock: 1,
+    },
+    ephemeral,
   };
 };
 

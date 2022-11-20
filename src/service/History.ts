@@ -43,7 +43,11 @@ export default class History {
     const elementsCount = object.renderingOrder;
     const renderingOrder = [...newAppState.renderingOrder, object.id];
 
+    if (!change.ephemeral) {
+      this.changes.push(change);
+    }
     this.setAppState({ ...newAppState, elementsCount, renderingOrder });
+    console.log("CHANGES: ", this.changes);
   }
 
   addRemoteChange(change: ChangeAction) {
