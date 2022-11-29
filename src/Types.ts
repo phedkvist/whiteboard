@@ -30,6 +30,7 @@ export enum SelectionModes {
   Rotating = "Rotating",
   Turning = "Turning",
   Panning = "Panning",
+  TextEditing = "TextEditing",
 }
 
 export interface SelectionMode {
@@ -49,6 +50,7 @@ interface ElementBase {
   state: ElementState;
   rotate: number;
   renderingOrder: number;
+  text: string;
   // TODO: Add this version number, maybe add as a separate object
   // version: number;
   // updateByUser: string;
@@ -75,7 +77,6 @@ export interface Rect extends ElementBase {
 
 export interface Text extends ElementBase {
   type: ElementType.Text;
-  text: string;
   x: number;
   y: number;
 }
@@ -147,6 +148,7 @@ export const initialState: AppState = {
     "1": {
       id: "1",
       type: ElementType.Ellipse,
+      text: "",
       cx: 50,
       cy: 50,
       rx: 50,
@@ -164,6 +166,7 @@ export const initialState: AppState = {
     "2": {
       id: "2",
       type: ElementType.Rect,
+      text: "TESTING",
       width: 100,
       height: 100,
       x: 200,

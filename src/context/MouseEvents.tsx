@@ -2,6 +2,7 @@ import {
   createContext,
   MouseEventHandler,
   useContext,
+  useEffect,
   WheelEventHandler,
 } from "react";
 import {
@@ -31,6 +32,7 @@ import {
   createPolylineAction,
   updatePolylineAction,
 } from "../services/Actions/Polyline";
+import { createUpdateChangeAction } from "../services/ChangeTypes";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -67,6 +69,31 @@ export const MouseEventsProvider = ({
     viewBox,
     setViewBox,
   } = useAppState();
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    switch (selectionMode.type) {
+      case SelectionModes.TextEditing: {
+        if (selectedElement) {
+          const { key } = e;
+          if (key === "Escape") {
+            setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+            setSelectedElement(null);
+            return;
+          }
+        }
+        break;
+      }
+      default: {
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  });
 
   const onMouseWheel: WheelEventHandler<SVGSVGElement> = (e) => {
     // https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
@@ -133,6 +160,13 @@ export const MouseEventsProvider = ({
 
         if (selectedElement !== null && id !== selectedElement) {
           removeSelection();
+        } else if (id === selectedElement) {
+          // IN edit text mode.
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.TextEditing,
+          });
+          break;
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
         // DRAGGING ELEMENT
@@ -207,6 +241,7 @@ export const MouseEventsProvider = ({
         }
         break;
       }
+      case SelectionModes.TextEditing:
       case SelectionModes.Selected: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
           setSelectionMode({ ...selectionMode, type: SelectionModes.None });
@@ -631,7 +666,13 @@ export const MouseEventsProvider = ({
   };
   return (
     <MouseEventsContext.Provider
-      value={{ onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel }}
+      value={{
+        onMouseOver,
+        onMouseDown,
+        onMouseMove,
+        onMouseUp,
+        onMouseWheel,
+      }}
     >
       {children}
     </MouseEventsContext.Provider>

@@ -160,9 +160,33 @@ const Canvas = () => {
     const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
     let renderElement;
     if (e.type === ElementType.Rect) {
+      const isEditable = !(
+        isSelected && selectionMode.type === SelectionModes.TextEditing
+      );
       const { type, renderingOrder, ...props } = e;
-      const { x, y, width, height, rotate } = props;
-      renderElement = <rect key={e.id} {...props} className={classes} />;
+      const { x, y, width, height, rotate, text } = props;
+      renderElement = (
+        <g>
+          <rect key={e.id} {...props} className={classes} />
+          <foreignObject
+            fontSize={14}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            alignmentBaseline="middle"
+            textAnchor="middle"
+            id={e.id}
+          >
+            <div
+              className="textContainer"
+              data-xmlns="http://www.w3.org/1999/xhtml"
+            >
+              <textarea className="textInput" id={e.id} disabled={isEditable} />
+            </div>
+          </foreignObject>
+        </g>
+      );
       const { tL, tR, bR, bL } = getCornerCoords(e);
       return addDraggableCorners(
         renderElement,
@@ -178,9 +202,13 @@ const Canvas = () => {
       );
     } else if (e.type === ElementType.Ellipse) {
       const { type, renderingOrder, ...props } = e;
-      const { cx, cy, rotate } = props;
+      const { cx, cy, rotate, text } = props;
 
-      renderElement = <ellipse key={e.id} {...props} className={classes} />;
+      renderElement = (
+        <ellipse key={e.id} {...props} className={classes}>
+          <text>{text}</text>
+        </ellipse>
+      );
       const { tL, tR, bR, bL } = getCornerCoords(e);
       return addDraggableCorners(
         renderElement,
@@ -218,6 +246,7 @@ const Canvas = () => {
   const isAdding = selectionMode.type === SelectionModes.Add;
   return (
     <svg
+      data-xmlns="http://www.w3.org/2000/svg"
       className={`canvas ${isAdding ? "isAdding" : ""}`}
       id="container"
       onMouseDown={onMouseDown}

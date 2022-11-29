@@ -14,6 +14,7 @@ export const createEllipseAction = (
   const object: Ellipse = {
     id,
     type: ElementType.Ellipse,
+    text: "",
     rx: 0,
     ry: 0,
     cx: initialX,

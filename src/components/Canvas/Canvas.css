@@ -27,3 +27,18 @@ polyline.isSelected {
 .isHovering {
   outline: 1px dashed rgba(173, 216, 230, 0.7);
 }
+
+.textContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.textInput {
+  background-color: transparent;
+  border: none;
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: bold;
+  width: 100%;
+  height: 100%;
+}

@@ -14,6 +14,7 @@ export const createPolylineAction = (
   const object: Polyline = {
     id,
     type: ElementType.Polyline,
+    text: "",
     points: [initialX, initialY],
     rotate: 0,
     stroke: "black",
