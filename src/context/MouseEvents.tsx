@@ -32,7 +32,6 @@ import {
   createPolylineAction,
   updatePolylineAction,
 } from "../services/Actions/Polyline";
-import { createUpdateChangeAction } from "../services/ChangeTypes";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.

@@ -342,3 +342,16 @@ export const getMidPoints = (element: Element): [number, number] => {
 export function copy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
+
+export function debounce<Params extends any[]>(
+  func: (...args: Params) => any,
+  timeout: number
+): (...args: Params) => void {
+  let timer: NodeJS.Timeout;
+  return (...args: Params) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func(...args);
+    }, timeout);
+  };
+}

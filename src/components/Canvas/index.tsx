@@ -2,6 +2,9 @@ import "./Canvas.css";
 import { SelectionModes, Element, ElementType } from "../../Types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents";
+import { useEffect, useState } from "react";
+import { copy } from "../../utility";
+import { updateRectAction } from "../../services/Actions/Rect";
 
 const CORNER_OFFSET = 8;
 const getCornerCoords = (e: Element) => {
@@ -142,6 +145,7 @@ const Canvas = () => {
     selectionMode,
     showDebugger,
     viewBox,
+    history,
   } = useAppState();
   const { onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel } =
     useMouseEvents();
@@ -153,6 +157,29 @@ const Canvas = () => {
     if (val !== 0) return val;
     return Number(a.id > b.id);
   });
+
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    const currentElement = selectedElement && elements[selectedElement];
+    if (currentElement) {
+      setText(currentElement.text);
+    }
+  }, [selectedElement, elements]);
+
+  const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
+    setText(e.target.value);
+    const element = selectedElement && copy(elements[selectedElement]);
+    if (element && element.type === ElementType.Rect && history) {
+      const changeAction = updateRectAction(
+        { ...element, text: e.target.value },
+        false
+      );
+      // TODO: Consider using debounce here.
+      history.addLocalChange(changeAction);
+    }
+  };
+
   const renderElements = sortedElements.map((e) => {
     const isSelected = e.id === selectedElement;
     const isSelectedCss = isSelected ? "isSelected" : "";
@@ -164,7 +191,7 @@ const Canvas = () => {
         isSelected && selectionMode.type === SelectionModes.TextEditing
       );
       const { type, renderingOrder, ...props } = e;
-      const { x, y, width, height, rotate, text } = props;
+      const { x, y, width, height, rotate } = props;
       renderElement = (
         <g>
           <rect key={e.id} {...props} className={classes} />
@@ -182,7 +209,13 @@ const Canvas = () => {
               className="textContainer"
               data-xmlns="http://www.w3.org/1999/xhtml"
             >
-              <textarea className="textInput" id={e.id} disabled={isEditable} />
+              <textarea
+                className="textInput"
+                id={e.id}
+                disabled={isEditable}
+                value={text}
+                onChange={onChangeInput}
+              />
             </div>
           </foreignObject>
         </g>
