@@ -1,5 +1,5 @@
 import "./Properties.css";
-import { ElementType, Element, COLORS } from "../../Types";
+import { ElementType, Element, COLORS } from "../../types";
 import { useAppState } from "../../context/AppState";
 import { copy } from "../../utility";
 import { createUpdateChangeAction } from "../../services/ChangeTypes";

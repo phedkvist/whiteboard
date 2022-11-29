@@ -1,4 +1,4 @@
-import { Corner, Element, ElementType, Ellipse, Rect } from "./Types";
+import { Corner, Element, ElementType, Ellipse, Rect } from "./types";
 
 export enum MouseButtons {
   LEFT = 0,

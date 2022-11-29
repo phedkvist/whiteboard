@@ -1,4 +1,4 @@
-import { ElementState, ElementType, Polyline } from "../../Types";
+import { ElementState, ElementType, Polyline } from "../../types";
 import {
   ChangeType,
   CreatePolylineAction,

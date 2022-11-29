@@ -1,5 +1,5 @@
 import "./Toolbar.css";
-import { SelectionModes, ElementType } from "../../Types";
+import { SelectionModes, ElementType } from "../../types";
 import { useAppState } from "../../context/AppState";
 /*
 Add element

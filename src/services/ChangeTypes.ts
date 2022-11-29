@@ -1,4 +1,4 @@
-import { Element, ElementType, Ellipse, Polyline, Rect, Text } from "../Types";
+import { Element, ElementType, Ellipse, Polyline, Rect, Text } from "../types";
 import { updateEllipseAction } from "./Actions/Ellipse";
 import { updatePolylineAction } from "./Actions/Polyline";
 import { updateRectAction } from "./Actions/Rect";

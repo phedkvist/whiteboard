@@ -1,4 +1,4 @@
-import { ElementState, ElementType, Text } from "../../Types";
+import { ElementState, ElementType, Text } from "../../types";
 import { ChangeType, CreateTextAction, UpdateTextAction } from "../ChangeTypes";
 
 export const createTextAction = (

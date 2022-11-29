@@ -11,7 +11,7 @@ import {
   ElementState,
   Element as WhiteboardElement,
   Corner,
-} from "../Types";
+} from "../types";
 import {
   getClosestCorner,
   resizeRect,

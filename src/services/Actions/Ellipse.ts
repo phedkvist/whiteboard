@@ -1,4 +1,4 @@
-import { ElementState, ElementType, Ellipse } from "../../Types";
+import { ElementState, ElementType, Ellipse } from "../../types";
 import {
   ChangeType,
   CreateEllipseAction,

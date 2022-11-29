@@ -1,5 +1,5 @@
 import "./Canvas.css";
-import { SelectionModes, Element, ElementType } from "../../Types";
+import { SelectionModes, Element, ElementType } from "../../types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents";
 import { useEffect, useState } from "react";

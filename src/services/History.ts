@@ -1,4 +1,4 @@
-import { AppState } from "../Types";
+import { AppState } from "../types";
 import { ChangeAction, ChangeActions, VersionVector } from "./ChangeTypes";
 
 /*

@@ -8,7 +8,7 @@ import {
   initialSelectionCoordinates,
   ViewBox,
   initialViewBox,
-} from "../Types";
+} from "../types";
 import History from "../services/History";
 
 interface IAppStateContext {
