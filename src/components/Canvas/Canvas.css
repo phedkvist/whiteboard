@@ -39,6 +39,7 @@ polyline.isSelected {
   color: #fff !important;
   font-size: 14px;
   font-weight: bold;
-  width: 100%;
+  outline: none;
   height: 100%;
+  width: 100%;
 }

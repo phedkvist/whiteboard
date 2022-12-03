@@ -1,7 +1,6 @@
 import "./Canvas.css";
 import {
   SelectionModes,
-  Element,
   ElementType,
   Rect,
   SelectionMode,
@@ -191,6 +190,7 @@ const RenderRect = ({
         <div
           className="textContainer"
           data-xmlns="http://www.w3.org/1999/xhtml"
+          id={e.id}
         >
           <textarea
             ref={ref}

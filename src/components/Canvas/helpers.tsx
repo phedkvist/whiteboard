@@ -1,17 +1,5 @@
 import "./Canvas.css";
-import {
-  SelectionModes,
-  Element,
-  ElementType,
-  Rect,
-  SelectionMode,
-} from "../../types";
-import { useAppState } from "../../context/AppState";
-import { useMouseEvents } from "../../context/MouseEvents";
-import { useEffect, useState } from "react";
-import { copy } from "../../utility";
-import { updateRectAction } from "../../services/Actions/Rect";
-import History from "../../services/History";
+import { Element, ElementType } from "../../types";
 
 const CORNER_OFFSET = 8;
 export const getCornerCoords = (e: Element) => {
