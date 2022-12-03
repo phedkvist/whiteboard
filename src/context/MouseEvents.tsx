@@ -136,6 +136,7 @@ export const MouseEventsProvider = ({
     if (e.button !== MouseButtons.LEFT) return;
 
     switch (selectionMode.type) {
+      case SelectionModes.TextEditing:
       case SelectionModes.None: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
           removeSelection();
@@ -240,7 +241,6 @@ export const MouseEventsProvider = ({
         }
         break;
       }
-      case SelectionModes.TextEditing:
       case SelectionModes.Selected: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
           setSelectionMode({ ...selectionMode, type: SelectionModes.None });
