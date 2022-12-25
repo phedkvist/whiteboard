@@ -247,6 +247,11 @@ export const MouseEventsProvider = ({
           setSelectedElement(null);
           return;
         }
+        if (e.target.id.includes("resize")) {
+          setupResizeElement(e);
+          break;
+        }
+
         // DRAGGING ELEMENT
         setupMovingElement(e);
 
