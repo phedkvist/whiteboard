@@ -88,6 +88,8 @@ const Canvas = () => {
           isSelected={isSelected}
           classes={classes}
           ellipse={e}
+          history={history}
+          selectionMode={selectionMode}
         />
       );
     } else if (e.type === ElementType.Polyline) {

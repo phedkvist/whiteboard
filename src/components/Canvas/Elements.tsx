@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
   SelectionModes,
   SelectionMode,
@@ -11,6 +11,7 @@ import {
 import { copy } from "../../utility";
 import { updateRectAction } from "../../services/Actions/Rect";
 import History from "../../services/History";
+import { updateEllipseAction } from "../../services/Actions/Ellipse";
 
 const CORNER_OFFSET = 8;
 const getCornerCoords = (e: Element) => {
@@ -102,6 +103,49 @@ const addDraggableCorners = (
   </g>
 );
 
+const EditableInput = ({
+  x,
+  y,
+  width,
+  height,
+  id,
+  isEditable,
+  text,
+  onChange,
+}: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  id: string;
+  isEditable: boolean;
+  text: string;
+  onChange: React.ChangeEventHandler<HTMLTextAreaElement>;
+}) => {
+  return (
+    <foreignObject
+      fontSize={14}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      alignmentBaseline="middle"
+      textAnchor="middle"
+      id={id}
+    >
+      <div className="textContainer" data-xmlns="http://www.w3.org/1999/xhtml">
+        <textarea
+          className="textInput"
+          id={id}
+          disabled={isEditable}
+          value={text}
+          onChange={onChange}
+        />
+      </div>
+    </foreignObject>
+  );
+};
+
 const RectRenderer = ({
   isSelected,
   selectionMode,
@@ -144,29 +188,16 @@ const RectRenderer = ({
   const renderElement = (
     <g>
       <rect key={rect.id} {...props} className={classes} />
-      <foreignObject
-        fontSize={14}
+      <EditableInput
         x={x}
         y={y}
         width={width}
         height={height}
-        alignmentBaseline="middle"
-        textAnchor="middle"
         id={rect.id}
-      >
-        <div
-          className="textContainer"
-          data-xmlns="http://www.w3.org/1999/xhtml"
-        >
-          <textarea
-            className="textInput"
-            id={rect.id}
-            disabled={isEditable}
-            value={text}
-            onChange={onChangeInput}
-          />
-        </div>
-      </foreignObject>
+        isEditable={isEditable}
+        text={rect.text}
+        onChange={onChangeInput}
+      />
     </g>
   );
   const { tL, tR, bR, bL } = getCornerCoords(rect);
@@ -188,18 +219,56 @@ const EllipseRenderer = ({
   ellipse,
   classes,
   isSelected,
+  selectionMode,
+  history,
 }: {
   ellipse: Ellipse;
   classes: string;
   isSelected: boolean;
+  selectionMode: SelectionMode;
+  history: History | null;
 }) => {
-  const { type, renderingOrder, ...props } = ellipse;
-  const { cx, cy, rotate, text } = props;
+  const [text, setText] = useState(ellipse.text);
 
+  useEffect(() => {
+    if (ellipse.text !== text) {
+      setText(ellipse.text);
+    }
+  }, [ellipse]);
+
+  const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
+    setText(e.target.value);
+    const element = copy(ellipse);
+    if (element && history) {
+      const changeAction = updateEllipseAction(
+        { ...element, text: e.target.value },
+        false
+      );
+      // TODO: Consider using debounce here.
+      history.addLocalChange(changeAction);
+    }
+  };
+  const { type, renderingOrder, ...props } = ellipse;
+  const { cx, cy, rx, ry, rotate } = props;
+  const isEditable = !(
+    isSelected && selectionMode.type === SelectionModes.TextEditing
+  );
+  const width = rx * Math.sqrt(2);
+  const height = ry * Math.sqrt(2);
   const renderElement = (
-    <ellipse key={ellipse.id} {...props} className={classes}>
-      <text>{text}</text>
-    </ellipse>
+    <g>
+      <ellipse key={ellipse.id} {...props} className={classes} />
+      <EditableInput
+        x={cx - width / 2}
+        y={cy - height / 2}
+        width={width}
+        height={height}
+        id={ellipse.id}
+        isEditable={isEditable}
+        text={text}
+        onChange={onChangeInput}
+      />
+    </g>
   );
   const { tL, tR, bR, bL } = getCornerCoords(ellipse);
   return addDraggableCorners(
