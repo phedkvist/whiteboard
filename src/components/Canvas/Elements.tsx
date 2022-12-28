@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   SelectionModes,
   SelectionMode,
@@ -167,7 +167,7 @@ const RectRenderer = ({
     if (rect.text !== text) {
       setText(rect.text);
     }
-  }, [rect]);
+  }, [rect, text]);
 
   const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
     setText(e.target.value);
@@ -236,7 +236,7 @@ const EllipseRenderer = ({
     if (ellipse.text !== text) {
       setText(ellipse.text);
     }
-  }, [ellipse]);
+  }, [ellipse, text]);
 
   const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
     setText(e.target.value);
@@ -325,7 +325,7 @@ const TextRenderer = ({
     if (textElement.text !== text) {
       setText(textElement.text);
     }
-  }, [textElement]);
+  }, [textElement, text]);
 
   const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
     setText(e.target.value);
@@ -375,9 +375,11 @@ const TextRenderer = ({
   );
 };
 
-export default {
+const defaultExports = {
   Rect: RectRenderer,
   Ellipse: EllipseRenderer,
   Polyline: PolylineRenderer,
   Text: TextRenderer,
 };
+
+export default defaultExports;
