@@ -7,15 +7,17 @@ import {
   ElementType,
   Ellipse,
   Polyline,
+  Text,
 } from "../../types";
 import { copy } from "../../utility";
 import { updateRectAction } from "../../services/Actions/Rect";
 import History from "../../services/History";
 import { updateEllipseAction } from "../../services/Actions/Ellipse";
+import { updateTextAction } from "../../services/Actions/Text";
 
 const CORNER_OFFSET = 8;
 const getCornerCoords = (e: Element) => {
-  if (e.type === ElementType.Rect) {
+  if (e.type === ElementType.Rect || e.type === ElementType.Text) {
     return {
       tL: { x: e.x - CORNER_OFFSET, y: e.y - CORNER_OFFSET },
       tR: { x: e.x + e.width, y: e.y - CORNER_OFFSET },
@@ -304,8 +306,78 @@ const PolylineRenderer = ({
   return renderElement;
 };
 
+const TextRenderer = ({
+  isSelected,
+  selectionMode,
+  classes,
+  textElement,
+  history,
+}: {
+  isSelected: boolean;
+  selectionMode: SelectionMode;
+  classes: string;
+  textElement: Text;
+  history: History | null;
+}) => {
+  const [text, setText] = useState(textElement.text);
+
+  useEffect(() => {
+    if (textElement.text !== text) {
+      setText(textElement.text);
+    }
+  }, [textElement]);
+
+  const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
+    setText(e.target.value);
+    const element = copy(textElement);
+    if (element && history) {
+      const changeAction = updateTextAction(
+        { ...element, text: e.target.value },
+        false
+      );
+      // TODO: Consider using debounce here.
+      history.addLocalChange(changeAction);
+    }
+  };
+
+  const isEditable = !(
+    isSelected && selectionMode.type === SelectionModes.TextEditing
+  );
+  const { type, renderingOrder, ...props } = textElement;
+  const { x, y, width, height, rotate } = props;
+  const renderElement = (
+    <g>
+      <rect key={textElement.id} {...props} className={classes} />
+      <EditableInput
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        id={textElement.id}
+        isEditable={isEditable}
+        text={textElement.text}
+        onChange={onChangeInput}
+      />
+    </g>
+  );
+  const { tL, tR, bR, bL } = getCornerCoords(textElement);
+  return addDraggableCorners(
+    renderElement,
+    textElement.id,
+    x + width / 2,
+    y + height / 2,
+    tL,
+    tR,
+    bR,
+    bL,
+    rotate,
+    isSelected
+  );
+};
+
 export default {
   Rect: RectRenderer,
   Ellipse: EllipseRenderer,
   Polyline: PolylineRenderer,
+  Text: TextRenderer,
 };

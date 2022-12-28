@@ -69,14 +69,14 @@ export interface Rect extends ElementBase {
   type: ElementType.Rect;
   width: number;
   height: number;
-  rx?: number;
-  ry?: number;
   x: number;
   y: number;
 }
 
 export interface Text extends ElementBase {
   type: ElementType.Text;
+  width: number;
+  height: number;
   x: number;
   y: number;
 }

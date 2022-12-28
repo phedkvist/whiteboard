@@ -43,8 +43,6 @@ export default class History {
     const elementsCount = object.renderingOrder;
     const renderingOrder = [...newAppState.renderingOrder, object.id];
 
-    console.log(change);
-
     if (!change.ephemeral) {
       this.changes.push(change);
     }

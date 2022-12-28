@@ -11,6 +11,8 @@ import {
   ElementState,
   Element as WhiteboardElement,
   Corner,
+  Rect,
+  Text,
 } from "../types";
 import {
   getClosestCorner,
@@ -149,7 +151,6 @@ export const MouseEventsProvider = ({
         const id = e.target.id;
 
         if (id.includes("resize")) {
-          // TODO: Might need to add elementType below as well :)
           setupResizeElement(e);
           break;
         } else if (id.includes("rotate")) {
@@ -160,7 +161,6 @@ export const MouseEventsProvider = ({
         if (selectedElement !== null && id !== selectedElement) {
           removeSelection();
         } else if (id === selectedElement) {
-          // IN edit text mode.
           setSelectionMode({
             ...selectionMode,
             type: SelectionModes.TextEditing,
@@ -168,7 +168,6 @@ export const MouseEventsProvider = ({
           break;
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
-        // DRAGGING ELEMENT
         setupMovingElement(e);
         break;
       }
@@ -274,7 +273,6 @@ export const MouseEventsProvider = ({
     if (!xOffset || !yOffset) return;
     const initialX = e.clientX / viewBox.scale + viewBox.x;
     const initialY = e.clientY / viewBox.scale + viewBox.y;
-    console.log("INITIAL XY:", initialX, initialY);
     if (!selectedElement) return;
     const element = copy(appState.elements[selectedElement]);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
@@ -446,27 +444,44 @@ export const MouseEventsProvider = ({
         const { selectedCorner } = selectionCoordinates;
         if (selectedElement && selectedCorner) {
           switch (selectionMode.elementType) {
+            case ElementType.Text:
             case ElementType.Rect: {
-              const el = copy(appState.elements[selectedElement]);
-              if (el.type !== ElementType.Rect) return;
+              const el = copy(appState.elements[selectedElement]) as
+                | Rect
+                | Text;
               const [width, height, x, y] = resizeRect(
                 selectedCorner,
                 e.clientX + viewBox.x,
                 e.clientY + viewBox.y,
                 el
               );
-              history?.addLocalChange(
-                updateRectAction(
-                  {
-                    ...el,
-                    width,
-                    height,
-                    x,
-                    y,
-                  },
-                  true
-                )
-              );
+              if (el.type === ElementType.Rect) {
+                history?.addLocalChange(
+                  updateRectAction(
+                    {
+                      ...el,
+                      width,
+                      height,
+                      x,
+                      y,
+                    },
+                    true
+                  )
+                );
+              } else if (el.type === ElementType.Text) {
+                history?.addLocalChange(
+                  updateTextAction(
+                    {
+                      ...el,
+                      width,
+                      height,
+                      x,
+                      y,
+                    },
+                    true
+                  )
+                );
+              }
               break;
             }
             case ElementType.Ellipse: {
@@ -516,6 +531,8 @@ export const MouseEventsProvider = ({
         let changeAction;
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
         } else if (element.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(element, false);
         }

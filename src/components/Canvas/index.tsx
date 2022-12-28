@@ -71,7 +71,6 @@ const Canvas = () => {
     const isSelectedCss = isSelected ? "isSelected" : "";
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
     const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
-    let renderElement;
     if (e.type === ElementType.Rect) {
       return (
         <Elements.Rect
@@ -95,13 +94,15 @@ const Canvas = () => {
     } else if (e.type === ElementType.Polyline) {
       return <Elements.Polyline classes={classes} polyline={e} />;
     } else {
-      const { type, renderingOrder, text, ...props } = e;
-      renderElement = (
-        <text key={e.id} {...props} className={classes}>
-          {text}
-        </text>
+      return (
+        <Elements.Text
+          isSelected={isSelected}
+          classes={classes}
+          selectionMode={selectionMode}
+          textElement={e}
+          history={history}
+        />
       );
-      return renderElement;
     }
   });
   const isAdding = selectionMode.type === SelectionModes.Add;
