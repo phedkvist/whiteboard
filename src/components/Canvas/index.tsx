@@ -92,7 +92,13 @@ const Canvas = () => {
         />
       );
     } else if (e.type === ElementType.Polyline) {
-      return <Elements.Polyline classes={classes} polyline={e} />;
+      return (
+        <Elements.Polyline
+          isSelected={isSelected}
+          classes={classes}
+          polyline={e}
+        />
+      );
     } else {
       return (
         <Elements.Text

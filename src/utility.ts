@@ -1,4 +1,12 @@
-import { Corner, Element, ElementType, Ellipse, Rect, Text } from "./types";
+import {
+  Corner,
+  Element,
+  ElementType,
+  Ellipse,
+  Polyline,
+  Rect,
+  Text,
+} from "./types";
 
 export enum MouseButtons {
   LEFT = 0,
@@ -73,8 +81,24 @@ export const getClosestCorner = (
   e: Element | null,
   xPos: number,
   yPos: number
-) => {
-  if (!e || e.type === ElementType.Polyline) return;
+): Corner | null => {
+  if (!e) return null;
+  if (e.type === ElementType.Polyline) {
+    // TODO: Ideally polyline and rect should not share this func
+    const matchRadius = 10;
+    const inLeftPoint =
+      Math.abs(e.points[0] + e.points[1] - (xPos + yPos)) < matchRadius;
+    const inRightPoint =
+      Math.abs(e.points[2] + e.points[3] - (xPos + yPos)) < matchRadius;
+    console.log(inLeftPoint, inRightPoint);
+    if (inLeftPoint) {
+      return Corner.TopLeft;
+    }
+    if (inRightPoint) {
+      return Corner.TopRight;
+    }
+    return null;
+  }
   const { topLeft, topRight, bottomRight, bottomLeft } =
     e.type === ElementType.Rect || e.type === ElementType.Text
       ? getElementCorners(e.x, e.y, e.width, e.height, e.rotate)
@@ -96,7 +120,6 @@ export const getClosestCorner = (
       closestCorner = corner;
     }
   });
-  console.log("CLOSEST CORNER: ", closestCorner);
   return closestCorner;
 };
 

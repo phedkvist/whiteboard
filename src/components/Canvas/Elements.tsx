@@ -290,20 +290,46 @@ const EllipseRenderer = ({
 const PolylineRenderer = ({
   polyline,
   classes,
+  isSelected,
 }: {
   classes: string;
   polyline: Polyline;
+  isSelected: boolean;
 }) => {
-  const { type, renderingOrder, points, ...props } = polyline;
-  const renderElement = (
-    <polyline
-      key={polyline.id}
-      {...props}
-      points={points.toString()}
-      className={classes}
-    ></polyline>
+  const { type, renderingOrder, points, id, ...props } = polyline;
+  return (
+    <g id={`g-${id}`}>
+      <polyline
+        key={id}
+        id={id}
+        {...props}
+        points={points.toString()}
+        className={classes}
+      ></polyline>
+      {isSelected && (
+        <>
+          <rect
+            id={`${id}-resize-left`}
+            width={8}
+            height={8}
+            x={points[0] - 4}
+            y={points[1] - 4}
+            style={{ cursor: "nwse-resize" }}
+            fill={"darkblue"}
+          />
+          <rect
+            id={`${id}-resize-right`}
+            width={8}
+            height={8}
+            x={points[2] - 4}
+            y={points[3] - 4}
+            style={{ cursor: "nwse-resize" }}
+            fill={"darkblue"}
+          />
+        </>
+      )}
+    </g>
   );
-  return renderElement;
 };
 
 const TextRenderer = ({

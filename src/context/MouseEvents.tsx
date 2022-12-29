@@ -72,19 +72,12 @@ export const MouseEventsProvider = ({
   } = useAppState();
 
   const onKeyDown = (e: KeyboardEvent) => {
-    switch (selectionMode.type) {
-      case SelectionModes.TextEditing: {
-        if (selectedElement) {
-          const { key } = e;
-          if (key === "Escape") {
-            setSelectionMode({ ...selectionMode, type: SelectionModes.None });
-            setSelectedElement(null);
-            return;
-          }
-        }
-        break;
-      }
-      default: {
+    if (selectedElement) {
+      const { key } = e;
+      if (key === "Escape") {
+        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+        setSelectedElement(null);
+        return;
       }
     }
   };
@@ -276,6 +269,7 @@ export const MouseEventsProvider = ({
     if (!selectedElement) return;
     const element = copy(appState.elements[selectedElement]);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
+    console.log("SELECTED CORNER: ", selectedCorner);
     if (!selectedCorner) return;
     setSelectionCoordinates({
       ...selectionCoordinates,
@@ -507,6 +501,30 @@ export const MouseEventsProvider = ({
               );
               break;
             }
+            case ElementType.Polyline: {
+              // TODO: Need to know which points are being dragged.
+              // selected corner, set this to some kind of index?
+              const newX = e.clientX + viewBox.x;
+              const newY = e.clientY + viewBox.y;
+              const el = appState.elements[selectedElement];
+              if (el.type !== ElementType.Polyline) {
+                return;
+              }
+              const newPoints = [...el.points];
+              const x = selectedCorner === Corner.TopLeft ? 0 : 2;
+              const y = selectedCorner === Corner.TopLeft ? 1 : 3;
+              newPoints[x] = newX;
+              newPoints[y] = newY;
+              history?.addLocalChange(
+                updatePolylineAction(
+                  {
+                    ...el,
+                    points: newPoints,
+                  },
+                  true
+                )
+              );
+            }
           }
         }
 
@@ -549,16 +567,16 @@ export const MouseEventsProvider = ({
       case SelectionModes.Selected: {
         // TODO: If element moved, we need to set a non ephemeral change here.
         if (!selectedElement) return;
-        const creationElement = copy(appState.elements[selectedElement]);
+        const element = copy(appState.elements[selectedElement]);
         let changeAction;
-        if (creationElement.type === ElementType.Rect) {
-          changeAction = updateRectAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Text) {
-          changeAction = updateTextAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Polyline) {
-          changeAction = updatePolylineAction(creationElement, false);
+        if (element.type === ElementType.Rect) {
+          changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Ellipse) {
+          changeAction = updateEllipseAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
+        } else if (element.type === ElementType.Polyline) {
+          changeAction = updatePolylineAction(element, false);
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -568,18 +586,18 @@ export const MouseEventsProvider = ({
       case SelectionModes.Add: {
         // Record selection elements and draw the element directly but with faded bg?
         if (!selectedElement) return;
-        const creationElement = copy(appState.elements[selectedElement]);
-        if (creationElement.type === ElementType.Polyline) {
+        const element = copy(appState.elements[selectedElement]);
+        if (element.type === ElementType.Polyline) {
           break;
         }
-        creationElement.state = ElementState.Visible;
+        element.state = ElementState.Visible;
         let changeAction;
-        if (creationElement.type === ElementType.Rect) {
-          changeAction = updateRectAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Text) {
-          changeAction = updateTextAction(creationElement, false);
+        if (element.type === ElementType.Rect) {
+          changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Ellipse) {
+          changeAction = updateEllipseAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -597,18 +615,18 @@ export const MouseEventsProvider = ({
         // TODO: Make sure every ephemeral change ends up with non ephemeral change at some point.
         if (!selectedElement) return;
 
-        const creationElement = copy(appState.elements[selectedElement]);
-        if (creationElement.type === ElementType.Polyline) {
-          break;
-        }
-        creationElement.state = ElementState.Visible;
+        const element = copy(appState.elements[selectedElement]);
+        element.state = ElementState.Visible;
         let changeAction;
-        if (creationElement.type === ElementType.Rect) {
-          changeAction = updateRectAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Text) {
-          changeAction = updateTextAction(creationElement, false);
+        if (element.type === ElementType.Rect) {
+          changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Ellipse) {
+          changeAction = updateEllipseAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
+        } else if (element.type === ElementType.Polyline) {
+          // todo last update (non ephemeral):
+          changeAction = updatePolylineAction(element, false);
         }
         changeAction && history?.addLocalChange(changeAction);
 
