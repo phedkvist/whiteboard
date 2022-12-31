@@ -1,4 +1,4 @@
-import { ElementState, ElementType, Polyline } from "../../Types";
+import { ElementState, ElementType, Polyline } from "../../types";
 import {
   ChangeType,
   CreatePolylineAction,
@@ -14,6 +14,7 @@ export const createPolylineAction = (
   const object: Polyline = {
     id,
     type: ElementType.Polyline,
+    text: "",
     points: [initialX, initialY],
     rotate: 0,
     stroke: "black",

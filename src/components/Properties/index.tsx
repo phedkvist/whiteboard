@@ -1,14 +1,8 @@
-import React from "react";
 import "./Properties.css";
-import { ElementType, Rect, Element, COLORS } from "../../Types";
-import History from "../../service/History";
+import { ElementType, Element, COLORS } from "../../types";
 import { useAppState } from "../../context/AppState";
-import { updateEllipseAction } from "../../service/Actions/Ellipse";
-import { updateTextAction } from "../../service/Actions/Text";
-import { updatePolylineAction } from "../../service/Actions/Polyline";
-import { updateRectAction } from "../../service/Actions/Rect";
 import { copy } from "../../utility";
-import { createUpdateChangeAction } from "../../service/ChangeTypes";
+import { createUpdateChangeAction } from "../../services/ChangeTypes";
 
 // When there is a selected element.
 // Find its state and respective properties.

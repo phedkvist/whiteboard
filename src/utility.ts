@@ -1,4 +1,4 @@
-import { Corner, Element, ElementType, Ellipse, Rect } from "./Types";
+import { Corner, Element, ElementType, Ellipse, Rect, Text } from "./types";
 
 export enum MouseButtons {
   LEFT = 0,
@@ -73,11 +73,26 @@ export const getClosestCorner = (
   e: Element | null,
   xPos: number,
   yPos: number
-) => {
-  if (!e || e.type === ElementType.Text || e.type === ElementType.Polyline)
-    return;
+): Corner | null => {
+  if (!e) return null;
+  if (e.type === ElementType.Polyline) {
+    // TODO: Ideally polyline and rect should not share this func
+    const matchRadius = 10;
+    const inLeftPoint =
+      Math.abs(e.points[0] + e.points[1] - (xPos + yPos)) < matchRadius;
+    const inRightPoint =
+      Math.abs(e.points[2] + e.points[3] - (xPos + yPos)) < matchRadius;
+    console.log(inLeftPoint, inRightPoint);
+    if (inLeftPoint) {
+      return Corner.TopLeft;
+    }
+    if (inRightPoint) {
+      return Corner.TopRight;
+    }
+    return null;
+  }
   const { topLeft, topRight, bottomRight, bottomLeft } =
-    e.type === ElementType.Rect
+    e.type === ElementType.Rect || e.type === ElementType.Text
       ? getElementCorners(e.x, e.y, e.width, e.height, e.rotate)
       : getElementCorners(
           e.cx - e.rx,
@@ -97,7 +112,6 @@ export const getClosestCorner = (
       closestCorner = corner;
     }
   });
-  console.log("CLOSEST CORNER: ", closestCorner);
   return closestCorner;
 };
 
@@ -122,7 +136,7 @@ export const resizeRect = (
   selectedCorner: Corner,
   clientX: number,
   clientY: number,
-  rect: Rect
+  rect: Rect | Text
 ) => {
   const { x, y, width: w, height: h, rotate } = rect;
 
@@ -329,7 +343,7 @@ const resizeRotatedRectangle = ({
 };
 
 export const getMidPoints = (element: Element): [number, number] => {
-  if (element.type === ElementType.Rect) {
+  if (element.type === ElementType.Rect || element.type === ElementType.Text) {
     return [element.x + element.width / 2, element.y + element.height / 2];
   } else if (element.type === "ellipse") {
     return [element.cx, element.cy];
@@ -341,4 +355,17 @@ export const getMidPoints = (element: Element): [number, number] => {
 
 export function copy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
+}
+
+export function debounce<Params extends any[]>(
+  func: (...args: Params) => any,
+  timeout: number
+): (...args: Params) => void {
+  let timer: NodeJS.Timeout;
+  return (...args: Params) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func(...args);
+    }, timeout);
+  };
 }

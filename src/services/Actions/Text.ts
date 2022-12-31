@@ -1,4 +1,4 @@
-import { ElementState, ElementType, Text } from "../../Types";
+import { ElementState, ElementType, Text } from "../../types";
 import { ChangeType, CreateTextAction, UpdateTextAction } from "../ChangeTypes";
 
 export const createTextAction = (
@@ -12,10 +12,15 @@ export const createTextAction = (
     type: ElementType.Text,
     x: initialX,
     y: initialY,
+    width: 100,
+    height: 20,
     text: "Text",
     state: ElementState.Creation,
     rotate: 0,
     renderingOrder,
+    style: {
+      fill: "transparent",
+    },
   };
 
   return {

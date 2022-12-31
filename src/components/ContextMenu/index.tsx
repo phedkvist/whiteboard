@@ -1,10 +1,8 @@
-import { MouseEventHandler } from "react";
 import { useAppState } from "../../context/AppState";
-import { Element } from "../../Types";
 import useContextMenu from "../../hooks/useContextMenu";
 import "./ContextMenu.css";
 import { copy } from "../../utility";
-import { createUpdateChangeAction } from "../../service/ChangeTypes";
+import { createUpdateChangeAction } from "../../services/ChangeTypes";
 
 const ContextMenu = () => {
   const { anchorPoint, show } = useContextMenu();

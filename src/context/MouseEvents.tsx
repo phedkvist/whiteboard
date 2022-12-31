@@ -2,6 +2,7 @@ import {
   createContext,
   MouseEventHandler,
   useContext,
+  useEffect,
   WheelEventHandler,
 } from "react";
 import {
@@ -10,7 +11,9 @@ import {
   ElementState,
   Element as WhiteboardElement,
   Corner,
-} from "../Types";
+  Rect,
+  Text,
+} from "../types";
 import {
   getClosestCorner,
   resizeRect,
@@ -21,16 +24,16 @@ import {
 } from "../utility";
 import { useAppState } from "./AppState";
 import { v4 as uuid } from "uuid";
-import { createRectAction, updateRectAction } from "../service/Actions/Rect";
+import { createRectAction, updateRectAction } from "../services/Actions/Rect";
 import {
   createEllipseAction,
   updateEllipseAction,
-} from "../service/Actions/Ellipse";
-import { createTextAction, updateTextAction } from "../service/Actions/Text";
+} from "../services/Actions/Ellipse";
+import { createTextAction, updateTextAction } from "../services/Actions/Text";
 import {
   createPolylineAction,
   updatePolylineAction,
-} from "../service/Actions/Polyline";
+} from "../services/Actions/Polyline";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -67,6 +70,24 @@ export const MouseEventsProvider = ({
     viewBox,
     setViewBox,
   } = useAppState();
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (selectedElement) {
+      const { key } = e;
+      if (key === "Escape") {
+        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+        setSelectedElement(null);
+        return;
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  });
 
   const onMouseWheel: WheelEventHandler<SVGSVGElement> = (e) => {
     // https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
@@ -123,7 +144,6 @@ export const MouseEventsProvider = ({
         const id = e.target.id;
 
         if (id.includes("resize")) {
-          // TODO: Might need to add elementType below as well :)
           setupResizeElement(e);
           break;
         } else if (id.includes("rotate")) {
@@ -133,9 +153,17 @@ export const MouseEventsProvider = ({
 
         if (selectedElement !== null && id !== selectedElement) {
           removeSelection();
+        } else if (id === selectedElement) {
+          const e = appState.elements[selectedElement];
+          if (e.type !== ElementType.Polyline) {
+            setSelectionMode({
+              ...selectionMode,
+              type: SelectionModes.TextEditing,
+            });
+            break;
+          }
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
-        // DRAGGING ELEMENT
         setupMovingElement(e);
         break;
       }
@@ -207,12 +235,18 @@ export const MouseEventsProvider = ({
         }
         break;
       }
+      case SelectionModes.TextEditing:
       case SelectionModes.Selected: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
           setSelectionMode({ ...selectionMode, type: SelectionModes.None });
           setSelectedElement(null);
           return;
         }
+        if (e.target.id.includes("resize")) {
+          setupResizeElement(e);
+          break;
+        }
+
         // DRAGGING ELEMENT
         setupMovingElement(e);
 
@@ -235,10 +269,10 @@ export const MouseEventsProvider = ({
     if (!xOffset || !yOffset) return;
     const initialX = e.clientX / viewBox.scale + viewBox.x;
     const initialY = e.clientY / viewBox.scale + viewBox.y;
-    console.log("INITIAL XY:", initialX, initialY);
     if (!selectedElement) return;
     const element = copy(appState.elements[selectedElement]);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
+    console.log("SELECTED CORNER: ", selectedCorner);
     if (!selectedCorner) return;
     setSelectionCoordinates({
       ...selectionCoordinates,
@@ -407,27 +441,44 @@ export const MouseEventsProvider = ({
         const { selectedCorner } = selectionCoordinates;
         if (selectedElement && selectedCorner) {
           switch (selectionMode.elementType) {
+            case ElementType.Text:
             case ElementType.Rect: {
-              const el = copy(appState.elements[selectedElement]);
-              if (el.type !== ElementType.Rect) return;
+              const el = copy(appState.elements[selectedElement]) as
+                | Rect
+                | Text;
               const [width, height, x, y] = resizeRect(
                 selectedCorner,
                 e.clientX + viewBox.x,
                 e.clientY + viewBox.y,
                 el
               );
-              history?.addLocalChange(
-                updateRectAction(
-                  {
-                    ...el,
-                    width,
-                    height,
-                    x,
-                    y,
-                  },
-                  true
-                )
-              );
+              if (el.type === ElementType.Rect) {
+                history?.addLocalChange(
+                  updateRectAction(
+                    {
+                      ...el,
+                      width,
+                      height,
+                      x,
+                      y,
+                    },
+                    true
+                  )
+                );
+              } else if (el.type === ElementType.Text) {
+                history?.addLocalChange(
+                  updateTextAction(
+                    {
+                      ...el,
+                      width,
+                      height,
+                      x,
+                      y,
+                    },
+                    true
+                  )
+                );
+              }
               break;
             }
             case ElementType.Ellipse: {
@@ -453,6 +504,30 @@ export const MouseEventsProvider = ({
               );
               break;
             }
+            case ElementType.Polyline: {
+              // TODO: Need to know which points are being dragged.
+              // selected corner, set this to some kind of index?
+              const newX = e.clientX + viewBox.x;
+              const newY = e.clientY + viewBox.y;
+              const el = appState.elements[selectedElement];
+              if (el.type !== ElementType.Polyline) {
+                return;
+              }
+              const newPoints = [...el.points];
+              const x = selectedCorner === Corner.TopLeft ? 0 : 2;
+              const y = selectedCorner === Corner.TopLeft ? 1 : 3;
+              newPoints[x] = newX;
+              newPoints[y] = newY;
+              history?.addLocalChange(
+                updatePolylineAction(
+                  {
+                    ...el,
+                    points: newPoints,
+                  },
+                  true
+                )
+              );
+            }
           }
         }
 
@@ -477,6 +552,8 @@ export const MouseEventsProvider = ({
         let changeAction;
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
         } else if (element.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(element, false);
         }
@@ -493,16 +570,16 @@ export const MouseEventsProvider = ({
       case SelectionModes.Selected: {
         // TODO: If element moved, we need to set a non ephemeral change here.
         if (!selectedElement) return;
-        const creationElement = copy(appState.elements[selectedElement]);
+        const element = copy(appState.elements[selectedElement]);
         let changeAction;
-        if (creationElement.type === ElementType.Rect) {
-          changeAction = updateRectAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Text) {
-          changeAction = updateTextAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Polyline) {
-          changeAction = updatePolylineAction(creationElement, false);
+        if (element.type === ElementType.Rect) {
+          changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Ellipse) {
+          changeAction = updateEllipseAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
+        } else if (element.type === ElementType.Polyline) {
+          changeAction = updatePolylineAction(element, false);
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -512,18 +589,18 @@ export const MouseEventsProvider = ({
       case SelectionModes.Add: {
         // Record selection elements and draw the element directly but with faded bg?
         if (!selectedElement) return;
-        const creationElement = copy(appState.elements[selectedElement]);
-        if (creationElement.type === ElementType.Polyline) {
+        const element = copy(appState.elements[selectedElement]);
+        if (element.type === ElementType.Polyline) {
           break;
         }
-        creationElement.state = ElementState.Visible;
+        element.state = ElementState.Visible;
         let changeAction;
-        if (creationElement.type === ElementType.Rect) {
-          changeAction = updateRectAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Text) {
-          changeAction = updateTextAction(creationElement, false);
+        if (element.type === ElementType.Rect) {
+          changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Ellipse) {
+          changeAction = updateEllipseAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -541,18 +618,18 @@ export const MouseEventsProvider = ({
         // TODO: Make sure every ephemeral change ends up with non ephemeral change at some point.
         if (!selectedElement) return;
 
-        const creationElement = copy(appState.elements[selectedElement]);
-        if (creationElement.type === ElementType.Polyline) {
-          break;
-        }
-        creationElement.state = ElementState.Visible;
+        const element = copy(appState.elements[selectedElement]);
+        element.state = ElementState.Visible;
         let changeAction;
-        if (creationElement.type === ElementType.Rect) {
-          changeAction = updateRectAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(creationElement, false);
-        } else if (creationElement.type === ElementType.Text) {
-          changeAction = updateTextAction(creationElement, false);
+        if (element.type === ElementType.Rect) {
+          changeAction = updateRectAction(element, false);
+        } else if (element.type === ElementType.Ellipse) {
+          changeAction = updateEllipseAction(element, false);
+        } else if (element.type === ElementType.Text) {
+          changeAction = updateTextAction(element, false);
+        } else if (element.type === ElementType.Polyline) {
+          // todo last update (non ephemeral):
+          changeAction = updatePolylineAction(element, false);
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -631,7 +708,13 @@ export const MouseEventsProvider = ({
   };
   return (
     <MouseEventsContext.Provider
-      value={{ onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel }}
+      value={{
+        onMouseOver,
+        onMouseDown,
+        onMouseMove,
+        onMouseUp,
+        onMouseWheel,
+      }}
     >
       {children}
     </MouseEventsContext.Provider>

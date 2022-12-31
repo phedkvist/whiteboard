@@ -20,10 +20,24 @@ text.isSelected {
   outline: 2px dashed lightblue;
 }
 
-polyline.isSelected {
-  outline: 2px dashed lightblue;
+rect.isHovering,
+ellipse.isHovering,
+text.isHovering {
+  outline: 1px dashed rgba(173, 216, 230, 0.7);
 }
 
-.isHovering {
-  outline: 1px dashed rgba(173, 216, 230, 0.7);
+.textContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.textInput {
+  background-color: transparent;
+  border: none;
+  color: rgb(197, 197, 197) !important;
+  font-size: 14px;
+  font-weight: bold;
+  width: 100%;
+  height: 100%;
+  outline: none;
 }

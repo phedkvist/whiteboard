@@ -1,4 +1,4 @@
-import { ElementState, ElementType, Ellipse } from "../../Types";
+import { ElementState, ElementType, Ellipse } from "../../types";
 import {
   ChangeType,
   CreateEllipseAction,
@@ -14,6 +14,7 @@ export const createEllipseAction = (
   const object: Ellipse = {
     id,
     type: ElementType.Ellipse,
+    text: "",
     rx: 0,
     ry: 0,
     cx: initialX,

@@ -1,4 +1,4 @@
-import { ElementState, ElementType, Rect } from "../../Types";
+import { ElementState, ElementType, Rect } from "../../types";
 import { ChangeType, CreateRectAction, UpdateRectAction } from "../ChangeTypes";
 
 export const createRectAction = (
@@ -10,6 +10,7 @@ export const createRectAction = (
   const rect: Rect = {
     id,
     type: ElementType.Rect,
+    text: "",
     width: 0,
     height: 0,
     x: initialX,
