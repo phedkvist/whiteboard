@@ -154,11 +154,14 @@ export const MouseEventsProvider = ({
         if (selectedElement !== null && id !== selectedElement) {
           removeSelection();
         } else if (id === selectedElement) {
-          setSelectionMode({
-            ...selectionMode,
-            type: SelectionModes.TextEditing,
-          });
-          break;
+          const e = appState.elements[selectedElement];
+          if (e.type !== ElementType.Polyline) {
+            setSelectionMode({
+              ...selectionMode,
+              type: SelectionModes.TextEditing,
+            });
+            break;
+          }
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
         setupMovingElement(e);
