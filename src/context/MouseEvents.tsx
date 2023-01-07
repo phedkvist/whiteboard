@@ -3,6 +3,7 @@ import {
   MouseEventHandler,
   useContext,
   useEffect,
+  useState,
   WheelEventHandler,
 } from "react";
 import {
@@ -70,22 +71,39 @@ export const MouseEventsProvider = ({
     viewBox,
     setViewBox,
   } = useAppState();
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (selectedElement) {
-      const { key } = e;
-      if (key === "Escape") {
-        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
-        setSelectedElement(null);
-        return;
-      }
+    const { key } = e;
+    if (key === "Escape") {
+      setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+      setSelectedElement(null);
+      setSelectionCoordinates({
+        ...selectionCoordinates,
+        startX: null,
+        startY: null,
+        currentX: null,
+        currentY: null,
+      });
+      return;
+    }
+    if (e.code === "Space") {
+      setIsSpacePressed(true);
+    }
+  };
+
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === "Space") {
+      setIsSpacePressed(false);
     }
   };
 
   useEffect(() => {
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     };
   });
 
@@ -132,12 +150,38 @@ export const MouseEventsProvider = ({
 
     switch (selectionMode.type) {
       case SelectionModes.None: {
-        if (!(e.target instanceof Element) || e.target.id === "container") {
+        if (!(e.target instanceof Element)) return;
+        const isPanning = e.target.id === "container" && isSpacePressed;
+        const isMultiSelecting = e.target.id === "container" && !isSpacePressed;
+        console.log("IS MULTI SELECTING: ", isMultiSelecting);
+        if (isPanning) {
           removeSelection();
-          setSelectionMode({ ...selectionMode, type: SelectionModes.Panning });
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.Panning,
+          });
           setViewBox({
             ...viewBox,
             startPoint: { x: e.movementX, y: e.movementY },
+          });
+          return;
+        }
+        if (isMultiSelecting) {
+          // TODO: Create a square with some opacity that grows with mouse.
+          // Once an area has been selected, find all elements that are overlapping with said square.
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.MultiSelecting,
+          });
+          const initialX = e.clientX / viewBox.scale + viewBox.x;
+          const initialY = e.clientY / viewBox.scale + viewBox.y;
+          console.log(initialX, initialY);
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            initialX,
+            initialY,
+            startX: initialX,
+            startY: initialY,
           });
           return;
         }
@@ -354,6 +398,16 @@ export const MouseEventsProvider = ({
           h: viewBox.h,
         };
         setViewBox({ ...viewBox, ...movedViewBox });
+        break;
+      }
+      case SelectionModes.MultiSelecting: {
+        const currentX = e.clientX / viewBox.scale + viewBox.x;
+        const currentY = e.clientY / viewBox.scale + viewBox.y;
+        setSelectionCoordinates({
+          ...selectionCoordinates,
+          currentX,
+          currentY,
+        });
         break;
       }
       case SelectionModes.Selected: {
@@ -646,6 +700,21 @@ export const MouseEventsProvider = ({
           type: SelectionModes.None,
         });
         setSelectedElement(null);
+        break;
+      }
+      case SelectionModes.MultiSelecting: {
+        setSelectionMode({
+          ...selectionMode,
+          type: SelectionModes.None,
+        });
+        setSelectedElement(null);
+        setSelectionCoordinates({
+          ...selectionCoordinates,
+          startX: null,
+          startY: null,
+          currentX: null,
+          currentY: null,
+        });
         break;
       }
     }

@@ -1,5 +1,5 @@
 import "./Canvas.css";
-import { SelectionModes, ElementType } from "../../types";
+import { SelectionModes, ElementType, SelectionCoordinates } from "../../types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents";
 import Elements from "./Elements";
@@ -45,6 +45,26 @@ const DrawBackgroundLines = () => (
   </>
 );
 
+const MultiSelectBox = ({
+  selectionCoordinates,
+}: {
+  selectionCoordinates: SelectionCoordinates;
+}) => {
+  const { startX, startY, currentX, currentY } = selectionCoordinates;
+  if (!startX || !startY || !currentX || !currentY) return null;
+  const width = currentX - startX;
+  const height = currentY - startY;
+  return (
+    <rect
+      className="multiSelect"
+      x={startX}
+      y={startY}
+      width={width}
+      height={height}
+    />
+  );
+};
+
 const Canvas = () => {
   const {
     appState,
@@ -54,6 +74,7 @@ const Canvas = () => {
     showDebugger,
     viewBox,
     history,
+    selectionCoordinates,
   } = useAppState();
   const { onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel } =
     useMouseEvents();
@@ -112,6 +133,7 @@ const Canvas = () => {
     }
   });
   const isAdding = selectionMode.type === SelectionModes.Add;
+  const showMultiSelect = selectionMode.type === SelectionModes.MultiSelecting;
   return (
     <svg
       data-xmlns="http://www.w3.org/2000/svg"
@@ -126,6 +148,9 @@ const Canvas = () => {
     >
       {showDebugger && <DrawBackgroundLines />}
       {renderElements}
+      {showMultiSelect && (
+        <MultiSelectBox selectionCoordinates={selectionCoordinates} />
+      )}
     </svg>
   );
 };

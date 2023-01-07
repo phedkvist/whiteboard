@@ -31,6 +31,7 @@ export enum SelectionModes {
   Turning = "Turning",
   Panning = "Panning",
   TextEditing = "TextEditing",
+  MultiSelecting = "MultiSelecting",
 }
 
 export interface SelectionMode {
