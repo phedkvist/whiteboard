@@ -11,8 +11,13 @@ import { createUpdateChangeAction } from "../../services/ChangeTypes";
 // Different settings for different elements
 
 export const Properties = () => {
-  const { appState, selectedElement, history } = useAppState();
-  const element = selectedElement ? appState.elements[selectedElement] : null;
+  const {
+    appState,
+    selectedElements: selectedElement,
+    history,
+  } = useAppState();
+  const element =
+    selectedElement.length > 0 ? appState.elements[selectedElement[0]] : null;
 
   const properties = (element: Element | null) => {
     if (!element) return;

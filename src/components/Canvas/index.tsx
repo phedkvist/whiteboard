@@ -68,7 +68,7 @@ const MultiSelectBox = ({
 const Canvas = () => {
   const {
     appState,
-    selectedElement,
+    selectedElements,
     hoverElement,
     selectionMode,
     showDebugger,
@@ -88,7 +88,7 @@ const Canvas = () => {
   });
 
   const renderElements = sortedElements.map((e) => {
-    const isSelected = e.id === selectedElement;
+    const isSelected = selectedElements.includes(e.id);
     const isSelectedCss = isSelected ? "isSelected" : "";
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
     const classes = `${e.state} ${isSelectedCss} ${isHovering}`;

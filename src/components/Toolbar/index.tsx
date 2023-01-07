@@ -8,13 +8,13 @@ Delete element
 */
 
 const Toolbar = () => {
-  const { setSelectedElement, setSelectionMode } = useAppState();
+  const { setSelectedElements, setSelectionMode } = useAppState();
   return (
     <div className="toolbar" id="toolbar">
       <button
         id="toolbar_select"
         onClick={() => {
-          setSelectedElement(null);
+          setSelectedElements([]);
           setSelectionMode({
             type: SelectionModes.None,
             elementType: undefined,
@@ -26,7 +26,7 @@ const Toolbar = () => {
       <button
         id="toolbar_rect"
         onClick={() => {
-          setSelectedElement(null);
+          setSelectedElements([]);
 
           setSelectionMode({
             type: SelectionModes.Add,
@@ -39,7 +39,7 @@ const Toolbar = () => {
       <button
         id="toolbar_ellipse"
         onClick={() => {
-          setSelectedElement(null);
+          setSelectedElements([]);
           setSelectionMode({
             type: SelectionModes.Add,
             elementType: ElementType.Ellipse,
@@ -51,7 +51,7 @@ const Toolbar = () => {
       <button
         id="toolbar_text"
         onClick={() => {
-          setSelectedElement(null);
+          setSelectedElements([]);
           setSelectionMode({
             type: SelectionModes.Add,
             elementType: ElementType.Text,
@@ -63,7 +63,7 @@ const Toolbar = () => {
       <button
         id="toolbar_polyline"
         onClick={() => {
-          setSelectedElement(null);
+          setSelectedElements([]);
           setSelectionMode({
             type: SelectionModes.Add,
             elementType: ElementType.Polyline,

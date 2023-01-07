@@ -14,8 +14,8 @@ import History from "../services/History";
 interface IAppStateContext {
   appState: AppState;
   history: History | null;
-  selectedElement: string | null;
-  setSelectedElement: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedElements: string[];
+  setSelectedElements: React.Dispatch<React.SetStateAction<string[]>>;
   hoverElement: string | null;
   setHoverElement: React.Dispatch<React.SetStateAction<string | null>>;
   selectionCoordinates: SelectionCoordinates;
@@ -32,8 +32,8 @@ interface IAppStateContext {
 export const AppStateContext = createContext<IAppStateContext>({
   appState: initialState,
   history: null,
-  selectedElement: null,
-  setSelectedElement: () => {},
+  selectedElements: [],
+  setSelectedElements: () => {},
   hoverElement: null,
   setHoverElement: () => {},
   selectionCoordinates: initialSelectionCoordinates,
@@ -60,7 +60,7 @@ export const AppStateProvider = (props: {
 }) => {
   const [appState, setAppState] = useState<AppState>(initialState);
   const [history] = useState(() => new History(appState, setAppState));
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const [hoverElement, setHoverElement] = useState<string | null>(null);
   const [selectionCoordinates, setSelectionCoordinates] =
     useState<SelectionCoordinates>(initialSelectionCoordinates);
@@ -75,8 +75,8 @@ export const AppStateProvider = (props: {
       value={{
         appState,
         history,
-        selectedElement,
-        setSelectedElement,
+        selectedElements,
+        setSelectedElements,
         hoverElement,
         setHoverElement,
         selectionCoordinates,
