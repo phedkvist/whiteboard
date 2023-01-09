@@ -35,6 +35,7 @@ import {
   createPolylineAction,
   updatePolylineAction,
 } from "../services/Actions/Polyline";
+import { intersectRect } from "../helpers/intersect";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -167,8 +168,7 @@ export const MouseEventsProvider = ({
           return;
         }
         if (isMultiSelecting) {
-          // TODO: Create a square with some opacity that grows with mouse.
-          // Once an area has been selected, find all elements that are overlapping with said square.
+          setSelectedElements([]);
           setSelectionMode({
             ...selectionMode,
             type: SelectionModes.MultiSelecting,
@@ -281,6 +281,7 @@ export const MouseEventsProvider = ({
         }
         break;
       }
+      case SelectionModes.MultiSelecting:
       case SelectionModes.TextEditing:
       case SelectionModes.Selected: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
@@ -388,6 +389,44 @@ export const MouseEventsProvider = ({
     });
   };
 
+  const findSelectedElements = (
+    startX: number,
+    startY: number,
+    currentX: number,
+    currentY: number
+  ) => {
+    const selectRect = {
+      left: startX,
+      top: startY,
+      right: currentX,
+      bottom: currentY,
+    };
+    return Object.keys(appState.elements).filter((elementId) => {
+      const element = appState.elements[elementId];
+      switch (element.type) {
+        case ElementType.Polyline:
+          return false;
+        case ElementType.Rect:
+        case ElementType.Text:
+          return intersectRect(selectRect, {
+            left: element.x,
+            top: element.y,
+            right: element.x + element.width,
+            bottom: element.y + element.height,
+          });
+        case ElementType.Ellipse:
+          return intersectRect(selectRect, {
+            left: element.cx - element.rx,
+            top: element.cy - element.ry,
+            right: element.cx + element.rx,
+            bottom: element.cy + element.ry,
+          });
+        default:
+          return false;
+      }
+    });
+  };
+
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
     if (e.button !== MouseButtons.LEFT) return;
 
@@ -409,6 +448,11 @@ export const MouseEventsProvider = ({
       case SelectionModes.MultiSelecting: {
         const currentX = e.clientX / viewBox.scale + viewBox.x;
         const currentY = e.clientY / viewBox.scale + viewBox.y;
+        const { startX, startY } = selectionCoordinates;
+        if (!startX || !startY) return;
+        setSelectedElements(
+          findSelectedElements(startX, startY, currentX, currentY)
+        );
         setSelectionCoordinates({
           ...selectionCoordinates,
           currentX,
@@ -720,11 +764,12 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.MultiSelecting: {
-        setSelectionMode({
-          ...selectionMode,
-          type: SelectionModes.None,
-        });
-        setSelectedElements([]);
+        if (selectedElements.length === 0) {
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.None,
+          });
+        }
         setSelectionCoordinates({
           ...selectionCoordinates,
           startX: null,

@@ -50,5 +50,6 @@ text.isHovering {
 
 rect.multiSelect {
   stroke: rgba(173, 216, 230, 0.8);
-  fill: rgba(173, 216, 230, 0.2);
+  stroke-width: 2px;
+  fill: rgba(173, 216, 230, 0.4);
 }
