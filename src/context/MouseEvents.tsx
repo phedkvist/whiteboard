@@ -146,6 +146,8 @@ export const MouseEventsProvider = ({
     setHoverElement(e.target.id);
   };
 
+  // Non-pure function
+  // Extract all the "logic" into separate functions that can be easily tested.
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
     if (e.button !== MouseButtons.LEFT) return;
 
@@ -302,6 +304,8 @@ export const MouseEventsProvider = ({
     }
   };
 
+  // Non-pure function
+  // Extract all the "logic" into separate functions that can be easily tested.
   const setupResizeElement: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element)) return;
     const {
@@ -339,6 +343,8 @@ export const MouseEventsProvider = ({
     });
   };
 
+  // Non-pure function
+  // Extract all the "logic" into separate functions that can be easily tested.
   const setupRotateElement: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element)) return;
     const { width, height } =
@@ -394,7 +400,7 @@ export const MouseEventsProvider = ({
     startY: number,
     currentX: number,
     currentY: number
-  ) => {
+  ): string[] => {
     const selectRect = {
       left: startX,
       top: startY,
