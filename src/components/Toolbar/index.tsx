@@ -1,6 +1,7 @@
 import "./Toolbar.css";
 import { SelectionModes, ElementType } from "../../types";
 import { useAppState } from "../../context/AppState";
+
 /*
 Add element
 - Rect, Circle, Text, Arrow
