@@ -36,6 +36,7 @@ import {
   updatePolylineAction,
 } from "../services/Actions/Polyline";
 import { intersectRect } from "../helpers/intersect";
+import * as KeyCode from "keycode-js";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -76,7 +77,7 @@ export const MouseEventsProvider = ({
 
   const onKeyDown = (e: KeyboardEvent) => {
     const { key } = e;
-    if (key === "Escape") {
+    if (key === KeyCode.CODE_ESCAPE) {
       setSelectionMode({ ...selectionMode, type: SelectionModes.None });
       setSelectedElements([]);
       setSelectionCoordinates({
@@ -88,13 +89,13 @@ export const MouseEventsProvider = ({
       });
       return;
     }
-    if (e.code === "Space") {
+    if (e.code === KeyCode.CODE_SPACE) {
       setIsSpacePressed(true);
     }
   };
 
   const onKeyUp = (e: KeyboardEvent) => {
-    if (e.code === "Space") {
+    if (e.code === KeyCode.CODE_SPACE) {
       setIsSpacePressed(false);
     }
   };
@@ -148,15 +149,18 @@ export const MouseEventsProvider = ({
 
   // Non-pure function
   // Extract all the "logic" into separate functions that can be easily tested.
+  // Should return new viewbox, selectionMode,
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
     if (e.button !== MouseButtons.LEFT) return;
+
+    const isDoubleClick = e.detail === 2;
 
     switch (selectionMode.type) {
       case SelectionModes.None: {
         if (!(e.target instanceof Element)) return;
         const isPanning = e.target.id === "container" && isSpacePressed;
         const isMultiSelecting = e.target.id === "container" && !isSpacePressed;
-        console.log("IS MULTI SELECTING: ", isMultiSelecting);
+
         if (isPanning) {
           removeSelection();
           setSelectionMode({
@@ -177,7 +181,6 @@ export const MouseEventsProvider = ({
           });
           const initialX = e.clientX / viewBox.scale + viewBox.x;
           const initialY = e.clientY / viewBox.scale + viewBox.y;
-          console.log(initialX, initialY);
           setSelectionCoordinates({
             ...selectionCoordinates,
             initialX,
@@ -199,7 +202,7 @@ export const MouseEventsProvider = ({
 
         if (selectedElements !== null && !selectedElements.includes(id)) {
           removeSelection();
-        } else if (selectedElements.includes(id)) {
+        } else if (selectedElements.includes(id) && isDoubleClick) {
           const e = appState.elements[id];
           if (e.type !== ElementType.Polyline) {
             setSelectionMode({
@@ -296,6 +299,13 @@ export const MouseEventsProvider = ({
           break;
         }
 
+        if (!selectedElements.includes(e.target.id)) {
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.None,
+          });
+        }
+
         // DRAGGING ELEMENT
         setupMovingElement(e);
 
@@ -324,7 +334,6 @@ export const MouseEventsProvider = ({
 
     const element = copy(appState.elements[selectedElements[0]]);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
-    console.log("SELECTED CORNER: ", selectedCorner);
     if (!selectedCorner) return;
     setSelectionCoordinates({
       ...selectionCoordinates,
