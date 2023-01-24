@@ -39,11 +39,21 @@ export default class History {
   loadLocalHistory() {
     try {
       const localHistory = JSON.parse(localStorage.getItem("history") || "");
+      const newAppState = Object.assign({}, this.appState);
+      const renderingOrder = [...newAppState.renderingOrder];
+      let elementsCount = 0; // this is likely incorrect
+
       if (localHistory && Array.isArray(localHistory)) {
-        localHistory.map((c) => {
-          if (isChangeAction(c)) this.addLocalChange(c, true);
+        const actions = localHistory.filter(isChangeAction);
+        actions.forEach((change) => {
+          const { object } = change;
+          newAppState.elements[object.id] = object;
+          renderingOrder.push(object.id);
+          this.changes.push(change);
+          elementsCount = change.object.renderingOrder;
         });
       }
+      this.setAppState({ ...newAppState, elementsCount, renderingOrder });
     } catch (e) {
       console.log("Error loading local history");
     }

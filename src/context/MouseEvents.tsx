@@ -317,23 +317,28 @@ export const MouseEventsProvider = ({
   // Non-pure function
   // Extract all the "logic" into separate functions that can be easily tested.
   const setupResizeElement: MouseEventHandler<SVGSVGElement> = (e) => {
+    console.log("On resize");
     if (!(e.target instanceof Element)) return;
     const {
-      x: xOffset,
-      y: yOffset,
+      x: xOffset = 0,
+      y: yOffset = 0,
       width,
       height,
     } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
       x: null,
       y: null,
     };
-    if (!xOffset || !yOffset) return;
+    console.log("hello");
+    if (xOffset === null || yOffset === null) return;
+    if (width === undefined || height === undefined) return;
+
     const initialX = e.clientX / viewBox.scale + viewBox.x;
     const initialY = e.clientY / viewBox.scale + viewBox.y;
     if (!(selectedElements.length > 0)) return;
 
     const element = copy(appState.elements[selectedElements[0]]);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
+    console.log("selected corner: ", selectedCorner);
     if (!selectedCorner) return;
     setSelectionCoordinates({
       ...selectionCoordinates,
