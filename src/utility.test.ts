@@ -5,5 +5,14 @@ describe("Utility functions", () => {
     it("should return 45 deg", () => {
       expect(angleBetweenPoints(0, 0, 100, 100)).toEqual(45);
     });
+    it("should return 0 deg", () => {
+      expect(angleBetweenPoints(0, 0, 100, 0)).toEqual(0);
+    });
+    it("should return 0 deg", () => {
+      expect(angleBetweenPoints(0, 0, 0, 100)).toEqual(90);
+    });
+    it("should return 180 deg", () => {
+      expect(angleBetweenPoints(100, 0, 0, 0)).toEqual(180);
+    });
   });
 });
