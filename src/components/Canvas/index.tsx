@@ -95,6 +95,7 @@ const Canvas = () => {
     if (e.type === ElementType.Rect) {
       return (
         <Elements.Rect
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}
@@ -105,6 +106,7 @@ const Canvas = () => {
     } else if (e.type === ElementType.Ellipse) {
       return (
         <Elements.Ellipse
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           ellipse={e}
@@ -115,6 +117,7 @@ const Canvas = () => {
     } else if (e.type === ElementType.Polyline) {
       return (
         <Elements.Polyline
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           polyline={e}
@@ -123,6 +126,7 @@ const Canvas = () => {
     } else {
       return (
         <Elements.Text
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}

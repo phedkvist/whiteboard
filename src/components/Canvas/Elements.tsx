@@ -317,15 +317,17 @@ const PolylineRenderer = ({
             style={{ cursor: "nwse-resize" }}
             fill={"darkblue"}
           />
-          <rect
-            id={`${id}-resize-right`}
-            width={8}
-            height={8}
-            x={points[2] - 4}
-            y={points[3] - 4}
-            style={{ cursor: "nwse-resize" }}
-            fill={"darkblue"}
-          />
+          {points.length > 2 && (
+            <rect
+              id={`${id}-resize-right`}
+              width={8}
+              height={8}
+              x={points[2] - 4}
+              y={points[3] - 4}
+              style={{ cursor: "nwse-resize" }}
+              fill={"darkblue"}
+            />
+          )}
         </>
       )}
     </g>
