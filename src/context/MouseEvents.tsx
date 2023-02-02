@@ -35,7 +35,7 @@ import {
   createPolylineAction,
   updatePolylineAction,
 } from "../services/Actions/Polyline";
-import { intersectRect } from "../helpers/intersect";
+import { isLineInsideRect, isRectsIntersecting } from "../helpers/intersect";
 import * as KeyCode from "keycode-js";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
@@ -425,17 +425,23 @@ export const MouseEventsProvider = ({
       const element = appState.elements[elementId];
       switch (element.type) {
         case ElementType.Polyline:
-          return false;
+          return isLineInsideRect(
+            element.points[0],
+            element.points[1],
+            element.points[2],
+            element.points[3],
+            selectRect
+          );
         case ElementType.Rect:
         case ElementType.Text:
-          return intersectRect(selectRect, {
+          return isRectsIntersecting(selectRect, {
             left: element.x,
             top: element.y,
             right: element.x + element.width,
             bottom: element.y + element.height,
           });
         case ElementType.Ellipse:
-          return intersectRect(selectRect, {
+          return isRectsIntersecting(selectRect, {
             left: element.cx - element.rx,
             top: element.cy - element.ry,
             right: element.cx + element.rx,
