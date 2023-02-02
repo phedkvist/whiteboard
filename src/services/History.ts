@@ -8,6 +8,11 @@ Then let those change that underlying state.
 
 */
 
+function isChangeAction(action: any): action is ChangeActions {
+  // TODO: Add more checks here.
+  return typeof action.changeType === "string";
+}
+
 export default class History {
   changes: ChangeActions[];
   redoStack: ChangeActions[];
@@ -28,9 +33,33 @@ export default class History {
     this.versionVector = {};
     this.appState = appState;
     this.setAppState = setAppState;
+    this.loadLocalHistory();
   }
 
-  addLocalChange(change: ChangeActions) {
+  loadLocalHistory() {
+    try {
+      const localHistory = JSON.parse(localStorage.getItem("history") || "");
+      const newAppState = Object.assign({}, this.appState);
+      const renderingOrder = [...newAppState.renderingOrder];
+      let elementsCount = 0; // this is likely incorrect
+
+      if (localHistory && Array.isArray(localHistory)) {
+        const actions = localHistory.filter(isChangeAction);
+        actions.forEach((change) => {
+          const { object } = change;
+          newAppState.elements[object.id] = object;
+          renderingOrder.push(object.id);
+          this.changes.push(change);
+          elementsCount = change.object.renderingOrder;
+        });
+      }
+      this.setAppState({ ...newAppState, elementsCount, renderingOrder });
+    } catch (e) {
+      console.log("Error loading local history");
+    }
+  }
+
+  addLocalChange(change: ChangeActions, skipSave: boolean = false) {
     // Add local change and submits it to the server.
     // Add corresponding changes to the undoStack.
     // If we have disconnected, then try submitting later
@@ -43,8 +72,9 @@ export default class History {
     const elementsCount = object.renderingOrder;
     const renderingOrder = [...newAppState.renderingOrder, object.id];
 
-    if (!change.ephemeral) {
+    if (!change.ephemeral && !skipSave) {
       this.changes.push(change);
+      localStorage.setItem("history", JSON.stringify(this.changes));
     }
     this.setAppState({ ...newAppState, elementsCount, renderingOrder });
   }

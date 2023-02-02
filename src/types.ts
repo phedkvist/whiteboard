@@ -31,6 +31,7 @@ export enum SelectionModes {
   Turning = "Turning",
   Panning = "Panning",
   TextEditing = "TextEditing",
+  MultiSelecting = "MultiSelecting",
 }
 
 export interface SelectionMode {
@@ -144,44 +145,7 @@ export interface AppState {
 }
 
 export const initialState: AppState = {
-  elements: {
-    "1": {
-      id: "1",
-      type: ElementType.Ellipse,
-      text: "",
-      cx: 50,
-      cy: 50,
-      rx: 50,
-      ry: 50,
-      style: {
-        fill: COLORS.red,
-        strokeWidth: 4,
-        strokeDasharray: 4,
-        stroke: COLORS.gray,
-      },
-      state: ElementState.Visible,
-      rotate: 0,
-      renderingOrder: 1,
-    },
-    "2": {
-      id: "2",
-      type: ElementType.Rect,
-      text: "TESTING",
-      width: 100,
-      height: 100,
-      x: 200,
-      y: 200,
-      style: {
-        fill: COLORS.blue,
-        strokeWidth: 2,
-        strokeDasharray: 2,
-        stroke: COLORS.gray,
-      },
-      state: ElementState.Visible,
-      rotate: 0,
-      renderingOrder: 2,
-    },
-  },
+  elements: {},
   renderingOrder: ["1", "2"],
   elementsCount: 2,
 };

@@ -3,9 +3,10 @@ import { useAppState } from "../../context/AppState";
 import "./Debugger.css";
 
 export const Debugger = () => {
-  const { selectedElement, appState, selectionMode, showDebugger, viewBox } =
+  const { selectedElements, appState, selectionMode, showDebugger, viewBox } =
     useAppState();
-  const element = selectedElement && appState.elements[selectedElement];
+  const element =
+    selectedElements.length > 0 && appState.elements[selectedElements[0]];
 
   if (!showDebugger) {
     return null;

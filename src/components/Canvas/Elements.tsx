@@ -9,7 +9,7 @@ import {
   Polyline,
   Text,
 } from "../../types";
-import { copy } from "../../utility";
+import { angleBetweenPoints, copy } from "../../utility";
 import { updateRectAction } from "../../services/Actions/Rect";
 import History from "../../services/History";
 import { updateEllipseAction } from "../../services/Actions/Ellipse";
@@ -297,14 +297,42 @@ const PolylineRenderer = ({
   isSelected: boolean;
 }) => {
   const { type, renderingOrder, points, id, ...props } = polyline;
+  const arrowStyle = { fill: props.style?.stroke || "" };
+  const rotate = angleBetweenPoints(points[0], points[1], points[2], points[3]);
   return (
     <g id={`g-${id}`}>
+      <defs>
+        <marker
+          id="arrow"
+          key={`${id}-arrow`}
+          orient="auto"
+          markerWidth="3"
+          markerHeight="4"
+          refX="1.5"
+          refY="2"
+        >
+          <path d="M0,0 V4 L2,2 Z" style={arrowStyle} />
+        </marker>
+        <marker
+          id="arrow-reverse"
+          key={`${id}-arrow-reverse`}
+          orient="auto"
+          markerWidth="3"
+          markerHeight="4"
+          refX="0.5"
+          refY="2"
+        >
+          <path d="M2,0 V4 L0,2 Z" style={arrowStyle} />
+        </marker>
+      </defs>
       <polyline
         key={id}
         id={id}
         {...props}
         points={points.toString()}
         className={classes}
+        markerStart="url(#arrow-reverse)"
+        markerEnd="url(#arrow)"
       ></polyline>
       {isSelected && (
         <>
@@ -315,17 +343,25 @@ const PolylineRenderer = ({
             x={points[0] - 4}
             y={points[1] - 4}
             style={{ cursor: "nwse-resize" }}
-            fill={"darkblue"}
+            transform={`rotate(${rotate} ${points[0]} ${points[1]})`}
+            fill="transparent"
+            stroke="black"
+            strokeWidth={1}
           />
-          <rect
-            id={`${id}-resize-right`}
-            width={8}
-            height={8}
-            x={points[2] - 4}
-            y={points[3] - 4}
-            style={{ cursor: "nwse-resize" }}
-            fill={"darkblue"}
-          />
+          {points.length > 2 && (
+            <rect
+              id={`${id}-resize-right`}
+              width={8}
+              height={8}
+              x={points[2] - 4}
+              y={points[3] - 4}
+              style={{ cursor: "nwse-resize" }}
+              transform={`rotate(${rotate} ${points[2]} ${points[3]})`}
+              fill="transparent"
+              stroke="black"
+              strokeWidth={1}
+            />
+          )}
         </>
       )}
     </g>

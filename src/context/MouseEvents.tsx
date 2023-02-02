@@ -3,6 +3,7 @@ import {
   MouseEventHandler,
   useContext,
   useEffect,
+  useState,
   WheelEventHandler,
 } from "react";
 import {
@@ -34,6 +35,8 @@ import {
   createPolylineAction,
   updatePolylineAction,
 } from "../services/Actions/Polyline";
+import { isLineInsideRect, isRectsIntersecting } from "../helpers/intersect";
+import * as KeyCode from "keycode-js";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -60,8 +63,8 @@ export const MouseEventsProvider = ({
   const {
     appState,
     history,
-    selectedElement,
-    setSelectedElement,
+    selectedElements,
+    setSelectedElements,
     setHoverElement,
     selectionCoordinates,
     setSelectionCoordinates,
@@ -70,22 +73,39 @@ export const MouseEventsProvider = ({
     viewBox,
     setViewBox,
   } = useAppState();
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (selectedElement) {
-      const { key } = e;
-      if (key === "Escape") {
-        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
-        setSelectedElement(null);
-        return;
-      }
+    const { key } = e;
+    if (key === KeyCode.CODE_ESCAPE) {
+      setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+      setSelectedElements([]);
+      setSelectionCoordinates({
+        ...selectionCoordinates,
+        startX: null,
+        startY: null,
+        currentX: null,
+        currentY: null,
+      });
+      return;
+    }
+    if (e.code === KeyCode.CODE_SPACE) {
+      setIsSpacePressed(true);
+    }
+  };
+
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === KeyCode.CODE_SPACE) {
+      setIsSpacePressed(false);
     }
   };
 
   useEffect(() => {
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     };
   });
 
@@ -127,17 +147,46 @@ export const MouseEventsProvider = ({
     setHoverElement(e.target.id);
   };
 
+  // Non-pure function
+  // Extract all the "logic" into separate functions that can be easily tested.
+  // Should return new viewbox, selectionMode,
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
     if (e.button !== MouseButtons.LEFT) return;
 
+    const isDoubleClick = e.detail === 2;
+
     switch (selectionMode.type) {
       case SelectionModes.None: {
-        if (!(e.target instanceof Element) || e.target.id === "container") {
+        if (!(e.target instanceof Element)) return;
+        const isPanning = e.target.id === "container" && isSpacePressed;
+        const isMultiSelecting = e.target.id === "container" && !isSpacePressed;
+
+        if (isPanning) {
           removeSelection();
-          setSelectionMode({ ...selectionMode, type: SelectionModes.Panning });
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.Panning,
+          });
           setViewBox({
             ...viewBox,
             startPoint: { x: e.movementX, y: e.movementY },
+          });
+          return;
+        }
+        if (isMultiSelecting) {
+          setSelectedElements([]);
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.MultiSelecting,
+          });
+          const initialX = e.clientX / viewBox.scale + viewBox.x;
+          const initialY = e.clientY / viewBox.scale + viewBox.y;
+          setSelectionCoordinates({
+            ...selectionCoordinates,
+            initialX,
+            initialY,
+            startX: initialX,
+            startY: initialY,
           });
           return;
         }
@@ -151,10 +200,10 @@ export const MouseEventsProvider = ({
           break;
         }
 
-        if (selectedElement !== null && id !== selectedElement) {
+        if (selectedElements !== null && !selectedElements.includes(id)) {
           removeSelection();
-        } else if (id === selectedElement) {
-          const e = appState.elements[selectedElement];
+        } else if (selectedElements.includes(id) && isDoubleClick) {
+          const e = appState.elements[id];
           if (e.type !== ElementType.Polyline) {
             setSelectionMode({
               ...selectionMode,
@@ -176,7 +225,7 @@ export const MouseEventsProvider = ({
           initialY,
         });
         const id = uuid();
-        setSelectedElement(id);
+        setSelectedElements([...selectedElements, id]);
         const renderingOrder = appState.elementsCount + 1;
 
         switch (selectionMode.elementType) {
@@ -200,6 +249,8 @@ export const MouseEventsProvider = ({
             break;
           }
           case ElementType.Polyline: {
+            const selectedElement = selectedElements[0];
+
             if (selectedElement) {
               // Second part of drawing the line.
               const creationElement = copy(appState.elements[selectedElement]);
@@ -223,7 +274,7 @@ export const MouseEventsProvider = ({
                 ...selectionMode,
                 type: SelectionModes.None,
               });
-              setSelectedElement(null);
+              setSelectedElements([]);
             } else {
               history?.addLocalChange(
                 createPolylineAction(initialX, initialY, renderingOrder, id)
@@ -235,16 +286,24 @@ export const MouseEventsProvider = ({
         }
         break;
       }
+      case SelectionModes.MultiSelecting:
       case SelectionModes.TextEditing:
       case SelectionModes.Selected: {
         if (!(e.target instanceof Element) || e.target.id === "container") {
           setSelectionMode({ ...selectionMode, type: SelectionModes.None });
-          setSelectedElement(null);
+          setSelectedElements([]);
           return;
         }
         if (e.target.id.includes("resize")) {
           setupResizeElement(e);
           break;
+        }
+
+        if (!selectedElements.includes(e.target.id)) {
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.None,
+          });
         }
 
         // DRAGGING ELEMENT
@@ -255,24 +314,31 @@ export const MouseEventsProvider = ({
     }
   };
 
+  // Non-pure function
+  // Extract all the "logic" into separate functions that can be easily tested.
   const setupResizeElement: MouseEventHandler<SVGSVGElement> = (e) => {
+    console.log("On resize");
     if (!(e.target instanceof Element)) return;
     const {
-      x: xOffset,
-      y: yOffset,
+      x: xOffset = 0,
+      y: yOffset = 0,
       width,
       height,
     } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
       x: null,
       y: null,
     };
-    if (!xOffset || !yOffset) return;
+    console.log("hello");
+    if (xOffset === null || yOffset === null) return;
+    if (width === undefined || height === undefined) return;
+
     const initialX = e.clientX / viewBox.scale + viewBox.x;
     const initialY = e.clientY / viewBox.scale + viewBox.y;
-    if (!selectedElement) return;
-    const element = copy(appState.elements[selectedElement]);
+    if (!(selectedElements.length > 0)) return;
+
+    const element = copy(appState.elements[selectedElements[0]]);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
-    console.log("SELECTED CORNER: ", selectedCorner);
+    console.log("selected corner: ", selectedCorner);
     if (!selectedCorner) return;
     setSelectionCoordinates({
       ...selectionCoordinates,
@@ -291,6 +357,8 @@ export const MouseEventsProvider = ({
     });
   };
 
+  // Non-pure function
+  // Extract all the "logic" into separate functions that can be easily tested.
   const setupRotateElement: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element)) return;
     const { width, height } =
@@ -308,6 +376,8 @@ export const MouseEventsProvider = ({
       initialWidth: width,
       initialHeight: height,
     });
+    const selectedElement = selectedElements[0];
+
     if (!selectedElement) return;
     const element = appState.elements[selectedElement];
     setSelectionMode({
@@ -320,11 +390,12 @@ export const MouseEventsProvider = ({
   const setupMovingElement: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element)) return;
     const id = e.target.id;
-    if (selectedElement !== null && id !== selectedElement) {
+
+    if (selectedElements.includes(id)) {
       removeSelection();
     }
     const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-    setSelectedElement(id);
+    setSelectedElements([id]);
     const initialX = e.clientX - xOffset;
     const initialY = e.clientY - yOffset;
     const originElement = copy(appState.elements[id]);
@@ -335,6 +406,50 @@ export const MouseEventsProvider = ({
       startX: e.clientX,
       startY: e.clientY,
       originElement,
+    });
+  };
+
+  const findSelectedElements = (
+    startX: number,
+    startY: number,
+    currentX: number,
+    currentY: number
+  ): string[] => {
+    const selectRect = {
+      left: Math.min(startX, currentX),
+      top: Math.min(startY, currentY),
+      right: Math.max(startX, currentX),
+      bottom: Math.max(startX, currentX),
+    };
+    return Object.keys(appState.elements).filter((elementId) => {
+      const element = appState.elements[elementId];
+      switch (element.type) {
+        case ElementType.Polyline:
+          return isLineInsideRect(
+            element.points[0],
+            element.points[1],
+            element.points[2],
+            element.points[3],
+            selectRect
+          );
+        case ElementType.Rect:
+        case ElementType.Text:
+          return isRectsIntersecting(selectRect, {
+            left: element.x,
+            top: element.y,
+            right: element.x + element.width,
+            bottom: element.y + element.height,
+          });
+        case ElementType.Ellipse:
+          return isRectsIntersecting(selectRect, {
+            left: element.cx - element.rx,
+            top: element.cy - element.ry,
+            right: element.cx + element.rx,
+            bottom: element.cy + element.ry,
+          });
+        default:
+          return false;
+      }
     });
   };
 
@@ -356,8 +471,25 @@ export const MouseEventsProvider = ({
         setViewBox({ ...viewBox, ...movedViewBox });
         break;
       }
+      case SelectionModes.MultiSelecting: {
+        const currentX = e.clientX / viewBox.scale + viewBox.x;
+        const currentY = e.clientY / viewBox.scale + viewBox.y;
+        const { startX, startY } = selectionCoordinates;
+        if (!startX || !startY) return;
+        setSelectedElements(
+          findSelectedElements(startX, startY, currentX, currentY)
+        );
+        setSelectionCoordinates({
+          ...selectionCoordinates,
+          currentX,
+          currentY,
+        });
+        break;
+      }
       case SelectionModes.Selected: {
         const { startX, startY, originElement } = selectionCoordinates;
+        const selectedElement = selectedElements[0];
+
         if (selectedElement && startX && startY && originElement) {
           e.preventDefault();
           const diffX = e.clientX - startX;
@@ -376,6 +508,7 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Add: {
+        const selectedElement = selectedElements[0];
         if (!selectedElement) return;
         const newAppState = Object.assign({}, appState);
         // Update actions with ephemeral set to true.
@@ -438,6 +571,7 @@ export const MouseEventsProvider = ({
       case SelectionModes.Resizing: {
         e.preventDefault();
 
+        const selectedElement = selectedElements[0];
         const { selectedCorner } = selectionCoordinates;
         if (selectedElement && selectedCorner) {
           switch (selectionMode.elementType) {
@@ -482,6 +616,8 @@ export const MouseEventsProvider = ({
               break;
             }
             case ElementType.Ellipse: {
+              const selectedElement = selectedElements[0];
+              if (!selectedElement) return;
               const obj = copy(appState.elements[selectedElement]);
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [rx, ry, cx, cy] = resizeEllipse(
@@ -509,6 +645,8 @@ export const MouseEventsProvider = ({
               // selected corner, set this to some kind of index?
               const newX = e.clientX + viewBox.x;
               const newY = e.clientY + viewBox.y;
+              const selectedElement = selectedElements[0];
+              if (!selectedElement) return;
               const el = appState.elements[selectedElement];
               if (el.type !== ElementType.Polyline) {
                 return;
@@ -538,7 +676,7 @@ export const MouseEventsProvider = ({
         // Get middle point of figure. And get the lines between prev two points
         // Set the radius accordingly
         // Take into account different types of elements.
-
+        const selectedElement = selectedElements[0];
         if (!selectedElement) return;
         const { clientX, clientY } = e;
         let element = copy(appState.elements[selectedElement]);
@@ -564,11 +702,13 @@ export const MouseEventsProvider = ({
 
   const onMouseUp: MouseEventHandler<SVGSVGElement> = (e) => {
     if (e.button !== MouseButtons.LEFT) return;
+    const selectedElement = selectedElements[0];
 
     // On mouse up add the element to the screen
     switch (selectionMode.type) {
       case SelectionModes.Selected: {
         // TODO: If element moved, we need to set a non ephemeral change here.
+
         if (!selectedElement) return;
         const element = copy(appState.elements[selectedElement]);
         let changeAction;
@@ -608,7 +748,7 @@ export const MouseEventsProvider = ({
           ...selectionMode,
           type: SelectionModes.None,
         });
-        setSelectedElement(null);
+        setSelectedElements([]);
         break;
       }
       case SelectionModes.Rotating:
@@ -616,6 +756,7 @@ export const MouseEventsProvider = ({
         // Size should already be set.
         // Change from resizing to selection mode.
         // TODO: Make sure every ephemeral change ends up with non ephemeral change at some point.
+
         if (!selectedElement) return;
 
         const element = copy(appState.elements[selectedElement]);
@@ -637,7 +778,7 @@ export const MouseEventsProvider = ({
           ...selectionMode,
           type: SelectionModes.None,
         });
-        setSelectedElement(null);
+        setSelectedElements([]);
         break;
       }
       case SelectionModes.Panning: {
@@ -645,7 +786,23 @@ export const MouseEventsProvider = ({
           ...selectionMode,
           type: SelectionModes.None,
         });
-        setSelectedElement(null);
+        setSelectedElements([]);
+        break;
+      }
+      case SelectionModes.MultiSelecting: {
+        if (selectedElements.length === 0) {
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.None,
+          });
+        }
+        setSelectionCoordinates({
+          ...selectionCoordinates,
+          startX: null,
+          startY: null,
+          currentX: null,
+          currentY: null,
+        });
         break;
       }
     }
@@ -704,7 +861,7 @@ export const MouseEventsProvider = ({
   };
 
   const removeSelection = () => {
-    setSelectedElement(null);
+    setSelectedElements([]);
   };
   return (
     <MouseEventsContext.Provider

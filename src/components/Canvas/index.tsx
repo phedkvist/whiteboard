@@ -1,5 +1,5 @@
 import "./Canvas.css";
-import { SelectionModes, ElementType } from "../../types";
+import { SelectionModes, ElementType, SelectionCoordinates } from "../../types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents";
 import Elements from "./Elements";
@@ -45,15 +45,32 @@ const DrawBackgroundLines = () => (
   </>
 );
 
+const MultiSelectBox = ({
+  selectionCoordinates,
+}: {
+  selectionCoordinates: SelectionCoordinates;
+}) => {
+  const { startX, startY, currentX, currentY } = selectionCoordinates;
+  if (!startX || !startY || !currentX || !currentY) return null;
+  const x = Math.min(startX, currentX);
+  const y = Math.min(startY, currentY);
+  const width = Math.abs(currentX - startX);
+  const height = Math.abs(currentY - startY);
+  return (
+    <rect className="multiSelect" x={x} y={y} width={width} height={height} />
+  );
+};
+
 const Canvas = () => {
   const {
     appState,
-    selectedElement,
+    selectedElements,
     hoverElement,
     selectionMode,
     showDebugger,
     viewBox,
     history,
+    selectionCoordinates,
   } = useAppState();
   const { onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel } =
     useMouseEvents();
@@ -67,13 +84,14 @@ const Canvas = () => {
   });
 
   const renderElements = sortedElements.map((e) => {
-    const isSelected = e.id === selectedElement;
+    const isSelected = selectedElements.includes(e.id);
     const isSelectedCss = isSelected ? "isSelected" : "";
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
     const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
     if (e.type === ElementType.Rect) {
       return (
         <Elements.Rect
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}
@@ -84,6 +102,7 @@ const Canvas = () => {
     } else if (e.type === ElementType.Ellipse) {
       return (
         <Elements.Ellipse
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           ellipse={e}
@@ -94,6 +113,7 @@ const Canvas = () => {
     } else if (e.type === ElementType.Polyline) {
       return (
         <Elements.Polyline
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           polyline={e}
@@ -102,6 +122,7 @@ const Canvas = () => {
     } else {
       return (
         <Elements.Text
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}
@@ -112,6 +133,7 @@ const Canvas = () => {
     }
   });
   const isAdding = selectionMode.type === SelectionModes.Add;
+  const showMultiSelect = selectionMode.type === SelectionModes.MultiSelecting;
   return (
     <svg
       data-xmlns="http://www.w3.org/2000/svg"
@@ -126,6 +148,9 @@ const Canvas = () => {
     >
       {showDebugger && <DrawBackgroundLines />}
       {renderElements}
+      {showMultiSelect && (
+        <MultiSelectBox selectionCoordinates={selectionCoordinates} />
+      )}
     </svg>
   );
 };
