@@ -416,10 +416,10 @@ export const MouseEventsProvider = ({
     currentY: number
   ): string[] => {
     const selectRect = {
-      left: startX,
-      top: startY,
-      right: currentX,
-      bottom: currentY,
+      left: Math.min(startX, currentX),
+      top: Math.min(startY, currentY),
+      right: Math.max(startX, currentX),
+      bottom: Math.max(startX, currentX),
     };
     return Object.keys(appState.elements).filter((elementId) => {
       const element = appState.elements[elementId];
