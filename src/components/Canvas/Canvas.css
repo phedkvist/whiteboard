@@ -24,12 +24,14 @@ rect.isSelected,
 ellipse.isSelected,
 text.isSelected {
   outline: 2px dashed lightblue;
+  outline-offset: 2px;
 }
 
 rect.isHovering,
 ellipse.isHovering,
 text.isHovering {
-  outline: 1px dashed rgba(173, 216, 230, 0.7);
+  outline: 2px dashed rgba(173, 216, 230, 0.5);
+  outline-offset: 2px;
 }
 
 .textContainer {
@@ -46,6 +48,12 @@ text.isHovering {
   width: 100%;
   height: 100%;
   outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: pre; /* Needed in order to get the newlines to appear */
 }
 
 rect.multiSelect {
