@@ -63,6 +63,8 @@ const addDraggableCorners = (
           cx={(tL.x + tR.x + CORNER_OFFSET) / 2}
           cy={tL.y - CORNER_OFFSET}
           style={{ cursor: "grabbing" }}
+          fill={"white"}
+          stroke={"lightblue"}
         />
         <rect
           id={`${id}-resize-top-left`}
@@ -71,7 +73,8 @@ const addDraggableCorners = (
           x={tL.x}
           y={tL.y}
           style={{ cursor: "nwse-resize" }}
-          fill={"darkblue"}
+          fill={"white"}
+          stroke={"lightblue"}
         />
         <rect
           id={`${id}-resize-top-right`}
@@ -80,7 +83,8 @@ const addDraggableCorners = (
           x={tR.x}
           y={tR.y}
           style={{ cursor: "nesw-resize" }}
-          fill={"darkblue"}
+          fill={"white"}
+          stroke={"lightblue"}
         />
         <rect
           id={`${id}-resize-bottom-right`}
@@ -89,7 +93,8 @@ const addDraggableCorners = (
           x={bR.x}
           y={bR.y}
           style={{ cursor: "nwse-resize" }}
-          fill={"darkblue"}
+          fill={"white"}
+          stroke={"lightblue"}
         />
         <rect
           id={`${id}-resize-bottom-left`}
@@ -98,7 +103,8 @@ const addDraggableCorners = (
           x={bL.x}
           y={bL.y}
           style={{ cursor: "nesw-resize" }}
-          fill={"darkblue"}
+          fill={"white"}
+          stroke={"lightblue"}
         />
       </>
     )}
@@ -122,7 +128,7 @@ const EditableInput = ({
   id: string;
   isEditable: boolean;
   text: string;
-  onChange: React.ChangeEventHandler<HTMLTextAreaElement>;
+  onChange: React.FormEventHandler<HTMLDivElement>;
 }) => {
   return (
     <foreignObject
@@ -136,13 +142,16 @@ const EditableInput = ({
       id={id}
     >
       <div className="textContainer" data-xmlns="http://www.w3.org/1999/xhtml">
-        <textarea
+        <div
           className="textInput"
           id={id}
-          disabled={isEditable}
-          value={text}
-          onChange={onChange}
-        />
+          //disabled={isEditable}
+          contentEditable={isEditable}
+          onInput={onChange}
+          suppressContentEditableWarning
+        >
+          {text}
+        </div>
       </div>
     </foreignObject>
   );
@@ -163,18 +172,20 @@ const RectRenderer = ({
 }) => {
   const [text, setText] = useState(rect.text);
 
-  useEffect(() => {
-    if (rect.text !== text) {
-      setText(rect.text);
-    }
-  }, [rect, text]);
+  // TODO: Need to have some logic that can update the text when a user is current not editing.
+  // For instance, it might work with just having the isEditable flag inside the useEffect below.
+  // useEffect(() => {
+  //   if (rect.text !== text) {
+  //     setText(rect.text);
+  //   }
+  // }, [rect, text]);
 
-  const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
-    setText(e.target.value);
+  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
+    // setText(e.currentTarget.textContent || "");
     const element = copy(rect);
     if (element && history) {
       const changeAction = updateRectAction(
-        { ...element, text: e.target.value },
+        { ...element, text: e.currentTarget.textContent || "" },
         false
       );
       // TODO: Consider using debounce here.
@@ -182,9 +193,8 @@ const RectRenderer = ({
     }
   };
 
-  const isEditable = !(
-    isSelected && selectionMode.type === SelectionModes.TextEditing
-  );
+  const isEditable =
+    isSelected && selectionMode.type === SelectionModes.TextEditing;
   const { type, renderingOrder, ...props } = rect;
   const { x, y, width, height, rotate } = props;
   const renderElement = (
@@ -197,7 +207,7 @@ const RectRenderer = ({
         height={height}
         id={rect.id}
         isEditable={isEditable}
-        text={rect.text}
+        text={text}
         onChange={onChangeInput}
       />
     </g>
@@ -232,18 +242,20 @@ const EllipseRenderer = ({
 }) => {
   const [text, setText] = useState(ellipse.text);
 
-  useEffect(() => {
-    if (ellipse.text !== text) {
-      setText(ellipse.text);
-    }
-  }, [ellipse, text]);
+  // TODO: Need to have some logic that can update the text when a user is current not editing.
+  // For instance, it might work with just having the isEditable flag inside the useEffect below.
+  // useEffect(() => {
+  //   if (ellipse.text !== text) {
+  //     setText(ellipse.text);
+  //   }
+  // }, [text]);
 
-  const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
-    setText(e.target.value);
+  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
+    // setText(e.currentTarget.textContent || "");
     const element = copy(ellipse);
     if (element && history) {
       const changeAction = updateEllipseAction(
-        { ...element, text: e.target.value },
+        { ...element, text: e.currentTarget.innerText || "" },
         false
       );
       // TODO: Consider using debounce here.
@@ -252,9 +264,8 @@ const EllipseRenderer = ({
   };
   const { type, renderingOrder, ...props } = ellipse;
   const { cx, cy, rx, ry, rotate } = props;
-  const isEditable = !(
-    isSelected && selectionMode.type === SelectionModes.TextEditing
-  );
+  const isEditable =
+    isSelected && selectionMode.type === SelectionModes.TextEditing;
   const width = rx * Math.sqrt(2);
   const height = ry * Math.sqrt(2);
   const renderElement = (
@@ -344,8 +355,8 @@ const PolylineRenderer = ({
             y={points[1] - 4}
             style={{ cursor: "nwse-resize" }}
             transform={`rotate(${rotate} ${points[0]} ${points[1]})`}
-            fill="transparent"
-            stroke="black"
+            fill={"white"}
+            stroke={"lightblue"}
             strokeWidth={1}
           />
           {points.length > 2 && (
@@ -357,8 +368,8 @@ const PolylineRenderer = ({
               y={points[3] - 4}
               style={{ cursor: "nwse-resize" }}
               transform={`rotate(${rotate} ${points[2]} ${points[3]})`}
-              fill="transparent"
-              stroke="black"
+              fill={"white"}
+              stroke={"lightblue"}
               strokeWidth={1}
             />
           )}
@@ -383,18 +394,20 @@ const TextRenderer = ({
 }) => {
   const [text, setText] = useState(textElement.text);
 
-  useEffect(() => {
-    if (textElement.text !== text) {
-      setText(textElement.text);
-    }
-  }, [textElement, text]);
+  // TODO: Need to have some logic that can update the text when a user is current not editing.
+  // For instance, it might work with just having the isEditable flag inside the useEffect below.
+  // useEffect(() => {
+  //   if (textElement.text !== text) {
+  //     setText(textElement.text);
+  //   }
+  // }, [textElement, text]);
 
-  const onChangeInput: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
-    setText(e.target.value);
+  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
+    // setText(e.currentTarget.textContent || "");
     const element = copy(textElement);
     if (element && history) {
       const changeAction = updateTextAction(
-        { ...element, text: e.target.value },
+        { ...element, text: e.currentTarget.innerText || "" },
         false
       );
       // TODO: Consider using debounce here.
@@ -402,9 +415,8 @@ const TextRenderer = ({
     }
   };
 
-  const isEditable = !(
-    isSelected && selectionMode.type === SelectionModes.TextEditing
-  );
+  const isEditable =
+    isSelected && selectionMode.type === SelectionModes.TextEditing;
   const { type, renderingOrder, ...props } = textElement;
   const { x, y, width, height, rotate } = props;
   const renderElement = (
@@ -417,7 +429,7 @@ const TextRenderer = ({
         height={height}
         id={textElement.id}
         isEditable={isEditable}
-        text={textElement.text}
+        text={text}
         onChange={onChangeInput}
       />
     </g>
