@@ -82,7 +82,6 @@ export const getClosestCorner = (
       Math.abs(e.points[0] + e.points[1] - (xPos + yPos)) < matchRadius;
     const inRightPoint =
       Math.abs(e.points[2] + e.points[3] - (xPos + yPos)) < matchRadius;
-    console.log(inLeftPoint, inRightPoint);
     if (inLeftPoint) {
       return Corner.TopLeft;
     }
