@@ -21,6 +21,7 @@ export default class History {
   versionVector: VersionVector;
   appState: AppState;
   setAppState: React.Dispatch<React.SetStateAction<AppState>>;
+  ws: WebSocket;
 
   constructor(
     appState: AppState,
@@ -34,6 +35,24 @@ export default class History {
     this.appState = appState;
     this.setAppState = setAppState;
     this.loadLocalHistory();
+
+    console.log("NEW HISTORY");
+    this.ws = new WebSocket("ws://localhost:8080");
+    this.ws.addEventListener("message", this.onMessage, false);
+    this.ws.addEventListener("close", this.onClose, false);
+    this.ws.addEventListener("open", this.onOpen, false);
+  }
+
+  onMessage(this: WebSocket, ev: MessageEvent) {
+    console.log("On message", ev);
+  }
+
+  onClose(this: WebSocket, ev: CloseEvent) {
+    console.log("On close", ev);
+  }
+
+  onOpen(this: WebSocket, ev: Event) {
+    console.log("On open", ev);
   }
 
   loadLocalHistory() {
