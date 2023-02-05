@@ -34,17 +34,35 @@ export default class History {
     this.versionVector = {};
     this.appState = appState;
     this.setAppState = setAppState;
-    this.loadLocalHistory();
+    // this.loadLocalHistory();
 
     console.log("NEW HISTORY");
     this.ws = new WebSocket("ws://localhost:8080");
-    this.ws.addEventListener("message", this.onMessage, false);
+    this.ws.addEventListener("message", this.onMessage.bind(this), false);
     this.ws.addEventListener("close", this.onClose, false);
     this.ws.addEventListener("open", this.onOpen, false);
   }
 
-  onMessage(this: WebSocket, ev: MessageEvent) {
-    console.log("On message", ev);
+  onSend(changeActions: ChangeActions[]) {
+    // Always send an array of changes
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(changeActions));
+    } else {
+      // TODO: Place in a queue?
+    }
+  }
+
+  async onMessage(ev: MessageEvent) {
+    // Verify that incoming message is correct ChangeActions.
+    // Should always receive an array of change actions. Easiest to deal with.
+    try {
+      console.log(ev, ev.data);
+      const changeActions = JSON.parse(await ev.data.text()) as ChangeActions[];
+      console.log("MSG: ", changeActions);
+      changeActions.forEach((change) => this.addLocalChange(change, true));
+    } catch (e) {
+      console.log("Error parsing incoming change", e);
+    }
   }
 
   onClose(this: WebSocket, ev: CloseEvent) {
@@ -93,7 +111,8 @@ export default class History {
 
     if (!change.ephemeral && !skipSave) {
       this.changes.push(change);
-      localStorage.setItem("history", JSON.stringify(this.changes));
+      // localStorage.setItem("history", JSON.stringify(this.changes));
+      this.onSend([change]);
     }
     this.setAppState({ ...newAppState, elementsCount, renderingOrder });
   }
