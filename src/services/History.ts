@@ -112,6 +112,8 @@ export default class History {
     if (!change.ephemeral && !skipSave) {
       this.changes.push(change);
       // localStorage.setItem("history", JSON.stringify(this.changes));
+    }
+    if (!skipSave) {
       this.onSend([change]);
     }
     this.setAppState({ ...newAppState, elementsCount, renderingOrder });
