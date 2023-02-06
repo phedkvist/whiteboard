@@ -1,7 +1,7 @@
 import { AppState, Cursor } from "../types";
 import { ChangeAction, ChangeActions, VersionVector } from "./ChangeTypes";
 import { v4 as uuidv4 } from "uuid";
-import { throttle } from "../utility";
+import _ from "lodash";
 
 function isChangeAction(action: any): action is ChangeActions {
   // TODO: Add more checks here.
@@ -30,6 +30,11 @@ export default class History {
   appState: AppState;
   setAppState: React.Dispatch<React.SetStateAction<AppState>>;
   ws: WebSocket;
+
+  throttledCursor: _.DebouncedFunc<any> = _.throttle(
+    this.sendThrottledCursor,
+    50
+  );
 
   constructor(
     appState: AppState,
@@ -144,24 +149,26 @@ export default class History {
     // Delete immediately, since that change takes precedence over the other changes.
   }
 
+  sendThrottledCursor(x: number, y: number) {
+    const cursor: Cursor = {
+      id: this.currentUserId,
+      color: "#00f",
+      position: {
+        x,
+        y,
+      },
+      lastUpdated: new Date().toISOString(),
+    };
+    this.ws.send(
+      JSON.stringify({
+        type: "cursor",
+        data: [cursor],
+      })
+    );
+  }
+
   sendCursor(x: number, y: number) {
-    if (this.ws.readyState === WebSocket.OPEN) {
-      const cursor: Cursor = {
-        id: this.currentUserId,
-        color: "#00f",
-        position: {
-          x,
-          y,
-        },
-        lastUpdated: new Date().toISOString(),
-      };
-      this.ws.send(
-        JSON.stringify({
-          type: "cursor",
-          data: [cursor],
-        })
-      );
-    }
+    this.throttledCursor && this.throttledCursor(x, y);
   }
 
   receiveCursors(cursors: Cursor[]) {

@@ -3,13 +3,9 @@ import { Cursor } from "../../types";
 import React from "react";
 
 const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
-  // Filter out cursors that are still active
-  // TODO: This needs to be placed inside a useEffect.
   const activeCursors = cursors.filter((c) =>
     isAfter(new Date(c.lastUpdated), subMinutes(new Date(), 1))
   );
-
-  console.log("ACTIVE CURSORS: ", activeCursors);
 
   return (
     <>
