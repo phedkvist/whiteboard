@@ -136,18 +136,30 @@ export interface ViewBox {
   startPoint: { x: number; y: number };
   endPoint: { x: number; y: number };
 }
+
+export interface Cursor {
+  id: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  lastUpdated: string; // ISO-timestamp
+  color: string;
+}
 export interface AppState {
   elements: {
     [id: string]: Element;
   };
   renderingOrder: string[];
   elementsCount: number;
+  cursors: { [id: string]: Cursor };
 }
 
 export const initialState: AppState = {
   elements: {},
   renderingOrder: ["1", "2"],
   elementsCount: 2,
+  cursors: {},
 };
 
 export const initialViewBox: ViewBox = {

@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 import { subMinutes } from "date-fns";
-import Cursors, { Cursor } from "./Cursors";
+import { Cursor } from "../../types";
+import Cursors from "./Cursors";
 
 describe("Cursors", () => {
   it("Should display active cursors", () => {

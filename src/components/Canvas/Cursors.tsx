@@ -1,15 +1,6 @@
 import { isAfter, subMinutes } from "date-fns";
+import { Cursor } from "../../types";
 import React from "react";
-
-export interface Cursor {
-  id: string;
-  position: {
-    x: number;
-    y: number;
-  };
-  lastUpdated: string; // ISO-timestamp
-  color: string;
-}
 
 const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
   // Filter out cursors that are still active
@@ -18,30 +9,24 @@ const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
     isAfter(new Date(c.lastUpdated), subMinutes(new Date(), 1))
   );
 
+  console.log("ACTIVE CURSORS: ", activeCursors);
+
   return (
-    <div>
+    <>
       {activeCursors.map((c) => (
-        <Cursor key={c.id} {...c} />
+        <RenderCursor key={c.id} {...c} />
       ))}
-    </div>
+    </>
   );
 };
 
-const Cursor = ({ id, color, position }: Cursor) => (
-  <svg
+const RenderCursor = ({ id, color, position }: Cursor) => (
+  <g
     data-testid={id}
     key={id}
-    xmlns="http://www.w3.org/2000/svg"
-    xmlnsXlink="http://www.w3.org/1999/xlink"
-    version="1.1"
-    id="Layer_1"
-    x={position.x}
-    y={position.y}
-    width="35px"
-    height="35px"
-    viewBox="0 0 28 28"
-    enableBackground="new 0 0 28 28"
-    xmlSpace="preserve"
+    transform={`translate(${position.x},${position.y})`}
+    width="35"
+    height="35"
   >
     <polygon
       fill="#FFFFFF"
@@ -60,7 +45,7 @@ const Cursor = ({ id, color, position }: Cursor) => (
       fill={color}
       points="9.2,7.3 9.2,18.5 12.2,15.6 12.6,15.5 17.4,15.5 "
     />
-  </svg>
+  </g>
 );
 
 export default Cursors;

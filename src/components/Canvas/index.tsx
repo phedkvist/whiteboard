@@ -3,6 +3,7 @@ import { SelectionModes, ElementType, SelectionCoordinates } from "../../types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents";
 import Elements from "./Elements";
+import Cursors from "./Cursors";
 
 const DrawBackgroundLines = () => (
   <>
@@ -151,6 +152,7 @@ const Canvas = () => {
       {showMultiSelect && (
         <MultiSelectBox selectionCoordinates={selectionCoordinates} />
       )}
+      {<Cursors cursors={Object.values(appState.cursors)} />}
     </svg>
   );
 };
