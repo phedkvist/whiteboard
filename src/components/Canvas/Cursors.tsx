@@ -16,32 +16,42 @@ const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
   );
 };
 
-const RenderCursor = ({ id, color, position }: Cursor) => (
-  <g
-    data-testid={id}
-    key={id}
-    transform={`translate(${position.x},${position.y})`}
-    width="35"
-    height="35"
-  >
-    <polygon
-      fill="#FFFFFF"
-      points="8.2,20.9 8.2,4.9 19.8,16.5 13,16.5 12.6,16.6 "
-    />
-    <polygon fill="#FFFFFF" points="17.3,21.6 13.7,23.1 9,12 12.7,10.5 " />
-    <rect
-      x="12.5"
-      y="13.6"
-      transform="matrix(0.9221 -0.3871 0.3871 0.9221 -5.7605 6.5909)"
-      width="2"
-      height="8"
-      fill={color}
-    />
-    <polygon
-      fill={color}
-      points="9.2,7.3 9.2,18.5 12.2,15.6 12.6,15.5 17.4,15.5 "
-    />
-  </g>
-);
+// CSS transition animated cursor
+const RenderCursor = ({
+  color,
+  position,
+  id,
+}: {
+  color: string;
+  position: { x: number; y: number };
+  id: string;
+}) => {
+  return (
+    <g
+      data-testid={id}
+      style={{
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        transition: "transform 120ms linear",
+      }}
+    >
+      <CursorSvg color={color} name={"John Doe"} />
+      <text fill={color} style={{ fontSize: 14 }} x={10} y={30}>
+        {"John Doe"}
+      </text>
+    </g>
+  );
+};
+
+// SVG cursor shape
+function CursorSvg({ color, name }: { color: string; name: string }) {
+  return (
+    <svg width="32" height="44" viewBox="0 0 24 36" fill="none">
+      <path
+        fill={color}
+        d="M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19841L11.7841 12.3673H5.65376Z"
+      />
+    </svg>
+  );
+}
 
 export default Cursors;

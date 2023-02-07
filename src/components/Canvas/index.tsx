@@ -152,7 +152,7 @@ const Canvas = () => {
       {showMultiSelect && (
         <MultiSelectBox selectionCoordinates={selectionCoordinates} />
       )}
-      {<Cursors cursors={Object.values(appState.cursors)} />}
+      <Cursors cursors={Object.values(appState.cursors)} />
     </svg>
   );
 };
