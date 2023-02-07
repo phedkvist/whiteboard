@@ -27,7 +27,7 @@ const RenderCursor = ({
   id: string;
 }) => {
   return (
-    <g
+    <svg
       data-testid={id}
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
@@ -38,7 +38,7 @@ const RenderCursor = ({
       <text fill={color} style={{ fontSize: 14 }} x={10} y={30}>
         {"John Doe"}
       </text>
-    </g>
+    </svg>
   );
 };
 
