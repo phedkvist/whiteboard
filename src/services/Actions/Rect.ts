@@ -10,7 +10,7 @@ export const createRectAction = (
   const rect: Rect = {
     id,
     type: ElementType.Rect,
-    text: "",
+    text: " ",
     width: 0,
     height: 0,
     x: initialX,
@@ -18,6 +18,9 @@ export const createRectAction = (
     state: ElementState.Creation,
     rotate: 0,
     renderingOrder,
+    style: {
+      fill: "#FDFD96",
+    },
   };
 
   return {

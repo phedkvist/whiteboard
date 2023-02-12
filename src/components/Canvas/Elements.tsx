@@ -41,6 +41,15 @@ const getCornerCoords = (e: Element) => {
   }
 };
 
+const fontFamily = `
+@font-face {
+  font-family: 'Kalam';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Kalam'), url('https://fonts.cdnfonts.com/s/13130/Kalam-Regular.woff') format('woff');
+}
+`;
+
 const addDraggableCorners = (
   renderElement: JSX.Element,
   id: string,
@@ -142,6 +151,7 @@ const EditableInput = ({
       id={id}
     >
       <div className="textContainer" data-xmlns="http://www.w3.org/1999/xhtml">
+        <style dangerouslySetInnerHTML={{ __html: fontFamily }} />
         <div
           className="textInput"
           id={id}
