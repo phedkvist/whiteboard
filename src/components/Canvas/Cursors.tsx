@@ -1,11 +1,18 @@
 import { isAfter, subMinutes } from "date-fns";
 import { Cursor } from "../../types";
-import React from "react";
+import React, { useLayoutEffect, useMemo, useState } from "react";
 
 const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
-  const activeCursors = cursors.filter((c) =>
-    isAfter(new Date(c.lastUpdated), subMinutes(new Date(), 1))
-  );
+  const [activeCursors, setActiveCursors] = useState<Cursor[]>([]);
+  useLayoutEffect(() => {
+    setActiveCursors(
+      cursors.filter((c) =>
+        isAfter(new Date(c.lastUpdated), subMinutes(new Date(), 1))
+      )
+    );
+  }, [JSON.stringify(cursors)]);
+
+  console.log(activeCursors);
 
   return (
     <>
@@ -27,17 +34,19 @@ const RenderCursor = ({
   id: string;
 }) => {
   return (
-    <svg
-      data-testid={id}
-      style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        transition: "transform 120ms linear",
-      }}
-    >
-      <CursorSvg color={color} name={"John Doe"} />
-      <text fill={color} style={{ fontSize: 14 }} x={10} y={30}>
-        {"John Doe"}
-      </text>
+    <svg>
+      <g
+        data-testid={id}
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          transition: "transform 120ms linear",
+        }}
+      >
+        <CursorSvg color={color} name={"John Doe"} />
+        <text fill={color} style={{ fontSize: 14 }} x={10} y={30}>
+          {"John Doe"}
+        </text>
+      </g>
     </svg>
   );
 };

@@ -159,16 +159,18 @@ export default class History {
       },
       lastUpdated: new Date().toISOString(),
     };
-    this.ws.send(
-      JSON.stringify({
-        type: "cursor",
-        data: [cursor],
-      })
-    );
+    if (this.ws.readyState === this.ws.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          type: "cursor",
+          data: [cursor],
+        })
+      );
+    }
   }
 
   sendCursor(x: number, y: number) {
-    this.throttledCursor && this.throttledCursor(x, y);
+    this.throttledCursor(x, y);
   }
 
   receiveCursors(cursors: Cursor[]) {
