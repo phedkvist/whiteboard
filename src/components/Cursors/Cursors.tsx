@@ -12,8 +12,6 @@ const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
     );
   }, [JSON.stringify(cursors)]);
 
-  console.log(activeCursors);
-
   return (
     <>
       {activeCursors.map((c) => (

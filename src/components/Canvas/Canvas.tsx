@@ -3,7 +3,7 @@ import { SelectionModes, ElementType, SelectionCoordinates } from "../../types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents";
 import Elements from "./Elements";
-import Cursors from "./Cursors";
+import Cursors from "../Cursors/Cursors";
 
 const DrawBackgroundLines = () => (
   <>

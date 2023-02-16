@@ -159,9 +159,8 @@ const EditableInput = ({
           contentEditable={isEditable}
           onInput={onChange}
           suppressContentEditableWarning
-        >
-          {text}
-        </div>
+          dangerouslySetInnerHTML={{ __html: text }}
+        />
       </div>
     </foreignObject>
   );
@@ -195,7 +194,7 @@ const RectRenderer = ({
     const element = copy(rect);
     if (element && history) {
       const changeAction = updateRectAction(
-        { ...element, text: e.currentTarget.textContent || "" },
+        { ...element, text: e.currentTarget.innerHTML || "" },
         false
       );
       // TODO: Consider using debounce here.
@@ -265,7 +264,7 @@ const EllipseRenderer = ({
     const element = copy(ellipse);
     if (element && history) {
       const changeAction = updateEllipseAction(
-        { ...element, text: e.currentTarget.innerText || "" },
+        { ...element, text: e.currentTarget.innerHTML || "" },
         false
       );
       // TODO: Consider using debounce here.
@@ -417,7 +416,7 @@ const TextRenderer = ({
     const element = copy(textElement);
     if (element && history) {
       const changeAction = updateTextAction(
-        { ...element, text: e.currentTarget.innerText || "" },
+        { ...element, text: e.currentTarget.innerHTML || "" },
         false
       );
       // TODO: Consider using debounce here.
