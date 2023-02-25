@@ -451,6 +451,9 @@ export const MouseEventsProvider = ({
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
+    // TODO: Send out ephemeral mouse movement action
+    history?.sendCursor(e.clientX + viewBox.x, e.clientY + viewBox.y);
+
     if (e.button !== MouseButtons.LEFT) return;
 
     switch (selectionMode.type) {

@@ -41,6 +41,15 @@ const getCornerCoords = (e: Element) => {
   }
 };
 
+const fontFamily = `
+@font-face {
+  font-family: 'Kalam';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Kalam'), url('https://fonts.cdnfonts.com/s/13130/Kalam-Regular.woff') format('woff');
+}
+`;
+
 const addDraggableCorners = (
   renderElement: JSX.Element,
   id: string,
@@ -142,6 +151,7 @@ const EditableInput = ({
       id={id}
     >
       <div className="textContainer" data-xmlns="http://www.w3.org/1999/xhtml">
+        <style dangerouslySetInnerHTML={{ __html: fontFamily }} />
         <div
           className="textInput"
           id={id}
@@ -149,9 +159,8 @@ const EditableInput = ({
           contentEditable={isEditable}
           onInput={onChange}
           suppressContentEditableWarning
-        >
-          {text}
-        </div>
+          dangerouslySetInnerHTML={{ __html: text }}
+        />
       </div>
     </foreignObject>
   );
@@ -172,20 +181,20 @@ const RectRenderer = ({
 }) => {
   const [text, setText] = useState(rect.text);
 
-  // TODO: Need to have some logic that can update the text when a user is current not editing.
-  // For instance, it might work with just having the isEditable flag inside the useEffect below.
-  // useEffect(() => {
-  //   if (rect.text !== text) {
-  //     setText(rect.text);
-  //   }
-  // }, [rect, text]);
+  useEffect(() => {
+    // Only update the state if its changed by another user.
+    // Since the uncontrolled state will get messed up if the user changes alters the local state
+    if (rect.text !== text && !isSelected) {
+      setText(rect.text);
+    }
+  }, [rect, text, isSelected]);
 
   const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     // setText(e.currentTarget.textContent || "");
     const element = copy(rect);
     if (element && history) {
       const changeAction = updateRectAction(
-        { ...element, text: e.currentTarget.textContent || "" },
+        { ...element, text: e.currentTarget.innerHTML || "" },
         false
       );
       // TODO: Consider using debounce here.
@@ -242,20 +251,20 @@ const EllipseRenderer = ({
 }) => {
   const [text, setText] = useState(ellipse.text);
 
-  // TODO: Need to have some logic that can update the text when a user is current not editing.
-  // For instance, it might work with just having the isEditable flag inside the useEffect below.
-  // useEffect(() => {
-  //   if (ellipse.text !== text) {
-  //     setText(ellipse.text);
-  //   }
-  // }, [text]);
+  useEffect(() => {
+    // Only update the state if its changed by another user.
+    // Since the uncontrolled state will get messed up if the user changes alters the local state
+    if (ellipse.text !== text && !isSelected) {
+      setText(ellipse.text);
+    }
+  }, [text, ellipse, isSelected]);
 
   const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     // setText(e.currentTarget.textContent || "");
     const element = copy(ellipse);
     if (element && history) {
       const changeAction = updateEllipseAction(
-        { ...element, text: e.currentTarget.innerText || "" },
+        { ...element, text: e.currentTarget.innerHTML || "" },
         false
       );
       // TODO: Consider using debounce here.
@@ -394,20 +403,20 @@ const TextRenderer = ({
 }) => {
   const [text, setText] = useState(textElement.text);
 
-  // TODO: Need to have some logic that can update the text when a user is current not editing.
-  // For instance, it might work with just having the isEditable flag inside the useEffect below.
-  // useEffect(() => {
-  //   if (textElement.text !== text) {
-  //     setText(textElement.text);
-  //   }
-  // }, [textElement, text]);
+  useEffect(() => {
+    // Only update the state if its changed by another user.
+    // Since the uncontrolled state will get messed up if the user changes alters the local state
+    if (textElement.text !== text && !isSelected) {
+      setText(textElement.text);
+    }
+  }, [textElement, text, isSelected]);
 
   const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     // setText(e.currentTarget.textContent || "");
     const element = copy(textElement);
     if (element && history) {
       const changeAction = updateTextAction(
-        { ...element, text: e.currentTarget.innerText || "" },
+        { ...element, text: e.currentTarget.innerHTML || "" },
         false
       );
       // TODO: Consider using debounce here.
