@@ -1,3 +1,4 @@
+import React from "react";
 import "./Properties.css";
 import { ElementType, Element, COLORS } from "../../types";
 import { useAppState } from "../../context/AppState";
@@ -17,7 +18,9 @@ export const Properties = () => {
     history,
   } = useAppState();
   const element =
-    selectedElement.length > 0 ? appState.elements[selectedElement[0]] : null;
+    selectedElement.length > 0
+      ? appState.elements[selectedElement[0]]?.element
+      : null;
 
   const properties = (element: Element | null) => {
     if (!element) return;

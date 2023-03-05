@@ -1,3 +1,4 @@
+import { UserVersion } from "./services/ChangeTypes";
 import { CSSProperties } from "react";
 
 export interface SelectionCoordinates {
@@ -148,7 +149,7 @@ export interface Cursor {
 }
 export interface AppState {
   elements: {
-    [id: string]: Element;
+    [id: string]: { element: Element; userVersion: UserVersion };
   };
   renderingOrder: string[];
   elementsCount: number;
@@ -157,8 +158,8 @@ export interface AppState {
 
 export const initialState: AppState = {
   elements: {},
-  renderingOrder: ["1", "2"],
-  elementsCount: 2,
+  renderingOrder: [],
+  elementsCount: 0,
   cursors: {},
 };
 

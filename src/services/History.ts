@@ -2,6 +2,7 @@ import { AppState, Cursor } from "../types";
 import { ChangeAction, ChangeActions, VersionVector } from "./ChangeTypes";
 import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
+import { copy, isNewerVersion } from "../utility";
 
 function isChangeAction(action: any): action is ChangeActions {
   // TODO: Add more checks here.
@@ -21,7 +22,9 @@ interface ChangeEvent {
 type SocketEvent = CursorEvent | ChangeEvent;
 
 export default class History {
-  changes: ChangeActions[];
+  changes: {
+    [userId: string]: ChangeActions[];
+  };
   redoStack: ChangeActions[];
   undoStack: ChangeActions[];
 
@@ -40,7 +43,7 @@ export default class History {
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>
   ) {
-    this.changes = [];
+    this.changes = {};
     this.redoStack = [];
     this.undoStack = [];
 
@@ -92,53 +95,104 @@ export default class History {
   }
 
   loadLocalHistory() {
-    try {
-      const localHistory = JSON.parse(localStorage.getItem("history") || "");
-      const newAppState = Object.assign({}, this.appState);
-      const renderingOrder = [...newAppState.renderingOrder];
-      let elementsCount = 0; // this is likely incorrect
-
-      if (localHistory && Array.isArray(localHistory)) {
-        const actions = localHistory.filter(isChangeAction);
-        actions.forEach((change) => {
-          const { object } = change;
-          newAppState.elements[object.id] = object;
-          renderingOrder.push(object.id);
-          this.changes.push(change);
-          elementsCount = change.object.renderingOrder;
-        });
-      }
-      this.setAppState({ ...newAppState, elementsCount, renderingOrder });
-    } catch (e) {
-      console.log("Error loading local history");
-    }
+    // try {
+    //   const localHistory = JSON.parse(localStorage.getItem("history") || "");
+    //   const newAppState = Object.assign({}, this.appState);
+    //   const renderingOrder = [...newAppState.renderingOrder];
+    //   let elementsCount = 0; // this is likely incorrect
+    //   if (localHistory && Array.isArray(localHistory)) {
+    //     const actions = localHistory.filter(isChangeAction);
+    //     actions.forEach((change) => {
+    //       const { object, userVersion } = change;
+    //       newAppState.elements[object.id] = { element: object, userVersion };
+    //       renderingOrder.push(object.id);
+    //       this.changes.push(change);
+    //       elementsCount = change.object.renderingOrder;
+    //     });
+    //   }
+    //   this.setAppState({ ...newAppState, elementsCount, renderingOrder });
+    // } catch (e) {
+    //   console.log("Error loading local history");
+    // }
   }
 
   addLocalChange(change: ChangeActions, skipSave: boolean = false) {
     // Add local change and submits it to the server.
     // Add corresponding changes to the undoStack.
     // If we have disconnected, then try submitting later
-    const newAppState = Object.assign({}, this.appState);
+    console.log(this.appState.elements);
+    this.setAppState((oldAppState) => {
+      const appState = copy(oldAppState);
+      const { object, userVersion } = change;
+      let elementsCount = appState.elementsCount;
+      const renderingOrder = [...appState.renderingOrder];
 
-    const { object } = change;
-
-    // TODO: Before applying, check that this version is the "most recent" using versions.
-    newAppState.elements[object.id] = object;
-    const elementsCount = object.renderingOrder;
-    const renderingOrder = [...newAppState.renderingOrder, object.id];
-
-    if (!change.ephemeral && !skipSave) {
-      this.changes.push(change);
-      // localStorage.setItem("history", JSON.stringify(this.changes));
-    }
-    if (!skipSave) {
-      this.onSend([change]);
-    }
-    this.setAppState({ ...newAppState, elementsCount, renderingOrder });
+      const prevElement = appState.elements[object.id];
+      const newElement = {
+        element: object,
+        userVersion: {
+          userId: this.currentUserId,
+          clock: (prevElement?.userVersion.clock || 0) + 1,
+        },
+      };
+      if (
+        prevElement === undefined ||
+        isNewerVersion(newElement.userVersion, prevElement.userVersion)
+      ) {
+        appState.elements[object.id] = newElement;
+        elementsCount = object.renderingOrder;
+        if (!renderingOrder.includes(object.id)) {
+          renderingOrder.push(object.id);
+        }
+        if (!change.ephemeral && !skipSave) {
+          //this.changes.push(change);
+          // localStorage.setItem("history", JSON.stringify(this.changes));
+        }
+        if (!skipSave) {
+          this.onSend([change]);
+        }
+        // this.setAppState({ ...newAppState, elementsCount, renderingOrder });
+      }
+      return { ...appState, elementsCount, renderingOrder };
+    });
   }
 
-  addRemoteChange(change: ChangeAction) {
+  addRemoteChange(changes: ChangeActions[]) {
     // Add change without submitting to server
+    const newAppState = copy(this.appState);
+    let elementsCount = newAppState.elementsCount;
+    const renderingOrder = [...newAppState.renderingOrder];
+
+    changes.forEach((change) => {
+      const { object, userVersion } = change;
+
+      const prevElement = newAppState.elements[object.id];
+      const newElement = {
+        element: object,
+        userVersion: {
+          userId: this.currentUserId,
+          clock: (prevElement?.userVersion.clock || 0) + 1,
+        },
+      };
+      if (
+        prevElement === undefined ||
+        isNewerVersion(newElement.userVersion, prevElement.userVersion)
+      ) {
+        newAppState.elements[object.id] = newElement;
+        if (object.renderingOrder > elementsCount) {
+          elementsCount = object.renderingOrder;
+        }
+
+        // TODO: This rendering order is not thought trough
+        renderingOrder.push(object.id);
+        //if (!change.ephemeral && !skipSave) {
+        // this.changes.push(change);
+        // localStorage.setItem("history", JSON.stringify(this.changes));
+        //}
+      }
+    });
+
+    this.setAppState({ ...newAppState, elementsCount, renderingOrder });
   }
 
   addChange() {
