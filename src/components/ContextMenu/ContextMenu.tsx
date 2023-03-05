@@ -1,3 +1,4 @@
+import React from "react";
 import { useAppState } from "../../context/AppState";
 import useContextMenu from "../../hooks/useContextMenu";
 import "./ContextMenu.css";
@@ -14,6 +15,8 @@ const ContextMenu = () => {
   // bring to bottom brings it to the new lowest renderingOrder
   // at some point this needs to be stored as an operation
 
+  console.log("rendering order: ", appState.renderingOrder);
+
   const changeRenderingOrder = (change: number) => {
     selectedElements.forEach((selectedElement) => {
       if (!selectedElement) {
@@ -26,8 +29,12 @@ const ContextMenu = () => {
           "No element with id in selectedElement, on bring up callback"
         );
       }
-      const renderingOrder = element.renderingOrder + change;
-      createUpdateChangeAction({ ...element, renderingOrder }, false, history);
+      const renderingOrder = element.element.renderingOrder + change;
+      createUpdateChangeAction(
+        { ...element.element, renderingOrder },
+        false,
+        history
+      );
     });
   };
 

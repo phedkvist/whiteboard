@@ -14,6 +14,7 @@ import { updateRectAction } from "../../services/Actions/Rect";
 import History from "../../services/History";
 import { updateEllipseAction } from "../../services/Actions/Ellipse";
 import { updateTextAction } from "../../services/Actions/Text";
+import React from "react";
 
 const CORNER_OFFSET = 8;
 const getCornerCoords = (e: Element) => {

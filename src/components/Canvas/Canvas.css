@@ -53,7 +53,7 @@ text.isHovering {
   align-items: center;
   justify-content: center;
   text-align: center;
-  white-space: pre; /* Needed in order to get the newlines to appear */
+  /* white-space: pre; Needed in order to get the newlines to appear */
 }
 
 rect.multiSelect {

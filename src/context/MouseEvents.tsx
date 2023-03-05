@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   MouseEventHandler,
   useContext,
@@ -203,7 +203,7 @@ export const MouseEventsProvider = ({
         if (selectedElements !== null && !selectedElements.includes(id)) {
           removeSelection();
         } else if (selectedElements.includes(id) && isDoubleClick) {
-          const e = appState.elements[id];
+          const e = appState.elements[id].element;
           if (e.type !== ElementType.Polyline) {
             setSelectionMode({
               ...selectionMode,
@@ -253,7 +253,9 @@ export const MouseEventsProvider = ({
 
             if (selectedElement) {
               // Second part of drawing the line.
-              const creationElement = copy(appState.elements[selectedElement]);
+              const creationElement = copy(
+                appState.elements[selectedElement].element
+              );
               if (creationElement.type !== ElementType.Polyline) {
                 throw new Error(
                   "Expected selected element to be a polyline element"
@@ -334,7 +336,7 @@ export const MouseEventsProvider = ({
     const initialY = e.clientY / viewBox.scale + viewBox.y;
     if (!(selectedElements.length > 0)) return;
 
-    const element = copy(appState.elements[selectedElements[0]]);
+    const element = copy(appState.elements[selectedElements[0]].element);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
     if (!selectedCorner) return;
     setSelectionCoordinates({
@@ -376,7 +378,7 @@ export const MouseEventsProvider = ({
     const selectedElement = selectedElements[0];
 
     if (!selectedElement) return;
-    const element = appState.elements[selectedElement];
+    const element = appState.elements[selectedElement].element;
     setSelectionMode({
       ...selectionMode,
       elementType: element.type,
@@ -395,7 +397,7 @@ export const MouseEventsProvider = ({
     setSelectedElements([id]);
     const initialX = e.clientX - xOffset;
     const initialY = e.clientY - yOffset;
-    const originElement = copy(appState.elements[id]);
+    const originElement = copy(appState.elements[id].element);
     setSelectionCoordinates({
       ...selectionCoordinates,
       initialX,
@@ -419,7 +421,7 @@ export const MouseEventsProvider = ({
       bottom: Math.max(startX, currentX),
     };
     return Object.keys(appState.elements).filter((elementId) => {
-      const element = appState.elements[elementId];
+      const element = appState.elements[elementId].element;
       switch (element.type) {
         case ElementType.Polyline:
           return isLineInsideRect(
@@ -514,7 +516,7 @@ export const MouseEventsProvider = ({
         // Update actions with ephemeral set to true.
         const creationElement = Object.assign(
           {},
-          newAppState.elements[selectedElement]
+          newAppState.elements[selectedElement].element
         );
         if (creationElement.type === ElementType.Rect) {
           const width = e.clientX + viewBox.x - creationElement.x;
@@ -577,7 +579,7 @@ export const MouseEventsProvider = ({
           switch (selectionMode.elementType) {
             case ElementType.Text:
             case ElementType.Rect: {
-              const el = copy(appState.elements[selectedElement]) as
+              const el = copy(appState.elements[selectedElement].element) as
                 | Rect
                 | Text;
               const [width, height, x, y] = resizeRect(
@@ -618,7 +620,7 @@ export const MouseEventsProvider = ({
             case ElementType.Ellipse: {
               const selectedElement = selectedElements[0];
               if (!selectedElement) return;
-              const obj = copy(appState.elements[selectedElement]);
+              const obj = copy(appState.elements[selectedElement].element);
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [rx, ry, cx, cy] = resizeEllipse(
                 selectedCorner,
@@ -647,7 +649,7 @@ export const MouseEventsProvider = ({
               const newY = e.clientY + viewBox.y;
               const selectedElement = selectedElements[0];
               if (!selectedElement) return;
-              const el = appState.elements[selectedElement];
+              const el = appState.elements[selectedElement].element;
               if (el.type !== ElementType.Polyline) {
                 return;
               }
@@ -679,7 +681,7 @@ export const MouseEventsProvider = ({
         const selectedElement = selectedElements[0];
         if (!selectedElement) return;
         const { clientX, clientY } = e;
-        let element = copy(appState.elements[selectedElement]);
+        let element = copy(appState.elements[selectedElement].element);
         const [midX, midY] = getMidPoints(element);
         const deltaX = clientX + viewBox.x - midX;
         const deltaY = clientY + viewBox.y - midY;
@@ -710,7 +712,7 @@ export const MouseEventsProvider = ({
         // TODO: If element moved, we need to set a non ephemeral change here.
 
         if (!selectedElement) return;
-        const element = copy(appState.elements[selectedElement]);
+        const element = copy(appState.elements[selectedElement].element);
         let changeAction;
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(element, false);
@@ -729,7 +731,7 @@ export const MouseEventsProvider = ({
       case SelectionModes.Add: {
         // Record selection elements and draw the element directly but with faded bg?
         if (!selectedElement) return;
-        const element = copy(appState.elements[selectedElement]);
+        const element = copy(appState.elements[selectedElement].element);
         if (element.type === ElementType.Polyline) {
           break;
         }
@@ -759,7 +761,7 @@ export const MouseEventsProvider = ({
 
         if (!selectedElement) return;
 
-        const element = copy(appState.elements[selectedElement]);
+        const element = copy(appState.elements[selectedElement].element);
         element.state = ElementState.Visible;
         let changeAction;
         if (element.type === ElementType.Rect) {
@@ -816,7 +818,7 @@ export const MouseEventsProvider = ({
     diffY: number,
     originElement: WhiteboardElement
   ) => {
-    const obj = copy(appState.elements[id]);
+    const obj = copy(appState.elements[id].element);
     let changeAction;
     if (!obj) {
       throw new Error(`Can't find element with id: ${id} on the screen.`);

@@ -1,3 +1,4 @@
+import { UserVersion } from "./services/ChangeTypes";
 import { Corner, Element, ElementType, Ellipse, Rect, Text } from "./types";
 
 export enum MouseButtons {
@@ -381,4 +382,17 @@ export function angleBetweenPoints(
   theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
   //if (theta < 0) theta = 360 + theta; // range [0, 360)
   return Math.round(theta);
+}
+
+/**
+ * is v1 a newer version as compared to v2
+ * @param v1
+ * @param v2
+ * @returns boolean
+ */
+export function isNewerVersion(v1: UserVersion, v2: UserVersion) {
+  return (
+    v1.clock > v2.clock ||
+    (v1.clock === v2.clock && v1.userId.localeCompare(v2.userId) < 0)
+  );
 }
