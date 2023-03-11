@@ -24,12 +24,12 @@ export class Sync {
     const nonEphemeralChanges = changes.filter((c) => !c.ephemeral);
     const newVersionVector = nonEphemeralChanges.reduce((cur, change) => {
       change.object.id;
-      const userId = change.userVersion.userId;
+      const userId = change.object.userVersion.userId;
       if (userId in cur) {
-        const clock = cur[change.userVersion.userId].clock + 1;
-        cur[change.userVersion.userId] = { userId, clock };
+        const clock = cur[change.object.userVersion.userId].version + 1;
+        cur[change.object.userVersion.userId] = { userId, version: clock };
       } else {
-        cur[change.userVersion.userId] = { userId, clock: 1 };
+        cur[change.object.userVersion.userId] = { userId, version: 1 };
       }
       return cur;
     }, copy<VersionVector>(this.versionVector));

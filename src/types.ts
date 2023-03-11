@@ -53,9 +53,7 @@ interface ElementBase {
   rotate: number;
   renderingOrder: number;
   text: string;
-  // TODO: Add this version number, maybe add as a separate object
-  // version: number;
-  // updateByUser: string;
+  userVersion: UserVersion;
 }
 
 // TODO: Turn these into classes that can also contain rendering functions.
@@ -149,7 +147,7 @@ export interface Cursor {
 }
 export interface AppState {
   elements: {
-    [id: string]: { element: Element; userVersion: UserVersion };
+    [id: string]: Element;
   };
   renderingOrder: string[];
   elementsCount: number;

@@ -19,13 +19,13 @@ describe("Utility functions", () => {
 
   describe("isBefore", () => {
     it("v1 is before v2 due to higher clock", () => {
-      const v1: UserVersion = { userId: "a", clock: 2 };
-      const v2: UserVersion = { userId: "b", clock: 1 };
+      const v1: UserVersion = { userId: "a", version: 2 };
+      const v2: UserVersion = { userId: "b", version: 1 };
       expect(isNewerVersion(v1, v2)).toBeTruthy();
     });
     it("v1 is before v2 due to id", () => {
-      const v1: UserVersion = { userId: "a", clock: 2 };
-      const v2: UserVersion = { userId: "b", clock: 2 };
+      const v1: UserVersion = { userId: "a", version: 2 };
+      const v2: UserVersion = { userId: "b", version: 2 };
       expect(isNewerVersion(v1, v2)).toBeTruthy();
     });
   });

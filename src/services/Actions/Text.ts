@@ -5,7 +5,8 @@ export const createTextAction = (
   initialX: number,
   initialY: number,
   renderingOrder: number,
-  id: string
+  id: string,
+  userId: string
 ): CreateTextAction => {
   const object: Text = {
     id,
@@ -21,32 +22,35 @@ export const createTextAction = (
     style: {
       fill: "transparent",
     },
+    userVersion: {
+      userId,
+      version: 1,
+    },
   };
 
   return {
     elementType: ElementType.Text,
     object,
     changeType: ChangeType.Create,
-    userVersion: {
-      userId: "test",
-      clock: 1,
-    },
     ephemeral: false,
   };
 };
 
 export const updateTextAction = (
   object: Text,
-  ephemeral: boolean
+  ephemeral: boolean,
+  userId: string
 ): UpdateTextAction => {
   return {
     elementType: ElementType.Text,
-    object,
-    changeType: ChangeType.Update,
-    userVersion: {
-      userId: "test",
-      clock: 1,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
     },
+    changeType: ChangeType.Update,
     ephemeral,
   };
 };

@@ -5,7 +5,8 @@ export const createRectAction = (
   initialX: number,
   initialY: number,
   renderingOrder: number,
-  id: string
+  id: string,
+  userId: string
 ): CreateRectAction => {
   const rect: Rect = {
     id,
@@ -21,32 +22,35 @@ export const createRectAction = (
     style: {
       fill: "#FDFD96",
     },
+    userVersion: {
+      userId,
+      version: 1,
+    },
   };
 
   return {
     elementType: ElementType.Rect,
     object: rect,
     changeType: ChangeType.Create,
-    userVersion: {
-      userId: "test",
-      clock: 1,
-    },
     ephemeral: false,
   };
 };
 
 export const updateRectAction = (
   object: Rect,
-  ephemeral: boolean
+  ephemeral: boolean,
+  userId: string
 ): UpdateRectAction => {
   return {
     elementType: ElementType.Rect,
-    object,
-    changeType: ChangeType.Update,
-    userVersion: {
-      userId: "test",
-      clock: 1,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
     },
+    changeType: ChangeType.Update,
     ephemeral,
   };
 };

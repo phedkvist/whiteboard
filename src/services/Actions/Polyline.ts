@@ -9,7 +9,8 @@ export const createPolylineAction = (
   initialX: number,
   initialY: number,
   renderingOrder: number,
-  id: string
+  id: string,
+  userId: string
 ): CreatePolylineAction => {
   const object: Polyline = {
     id,
@@ -21,32 +22,35 @@ export const createPolylineAction = (
     state: ElementState.Creation,
     strokeWidth: "4px",
     renderingOrder,
+    userVersion: {
+      userId,
+      version: 1,
+    },
   };
 
   return {
     elementType: ElementType.Polyline,
     object,
     changeType: ChangeType.Create,
-    userVersion: {
-      userId: "test",
-      clock: 1,
-    },
     ephemeral: true,
   };
 };
 
 export const updatePolylineAction = (
   object: Polyline,
-  ephemeral: boolean
+  ephemeral: boolean,
+  userId: string
 ): UpdatePolylineAction => {
   return {
     elementType: ElementType.Polyline,
-    object,
-    changeType: ChangeType.Update,
-    userVersion: {
-      userId: "test",
-      clock: 1,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
     },
+    changeType: ChangeType.Update,
     ephemeral,
   };
 };

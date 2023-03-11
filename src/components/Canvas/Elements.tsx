@@ -196,7 +196,8 @@ const RectRenderer = ({
     if (element && history) {
       const changeAction = updateRectAction(
         { ...element, text: e.currentTarget.innerHTML || "" },
-        false
+        false,
+        history?.currentUserId
       );
       // TODO: Consider using debounce here.
       history.addLocalChange(changeAction);
@@ -205,7 +206,7 @@ const RectRenderer = ({
 
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
-  const { type, renderingOrder, ...props } = rect;
+  const { type, renderingOrder, userVersion, ...props } = rect;
   const { x, y, width, height, rotate } = props;
   const renderElement = (
     <g>
@@ -266,13 +267,14 @@ const EllipseRenderer = ({
     if (element && history) {
       const changeAction = updateEllipseAction(
         { ...element, text: e.currentTarget.innerHTML || "" },
-        false
+        false,
+        history?.currentUserId
       );
       // TODO: Consider using debounce here.
       history.addLocalChange(changeAction);
     }
   };
-  const { type, renderingOrder, ...props } = ellipse;
+  const { type, renderingOrder, userVersion, ...props } = ellipse;
   const { cx, cy, rx, ry, rotate } = props;
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
@@ -317,7 +319,7 @@ const PolylineRenderer = ({
   polyline: Polyline;
   isSelected: boolean;
 }) => {
-  const { type, renderingOrder, points, id, ...props } = polyline;
+  const { type, renderingOrder, points, id, userVersion, ...props } = polyline;
   const arrowStyle = { fill: props.style?.stroke || "" };
   const rotate = angleBetweenPoints(points[0], points[1], points[2], points[3]);
   return (
@@ -418,7 +420,8 @@ const TextRenderer = ({
     if (element && history) {
       const changeAction = updateTextAction(
         { ...element, text: e.currentTarget.innerHTML || "" },
-        false
+        false,
+        history?.currentUserId
       );
       // TODO: Consider using debounce here.
       history.addLocalChange(changeAction);
@@ -427,7 +430,7 @@ const TextRenderer = ({
 
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
-  const { type, renderingOrder, ...props } = textElement;
+  const { type, renderingOrder, userVersion, ...props } = textElement;
   const { x, y, width, height, rotate } = props;
   const renderElement = (
     <g>
