@@ -9,7 +9,8 @@ export const createEllipseAction = (
   initialX: number,
   initialY: number,
   renderingOrder: number,
-  id: string
+  id: string,
+  userId: string
 ): CreateEllipseAction => {
   const object: Ellipse = {
     id,
@@ -22,32 +23,35 @@ export const createEllipseAction = (
     state: ElementState.Creation,
     rotate: 0,
     renderingOrder,
+    userVersion: {
+      userId,
+      version: 1,
+    },
   };
 
   return {
     elementType: ElementType.Ellipse,
     object,
     changeType: ChangeType.Create,
-    userVersion: {
-      userId: "test",
-      clock: 1,
-    },
     ephemeral: false,
   };
 };
 
 export const updateEllipseAction = (
   object: Ellipse,
-  ephemeral: boolean
+  ephemeral: boolean,
+  userId: string
 ): UpdateEllipseAction => {
   return {
     elementType: ElementType.Ellipse,
-    object,
-    changeType: ChangeType.Update,
-    userVersion: {
-      userId: "test",
-      clock: 1,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
     },
+    changeType: ChangeType.Update,
     ephemeral,
   };
 };

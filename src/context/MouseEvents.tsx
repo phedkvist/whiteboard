@@ -203,7 +203,7 @@ export const MouseEventsProvider = ({
         if (selectedElements !== null && !selectedElements.includes(id)) {
           removeSelection();
         } else if (selectedElements.includes(id) && isDoubleClick) {
-          const e = appState.elements[id].element;
+          const e = appState.elements[id];
           if (e.type !== ElementType.Polyline) {
             setSelectionMode({
               ...selectionMode,
@@ -232,19 +232,37 @@ export const MouseEventsProvider = ({
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
           case ElementType.Rect: {
             history?.addLocalChange(
-              createRectAction(initialX, initialY, renderingOrder, id)
+              createRectAction(
+                initialX,
+                initialY,
+                renderingOrder,
+                id,
+                history?.currentUserId
+              )
             );
             break;
           }
           case ElementType.Ellipse: {
             history?.addLocalChange(
-              createEllipseAction(initialX, initialY, renderingOrder, id)
+              createEllipseAction(
+                initialX,
+                initialY,
+                renderingOrder,
+                id,
+                history?.currentUserId
+              )
             );
             break;
           }
           case ElementType.Text: {
             history?.addLocalChange(
-              createTextAction(initialX, initialY, renderingOrder, id)
+              createTextAction(
+                initialX,
+                initialY,
+                renderingOrder,
+                id,
+                history?.currentUserId
+              )
             );
             break;
           }
@@ -253,9 +271,7 @@ export const MouseEventsProvider = ({
 
             if (selectedElement) {
               // Second part of drawing the line.
-              const creationElement = copy(
-                appState.elements[selectedElement].element
-              );
+              const creationElement = copy(appState.elements[selectedElement]);
               if (creationElement.type !== ElementType.Polyline) {
                 throw new Error(
                   "Expected selected element to be a polyline element"
@@ -267,7 +283,8 @@ export const MouseEventsProvider = ({
                     ...creationElement,
                     state: ElementState.Visible,
                   },
-                  false
+                  false,
+                  history?.currentUserId
                 )
               );
 
@@ -279,7 +296,13 @@ export const MouseEventsProvider = ({
               setSelectedElements([]);
             } else {
               history?.addLocalChange(
-                createPolylineAction(initialX, initialY, renderingOrder, id)
+                createPolylineAction(
+                  initialX,
+                  initialY,
+                  renderingOrder,
+                  id,
+                  history?.currentUserId
+                )
               );
               break;
             }
@@ -336,7 +359,7 @@ export const MouseEventsProvider = ({
     const initialY = e.clientY / viewBox.scale + viewBox.y;
     if (!(selectedElements.length > 0)) return;
 
-    const element = copy(appState.elements[selectedElements[0]].element);
+    const element = copy(appState.elements[selectedElements[0]]);
     const selectedCorner = getClosestCorner(element, initialX, initialY);
     if (!selectedCorner) return;
     setSelectionCoordinates({
@@ -378,7 +401,7 @@ export const MouseEventsProvider = ({
     const selectedElement = selectedElements[0];
 
     if (!selectedElement) return;
-    const element = appState.elements[selectedElement].element;
+    const element = appState.elements[selectedElement];
     setSelectionMode({
       ...selectionMode,
       elementType: element.type,
@@ -397,7 +420,7 @@ export const MouseEventsProvider = ({
     setSelectedElements([id]);
     const initialX = e.clientX - xOffset;
     const initialY = e.clientY - yOffset;
-    const originElement = copy(appState.elements[id].element);
+    const originElement = copy(appState.elements[id]);
     setSelectionCoordinates({
       ...selectionCoordinates,
       initialX,
@@ -421,7 +444,7 @@ export const MouseEventsProvider = ({
       bottom: Math.max(startX, currentX),
     };
     return Object.keys(appState.elements).filter((elementId) => {
-      const element = appState.elements[elementId].element;
+      const element = appState.elements[elementId];
       switch (element.type) {
         case ElementType.Polyline:
           return isLineInsideRect(
@@ -516,7 +539,7 @@ export const MouseEventsProvider = ({
         // Update actions with ephemeral set to true.
         const creationElement = Object.assign(
           {},
-          newAppState.elements[selectedElement].element
+          newAppState.elements[selectedElement]
         );
         if (creationElement.type === ElementType.Rect) {
           const width = e.clientX + viewBox.x - creationElement.x;
@@ -529,7 +552,8 @@ export const MouseEventsProvider = ({
                 height,
                 state: ElementState.Creation,
               },
-              true
+              true,
+              history?.currentUserId
             )
           );
         } else if (creationElement.type === ElementType.Ellipse) {
@@ -551,7 +575,8 @@ export const MouseEventsProvider = ({
                 cy,
                 state: ElementState.Creation,
               },
-              true
+              true,
+              history?.currentUserId
             )
           );
         } else if (creationElement.type === ElementType.Polyline) {
@@ -564,7 +589,8 @@ export const MouseEventsProvider = ({
           history?.addLocalChange(
             updatePolylineAction(
               { ...creationElement, points, state: ElementState.Creation },
-              true
+              true,
+              history?.currentUserId
             )
           );
         }
@@ -579,7 +605,7 @@ export const MouseEventsProvider = ({
           switch (selectionMode.elementType) {
             case ElementType.Text:
             case ElementType.Rect: {
-              const el = copy(appState.elements[selectedElement].element) as
+              const el = copy(appState.elements[selectedElement]) as
                 | Rect
                 | Text;
               const [width, height, x, y] = resizeRect(
@@ -598,7 +624,8 @@ export const MouseEventsProvider = ({
                       x,
                       y,
                     },
-                    true
+                    true,
+                    history?.currentUserId
                   )
                 );
               } else if (el.type === ElementType.Text) {
@@ -611,7 +638,8 @@ export const MouseEventsProvider = ({
                       x,
                       y,
                     },
-                    true
+                    true,
+                    history?.currentUserId
                   )
                 );
               }
@@ -620,7 +648,7 @@ export const MouseEventsProvider = ({
             case ElementType.Ellipse: {
               const selectedElement = selectedElements[0];
               if (!selectedElement) return;
-              const obj = copy(appState.elements[selectedElement].element);
+              const obj = copy(appState.elements[selectedElement]);
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [rx, ry, cx, cy] = resizeEllipse(
                 selectedCorner,
@@ -637,7 +665,8 @@ export const MouseEventsProvider = ({
                     cx,
                     cy,
                   },
-                  true
+                  true,
+                  history?.currentUserId
                 )
               );
               break;
@@ -649,7 +678,7 @@ export const MouseEventsProvider = ({
               const newY = e.clientY + viewBox.y;
               const selectedElement = selectedElements[0];
               if (!selectedElement) return;
-              const el = appState.elements[selectedElement].element;
+              const el = appState.elements[selectedElement];
               if (el.type !== ElementType.Polyline) {
                 return;
               }
@@ -664,7 +693,8 @@ export const MouseEventsProvider = ({
                     ...el,
                     points: newPoints,
                   },
-                  true
+                  true,
+                  history?.currentUserId
                 )
               );
             }
@@ -681,7 +711,7 @@ export const MouseEventsProvider = ({
         const selectedElement = selectedElements[0];
         if (!selectedElement) return;
         const { clientX, clientY } = e;
-        let element = copy(appState.elements[selectedElement].element);
+        let element = copy(appState.elements[selectedElement]);
         const [midX, midY] = getMidPoints(element);
         const deltaX = clientX + viewBox.x - midX;
         const deltaY = clientY + viewBox.y - midY;
@@ -689,13 +719,26 @@ export const MouseEventsProvider = ({
           (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90
         );
         element.rotate = rotate;
+        if (!history) return;
         let changeAction;
         if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(element, false);
+          changeAction = updateRectAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(element, false);
+          changeAction = updateTextAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(element, false);
+          changeAction = updateEllipseAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         }
         changeAction && history?.addLocalChange(changeAction);
       }
@@ -711,17 +754,33 @@ export const MouseEventsProvider = ({
       case SelectionModes.Selected: {
         // TODO: If element moved, we need to set a non ephemeral change here.
 
-        if (!selectedElement) return;
-        const element = copy(appState.elements[selectedElement].element);
+        if (!selectedElement || !history) return;
+        const element = copy(appState.elements[selectedElement]);
         let changeAction;
         if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(element, false);
+          changeAction = updateRectAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(element, false);
+          changeAction = updateEllipseAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(element, false);
+          changeAction = updateTextAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Polyline) {
-          changeAction = updatePolylineAction(element, false);
+          changeAction = updatePolylineAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -730,19 +789,31 @@ export const MouseEventsProvider = ({
       }
       case SelectionModes.Add: {
         // Record selection elements and draw the element directly but with faded bg?
-        if (!selectedElement) return;
-        const element = copy(appState.elements[selectedElement].element);
+        if (!selectedElement || !history) return;
+        const element = copy(appState.elements[selectedElement]);
         if (element.type === ElementType.Polyline) {
           break;
         }
         element.state = ElementState.Visible;
         let changeAction;
         if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(element, false);
+          changeAction = updateRectAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(element, false);
+          changeAction = updateEllipseAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(element, false);
+          changeAction = updateTextAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -759,20 +830,36 @@ export const MouseEventsProvider = ({
         // Change from resizing to selection mode.
         // TODO: Make sure every ephemeral change ends up with non ephemeral change at some point.
 
-        if (!selectedElement) return;
+        if (!selectedElement || !history) return;
 
-        const element = copy(appState.elements[selectedElement].element);
+        const element = copy(appState.elements[selectedElement]);
         element.state = ElementState.Visible;
         let changeAction;
         if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(element, false);
+          changeAction = updateRectAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(element, false);
+          changeAction = updateEllipseAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(element, false);
+          changeAction = updateTextAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Polyline) {
           // todo last update (non ephemeral):
-          changeAction = updatePolylineAction(element, false);
+          changeAction = updatePolylineAction(
+            element,
+            false,
+            history?.currentUserId
+          );
         }
         changeAction && history?.addLocalChange(changeAction);
 
@@ -818,9 +905,9 @@ export const MouseEventsProvider = ({
     diffY: number,
     originElement: WhiteboardElement
   ) => {
-    const obj = copy(appState.elements[id].element);
+    const obj = copy(appState.elements[id]);
     let changeAction;
-    if (!obj) {
+    if (!obj || !history) {
       throw new Error(`Can't find element with id: ${id} on the screen.`);
     }
     if (
@@ -829,21 +916,21 @@ export const MouseEventsProvider = ({
     ) {
       obj.cx = diffX + originElement.cx;
       obj.cy = diffY + originElement.cy;
-      changeAction = updateEllipseAction(obj, true);
+      changeAction = updateEllipseAction(obj, true, history?.currentUserId);
     } else if (
       obj.type === ElementType.Rect &&
       originElement.type === ElementType.Rect
     ) {
       obj.x = originElement.x + diffX;
       obj.y = originElement.y + diffY;
-      changeAction = updateRectAction(obj, true);
+      changeAction = updateRectAction(obj, true, history?.currentUserId);
     } else if (
       obj.type === ElementType.Text &&
       originElement.type === ElementType.Text
     ) {
       obj.x = originElement.x + diffX;
       obj.y = originElement.y + diffY;
-      changeAction = updateTextAction(obj, true);
+      changeAction = updateTextAction(obj, true, history?.currentUserId);
     } else if (
       obj.type === ElementType.Polyline &&
       originElement.type === ElementType.Polyline
@@ -852,7 +939,7 @@ export const MouseEventsProvider = ({
         i % 2 === 0 || i === 0 ? v + diffX : v + diffY
       );
       obj.points = newPoints;
-      changeAction = updatePolylineAction(obj, true);
+      changeAction = updatePolylineAction(obj, true, history?.currentUserId);
     } else {
       throw new Error("Something went wrong in set element coords");
     }

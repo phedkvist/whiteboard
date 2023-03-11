@@ -12,7 +12,7 @@ export enum ChangeType {
 }
 
 export interface ChangeAction {
-  userVersion: UserVersion;
+  // userVersion: UserVersion;
   ephemeral: boolean; // Ephemeral changes should not be stored in memory.
 }
 
@@ -94,7 +94,7 @@ export type ChangeActions =
 
 export interface UserVersion {
   userId: string;
-  clock: number;
+  version: number;
 }
 
 export interface VersionVector {
@@ -108,10 +108,16 @@ export const createUpdateChangeAction = (
 ) => {
   const { type } = element;
   if (type === ElementType.Ellipse) {
-    return history?.addLocalChange(updateEllipseAction(element, ephemeral));
+    return history?.addLocalChange(
+      updateEllipseAction(element, ephemeral, history?.currentUserId)
+    );
   } else if (type === ElementType.Polyline) {
-    return history?.addLocalChange(updatePolylineAction(element, ephemeral));
+    return history?.addLocalChange(
+      updatePolylineAction(element, ephemeral, history?.currentUserId)
+    );
   } else if (type === ElementType.Rect) {
-    return history?.addLocalChange(updateRectAction(element, ephemeral));
+    return history?.addLocalChange(
+      updateRectAction(element, ephemeral, history?.currentUserId)
+    );
   }
 };

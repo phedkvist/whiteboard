@@ -79,57 +79,56 @@ const Canvas = () => {
 
   const { elements } = appState;
   const sortedElements = Object.values(elements).sort((a, b) => {
-    const val = a.element.renderingOrder - b.element.renderingOrder;
+    const val = a.renderingOrder - b.renderingOrder;
 
     if (val !== 0) return val;
-    return Number(a.element.id > b.element.id);
+    return Number(a.id > b.id);
   });
 
   const renderElements = sortedElements.map((e) => {
-    const isSelected = selectedElements.includes(e.element.id);
+    const isSelected = selectedElements.includes(e.id);
     const isSelectedCss = isSelected ? "isSelected" : "";
-    const isHovering =
-      !isSelected && e.element.id === hoverElement ? "isHovering" : "";
-    const classes = `${e.element.state} ${isSelectedCss} ${isHovering}`;
-    if (e.element.type === ElementType.Rect) {
+    const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
+    const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
+    if (e.type === ElementType.Rect) {
       return (
         <Elements.Rect
-          key={e.element.id}
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}
-          rect={e.element}
+          rect={e}
           history={history}
         />
       );
-    } else if (e.element.type === ElementType.Ellipse) {
+    } else if (e.type === ElementType.Ellipse) {
       return (
         <Elements.Ellipse
-          key={e.element.id}
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
-          ellipse={e.element}
+          ellipse={e}
           history={history}
           selectionMode={selectionMode}
         />
       );
-    } else if (e.element.type === ElementType.Polyline) {
+    } else if (e.type === ElementType.Polyline) {
       return (
         <Elements.Polyline
-          key={e.element.id}
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
-          polyline={e.element}
+          polyline={e}
         />
       );
     } else {
       return (
         <Elements.Text
-          key={e.element.id}
+          key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}
-          textElement={e.element}
+          textElement={e}
           history={history}
         />
       );

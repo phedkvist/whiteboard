@@ -392,7 +392,7 @@ export function angleBetweenPoints(
  */
 export function isNewerVersion(v1: UserVersion, v2: UserVersion) {
   return (
-    v1.clock > v2.clock ||
-    (v1.clock === v2.clock && v1.userId.localeCompare(v2.userId) < 0)
+    v1.version > v2.version ||
+    (v1.version === v2.version && v1.userId.localeCompare(v2.userId) < 0)
   );
 }

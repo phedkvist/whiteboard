@@ -18,9 +18,7 @@ export const Properties = () => {
     history,
   } = useAppState();
   const element =
-    selectedElement.length > 0
-      ? appState.elements[selectedElement[0]]?.element
-      : null;
+    selectedElement.length > 0 ? appState.elements[selectedElement[0]] : null;
 
   const properties = (element: Element | null) => {
     if (!element) return;

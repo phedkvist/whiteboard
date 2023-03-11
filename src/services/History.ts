@@ -120,29 +120,22 @@ export default class History {
     // Add local change and submits it to the server.
     // Add corresponding changes to the undoStack.
     // If we have disconnected, then try submitting later
-    console.log(this.appState.elements);
+
     this.setAppState((oldAppState) => {
       const appState = copy(oldAppState);
-      const { object, userVersion } = change;
+      const { object: newElement } = change;
       let elementsCount = appState.elementsCount;
       const renderingOrder = [...appState.renderingOrder];
 
-      const prevElement = appState.elements[object.id];
-      const newElement = {
-        element: object,
-        userVersion: {
-          userId: this.currentUserId,
-          clock: (prevElement?.userVersion.clock || 0) + 1,
-        },
-      };
+      const prevElement = appState.elements[newElement.id];
       if (
         prevElement === undefined ||
         isNewerVersion(newElement.userVersion, prevElement.userVersion)
       ) {
-        appState.elements[object.id] = newElement;
-        elementsCount = object.renderingOrder;
-        if (!renderingOrder.includes(object.id)) {
-          renderingOrder.push(object.id);
+        appState.elements[newElement.id] = newElement;
+        elementsCount = newElement.renderingOrder;
+        if (!renderingOrder.includes(newElement.id)) {
+          renderingOrder.push(newElement.id);
         }
         if (!change.ephemeral && !skipSave) {
           //this.changes.push(change);
@@ -164,27 +157,20 @@ export default class History {
     const renderingOrder = [...newAppState.renderingOrder];
 
     changes.forEach((change) => {
-      const { object, userVersion } = change;
+      const { object: newElement } = change;
 
-      const prevElement = newAppState.elements[object.id];
-      const newElement = {
-        element: object,
-        userVersion: {
-          userId: this.currentUserId,
-          clock: (prevElement?.userVersion.clock || 0) + 1,
-        },
-      };
+      const prevElement = newAppState.elements[newElement.id];
       if (
         prevElement === undefined ||
         isNewerVersion(newElement.userVersion, prevElement.userVersion)
       ) {
-        newAppState.elements[object.id] = newElement;
-        if (object.renderingOrder > elementsCount) {
-          elementsCount = object.renderingOrder;
+        newAppState.elements[newElement.id] = newElement;
+        if (newElement.renderingOrder > elementsCount) {
+          elementsCount = newElement.renderingOrder;
         }
 
         // TODO: This rendering order is not thought trough
-        renderingOrder.push(object.id);
+        renderingOrder.push(newElement.id);
         //if (!change.ephemeral && !skipSave) {
         // this.changes.push(change);
         // localStorage.setItem("history", JSON.stringify(this.changes));
