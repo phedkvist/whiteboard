@@ -4,13 +4,13 @@ import { copy } from "../../src/utility";
 // dependency injection so this class has no knowledge of websocket
 
 export class Sync {
-  changes: ChangeActions[];
-  versionVector: VersionVector;
+  changes: {
+    [userId: string]: ChangeActions[];
+  };
 
   // dependency injection for sending updates to other users?
-  constructor(initialChanges: [] = []) {
-    this.changes = initialChanges;
-    this.versionVector = {};
+  constructor() {
+    this.changes = {};
   }
 
   // Add changes to local storage, dependency injection for sending updates to all other users except this client.
@@ -22,22 +22,16 @@ export class Sync {
     // only update version vector if its not an ephemeral change
 
     const nonEphemeralChanges = changes.filter((c) => !c.ephemeral);
-    const newVersionVector = nonEphemeralChanges.reduce((cur, change) => {
-      change.object.id;
+
+    const newChanges = nonEphemeralChanges.reduce((acc, change) => {
       const userId = change.object.userVersion.userId;
-      if (userId in cur) {
-        const clock = cur[change.object.userVersion.userId].version + 1;
-        cur[change.object.userVersion.userId] = { userId, version: clock };
-      } else {
-        cur[change.object.userVersion.userId] = { userId, version: 1 };
-      }
-      return cur;
-    }, copy<VersionVector>(this.versionVector));
+      acc[userId] = userId in acc ? [...acc[userId], change] : [change];
+      return acc;
+    }, copy(this.changes));
 
-    this.versionVector = newVersionVector;
-    this.changes = this.changes.concat(nonEphemeralChanges);
+    this.changes = newChanges;
 
-    onSend(changes);
+    onSend(nonEphemeralChanges);
   }
 
   // Send client any missing changes, dependency injection for sending the change back to client?
