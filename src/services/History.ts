@@ -121,6 +121,8 @@ export default class History {
     // Add corresponding changes to the undoStack.
     // If we have disconnected, then try submitting later
 
+    // If its an ephemeral change then don't save it
+
     this.setAppState((oldAppState) => {
       const appState = copy(oldAppState);
       const { object: newElement } = change;
