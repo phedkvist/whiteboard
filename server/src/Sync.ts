@@ -3,14 +3,15 @@ import { copy } from "../../src/utility";
 
 // dependency injection so this class has no knowledge of websocket
 
+type Changes = {
+  [userId: string]: ChangeActions[];
+};
 export class Sync {
-  changes: {
-    [userId: string]: ChangeActions[];
-  };
+  changes: Changes;
 
   // dependency injection for sending updates to other users?
-  constructor() {
-    this.changes = {};
+  constructor(initialChanges: Changes = {}) {
+    this.changes = initialChanges;
   }
 
   // Add changes to local storage, dependency injection for sending updates to all other users except this client.
@@ -39,5 +40,33 @@ export class Sync {
   syncUser(
     clientVersionVector: VersionVector,
     onSend: (changes: ChangeActions[]) => void
-  ) {}
+  ) {
+    const serverUserIds = Object.keys(this.changes);
+
+    const mergedVector = serverUserIds.reduce((acc, userId) => {
+      if (!(userId in acc)) {
+        acc[userId] = {
+          userId,
+          version: 0,
+        };
+      }
+      return acc;
+    }, copy(clientVersionVector));
+
+    const missingChanges = Object.keys(mergedVector).reduce(
+      (acc: ChangeActions[], userId) => {
+        // Get all missing changes by the user id, then send all back to user.
+        if (mergedVector[userId].version === 0) {
+          return [...acc, ...this.changes[userId]];
+        } else {
+          const missingActions = this.changes[userId].slice(
+            mergedVector[userId].version
+          );
+          return [...acc, ...missingActions];
+        }
+      },
+      []
+    );
+    onSend(missingChanges);
+  }
 }
