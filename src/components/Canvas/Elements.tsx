@@ -210,7 +210,7 @@ const RectRenderer = ({
   const { x, y, width, height, rotate } = props;
   const renderElement = (
     <g>
-      <rect key={rect.id} {...props} className={classes} />
+      <rect key={rect.id} {...props} className={classes} data-testid="rect-svg" />
       <EditableInput
         x={x}
         y={y}
