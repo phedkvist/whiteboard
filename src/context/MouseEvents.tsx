@@ -153,8 +153,6 @@ export const MouseEventsProvider = ({
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
     if (e.button !== MouseButtons.LEFT) return;
 
-    console.log(e);
-
     const isDoubleClick = e.detail === 2;
 
     switch (selectionMode.type) {

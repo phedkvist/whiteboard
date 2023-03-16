@@ -210,7 +210,12 @@ const RectRenderer = ({
   const { x, y, width, height, rotate } = props;
   const renderElement = (
     <g>
-      <rect key={rect.id} {...props} className={classes} data-testid="rect-svg" />
+      <rect
+        key={rect.id}
+        {...props}
+        className={classes}
+        data-testid="rect-svg"
+      />
       <EditableInput
         x={x}
         y={y}
@@ -282,7 +287,12 @@ const EllipseRenderer = ({
   const height = ry * Math.sqrt(2);
   const renderElement = (
     <g>
-      <ellipse key={ellipse.id} {...props} className={classes} />
+      <ellipse
+        key={ellipse.id}
+        {...props}
+        className={classes}
+        data-testid="circle-svg"
+      />
       <EditableInput
         x={cx - width / 2}
         y={cy - height / 2}
