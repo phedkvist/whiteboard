@@ -1,4 +1,3 @@
-import { Cursor } from "../../src/types";
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { Sync } from "./Sync";
 import { ChangeActions } from "../../src/services/ChangeTypes";
