@@ -147,6 +147,7 @@ const Canvas = () => {
       onMouseOver={onMouseOver}
       onWheel={onMouseWheel}
       viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+      data-testid="canvas"
     >
       {showDebugger && <DrawBackgroundLines />}
       {renderElements}
