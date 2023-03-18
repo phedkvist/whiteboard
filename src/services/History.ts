@@ -41,7 +41,8 @@ export default class History {
 
   constructor(
     appState: AppState,
-    setAppState: React.Dispatch<React.SetStateAction<AppState>>
+    setAppState: React.Dispatch<React.SetStateAction<AppState>>,
+    ws: WebSocket = new WebSocket("ws://localhost:8080")
   ) {
     this.changes = {};
     this.redoStack = [];
@@ -51,9 +52,8 @@ export default class History {
     this.versionVector = {};
     this.appState = appState;
     this.setAppState = setAppState;
-    // this.loadLocalHistory();
 
-    this.ws = new WebSocket("ws://localhost:8080");
+    this.ws = ws;
     this.ws.addEventListener("message", this.onMessage.bind(this), false);
     this.ws.addEventListener("close", this.onClose, false);
     this.ws.addEventListener("open", this.onOpen, false);
@@ -94,35 +94,9 @@ export default class History {
     console.log("On open", ev);
   }
 
-  loadLocalHistory() {
-    // try {
-    //   const localHistory = JSON.parse(localStorage.getItem("history") || "");
-    //   const newAppState = Object.assign({}, this.appState);
-    //   const renderingOrder = [...newAppState.renderingOrder];
-    //   let elementsCount = 0; // this is likely incorrect
-    //   if (localHistory && Array.isArray(localHistory)) {
-    //     const actions = localHistory.filter(isChangeAction);
-    //     actions.forEach((change) => {
-    //       const { object, userVersion } = change;
-    //       newAppState.elements[object.id] = { element: object, userVersion };
-    //       renderingOrder.push(object.id);
-    //       this.changes.push(change);
-    //       elementsCount = change.object.renderingOrder;
-    //     });
-    //   }
-    //   this.setAppState({ ...newAppState, elementsCount, renderingOrder });
-    // } catch (e) {
-    //   console.log("Error loading local history");
-    // }
-  }
-
   addLocalChange(change: ChangeActions, skipSending: boolean = false) {
-    // Add local change and submits it to the server.
     // Add corresponding changes to the undoStack.
     // If we have disconnected, then try submitting later
-
-    // If its an ephemeral change then don't save it
-
     this.setAppState((oldAppState) => {
       const appState = copy(oldAppState);
       const { object: newElement } = change;
@@ -137,35 +111,13 @@ export default class History {
           this.onSend([change]);
         }
       }
-      return { ...appState };
+      return appState;
     });
   }
 
   addRemoteChange(changes: ChangeActions[]) {
     // Add change without submitting to server
-    const newAppState = copy(this.appState);
-
-    changes.forEach((change) => {
-      const { object: newElement } = change;
-
-      const prevElement = newAppState.elements[newElement.id];
-      if (
-        prevElement === undefined ||
-        isNewerVersion(newElement.userVersion, prevElement.userVersion)
-      ) {
-        newAppState.elements[newElement.id] = newElement;
-      }
-    });
-
-    this.setAppState({ ...newAppState });
-  }
-
-  addChange() {
-    // Include change to appState.
-    // Creating a new change, just set the id to the element. Don't need to do anything more.
-    // Moving a change, just replace the existing element and that should be fine. Given that the "version is good".
-    // Updating is the same thing? Perhaps we can also remove it.
-    // Delete immediately, since that change takes precedence over the other changes.
+    changes.forEach((change) => this.addLocalChange(change, true));
   }
 
   sendThrottledCursor(x: number, y: number) {
