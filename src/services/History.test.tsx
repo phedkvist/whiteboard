@@ -17,20 +17,33 @@ const appStateStub: AppState = {
   cursors: {},
 };
 
-const useRenderThing = (
+const useHistoryRender = (
+  ws: WebSocket,
   initialState: AppState = {
     elements: {},
     cursors: {},
   }
 ): [History, AppState] => {
   const [appState, setAppState] = useState<AppState>(initialState);
+  const [history] = useState(new History(appState, setAppState, ws));
 
-  return [new History(appState, setAppState), appState];
+  return [history, appState];
 };
 
 describe("History", () => {
   it("Should handle adding local changes to appState", async () => {
-    const { result } = renderHook(() => useRenderThing());
+    const mockWs = mock<WebSocket>();
+    when(() => mockWs.addEventListener("message", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("open", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("close", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+
+    const { result } = renderHook(() => useHistoryRender(mockWs));
     const [history, state] = result.current;
 
     act(() => {
@@ -42,7 +55,18 @@ describe("History", () => {
   });
 
   it("Should handle updating existing changes to appState", async () => {
-    const { result } = renderHook(() => useRenderThing(appStateStub));
+    const mockWs = mock<WebSocket>();
+    when(() => mockWs.addEventListener("message", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("open", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("close", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+
+    const { result } = renderHook(() => useHistoryRender(mockWs, appStateStub));
     const [history, state] = result.current;
 
     act(() => {
