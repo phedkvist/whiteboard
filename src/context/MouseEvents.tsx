@@ -226,7 +226,7 @@ export const MouseEventsProvider = ({
         });
         const id = uuid();
         setSelectedElements([...selectedElements, id]);
-        const renderingOrder = appState.elementsCount + 1;
+        const renderingOrder = Object.keys(appState.elements).length + 1;
 
         switch (selectionMode.elementType) {
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
