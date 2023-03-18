@@ -1,4 +1,4 @@
-import History from "../History";
+import History from "./History";
 
 describe("History", () => {
   it("Initiate class with empty values", () => {

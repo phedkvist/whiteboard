@@ -88,9 +88,7 @@ describe("MouseEvents", () => {
 
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
     const circle = screen.getByTestId("circle-svg");
-
     mouseDragEvent(circle, { x: 200, y: 200 }, { x: 300, y: 300 });
 
     expect(Number(circle.getAttribute("cx"))).toEqual(250);
@@ -160,5 +158,34 @@ describe("MouseEvents", () => {
       expect(text.getAttribute("x")).toEqual(200);
       expect(text.getAttribute("y")).toEqual(200);
     });
+  });
+
+  it("Should select multiple elements when holding click and dragging mouse", () => {
+    const screen = renderWrapper();
+    const canvas = screen.getByTestId("canvas");
+
+    // create a rect
+    fireEvent.click(screen.getByText("Rect"));
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+    screen.getByTestId("rect-svg");
+
+    // create a circle
+    fireEvent.click(screen.getByText("Circle"));
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+    expect(screen.getByTestId("circle-svg")).toBeDefined();
+
+    // create a text element
+    fireEvent.click(screen.getByText("Text"));
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+    const text = screen.getByTestId("text");
+
+    // create a line
+    fireEvent.click(screen.getByText("Line"));
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+    mouseDragEvent(canvas, { x: 200, y: 200 }, { x: 200, y: 200 });
+    const line = screen.getByTestId("polyline");
+    expect(line).toBeDefined();
+
+    // TODO: Select all elements and move them in one go.
   });
 });

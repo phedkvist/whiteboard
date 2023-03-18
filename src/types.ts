@@ -149,15 +149,11 @@ export interface AppState {
   elements: {
     [id: string]: Element;
   };
-  renderingOrder: string[];
-  elementsCount: number;
   cursors: { [id: string]: Cursor };
 }
 
 export const initialState: AppState = {
   elements: {},
-  renderingOrder: [],
-  elementsCount: 0,
   cursors: {},
 };
 

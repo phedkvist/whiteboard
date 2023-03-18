@@ -116,7 +116,7 @@ export default class History {
     // }
   }
 
-  addLocalChange(change: ChangeActions, skipSave: boolean = false) {
+  addLocalChange(change: ChangeActions, skipSending: boolean = false) {
     // Add local change and submits it to the server.
     // Add corresponding changes to the undoStack.
     // If we have disconnected, then try submitting later
@@ -126,8 +126,6 @@ export default class History {
     this.setAppState((oldAppState) => {
       const appState = copy(oldAppState);
       const { object: newElement } = change;
-      let elementsCount = appState.elementsCount;
-      const renderingOrder = [...appState.renderingOrder];
 
       const prevElement = appState.elements[newElement.id];
       if (
@@ -135,28 +133,17 @@ export default class History {
         isNewerVersion(newElement.userVersion, prevElement.userVersion)
       ) {
         appState.elements[newElement.id] = newElement;
-        elementsCount = newElement.renderingOrder;
-        if (!renderingOrder.includes(newElement.id)) {
-          renderingOrder.push(newElement.id);
-        }
-        if (!change.ephemeral && !skipSave) {
-          //this.changes.push(change);
-          // localStorage.setItem("history", JSON.stringify(this.changes));
-        }
-        if (!skipSave) {
+        if (!skipSending) {
           this.onSend([change]);
         }
-        // this.setAppState({ ...newAppState, elementsCount, renderingOrder });
       }
-      return { ...appState, elementsCount, renderingOrder };
+      return { ...appState };
     });
   }
 
   addRemoteChange(changes: ChangeActions[]) {
     // Add change without submitting to server
     const newAppState = copy(this.appState);
-    let elementsCount = newAppState.elementsCount;
-    const renderingOrder = [...newAppState.renderingOrder];
 
     changes.forEach((change) => {
       const { object: newElement } = change;
@@ -167,20 +154,10 @@ export default class History {
         isNewerVersion(newElement.userVersion, prevElement.userVersion)
       ) {
         newAppState.elements[newElement.id] = newElement;
-        if (newElement.renderingOrder > elementsCount) {
-          elementsCount = newElement.renderingOrder;
-        }
-
-        // TODO: This rendering order is not thought trough
-        renderingOrder.push(newElement.id);
-        //if (!change.ephemeral && !skipSave) {
-        // this.changes.push(change);
-        // localStorage.setItem("history", JSON.stringify(this.changes));
-        //}
       }
     });
 
-    this.setAppState({ ...newAppState, elementsCount, renderingOrder });
+    this.setAppState({ ...newAppState });
   }
 
   addChange() {
