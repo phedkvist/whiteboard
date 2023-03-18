@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Canvas from "../components/Canvas/Canvas";
 import Toolbar from "../components/Toolbar/Toolbar";
 import { AppStateProvider } from "./AppState";
@@ -95,5 +95,38 @@ describe("MouseEvents", () => {
 
     expect(Number(circle.getAttribute("cx"))).toEqual(250);
     expect(Number(circle.getAttribute("cy"))).toEqual(250);
+  });
+
+  it("Should draw a line", () => {
+    const screen = renderWrapper();
+
+    fireEvent.click(screen.getByText("Line"));
+    const canvas = screen.getByTestId("canvas");
+
+    // two separate onclick events pretty much
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+    mouseDragEvent(canvas, { x: 200, y: 200 }, { x: 200, y: 200 });
+
+    const line = screen.getByTestId("polyline");
+    expect(line).toBeDefined();
+  });
+
+  it("Should move a line", () => {
+    const screen = renderWrapper();
+
+    fireEvent.click(screen.getByText("Line"));
+    const canvas = screen.getByTestId("canvas");
+
+    // two separate onclick events pretty much
+    mouseDragEvent(canvas, { x: 100, y: 0 }, { x: 100, y: 0 });
+    mouseDragEvent(canvas, { x: 200, y: 0 }, { x: 200, y: 0 });
+
+    const line = screen.getByTestId("polyline");
+    expect(line).toBeDefined();
+
+    mouseDragEvent(line, { x: 150, y: 0 }, { x: 150, y: 100 });
+    waitFor(() => {
+      expect(line.getAttribute("points")).toEqual("100,100,200,100");
+    });
   });
 });

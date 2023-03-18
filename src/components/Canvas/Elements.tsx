@@ -366,6 +366,7 @@ const PolylineRenderer = ({
         className={classes}
         markerStart="url(#arrow-reverse)"
         markerEnd="url(#arrow)"
+        data-testid="polyline"
       ></polyline>
       {isSelected && (
         <>
