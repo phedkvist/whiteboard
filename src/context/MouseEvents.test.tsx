@@ -129,4 +129,36 @@ describe("MouseEvents", () => {
       expect(line.getAttribute("points")).toEqual("100,100,200,100");
     });
   });
+
+  it("Should create a text element", () => {
+    const screen = renderWrapper();
+
+    fireEvent.click(screen.getByText("Text"));
+    const canvas = screen.getByTestId("canvas");
+
+    // one onclick event
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+
+    const text = screen.getByTestId("text");
+    expect(text).toBeDefined();
+  });
+
+  it("Should create a text element", () => {
+    const screen = renderWrapper();
+
+    fireEvent.click(screen.getByText("Text"));
+    const canvas = screen.getByTestId("canvas");
+
+    // one onclick event
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+
+    const text = screen.getByTestId("text");
+    expect(text).toBeDefined();
+
+    mouseDragEvent(text, { x: 100, y: 100 }, { x: 200, y: 200 });
+    waitFor(() => {
+      expect(text.getAttribute("x")).toEqual(200);
+      expect(text.getAttribute("y")).toEqual(200);
+    });
+  });
 });

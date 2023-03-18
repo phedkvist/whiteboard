@@ -445,7 +445,12 @@ const TextRenderer = ({
   const { x, y, width, height, rotate } = props;
   const renderElement = (
     <g>
-      <rect key={textElement.id} {...props} className={classes} />
+      <rect
+        key={textElement.id}
+        {...props}
+        className={classes}
+        data-testid="text"
+      />
       <EditableInput
         x={x}
         y={y}
