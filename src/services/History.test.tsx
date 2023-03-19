@@ -22,10 +22,14 @@ const useHistoryRender = (
   initialState: AppState = {
     elements: {},
     cursors: {},
-  }
+  },
+  userId: string = "user-id"
 ): [History, AppState] => {
   const [appState, setAppState] = useState<AppState>(initialState);
-  const history = useMemo(() => new History(appState, setAppState, ws), []);
+  const history = useMemo(
+    () => new History(appState, setAppState, ws, userId),
+    []
+  );
 
   return [history, appState];
 };
@@ -158,5 +162,34 @@ describe("History", () => {
         cursors: {},
       });
     });
+  });
+
+  it("Should send a cursor to other users", async () => {
+    const mockWs = mock<WebSocket>();
+    when(() => mockWs.addEventListener("message", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("open", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("close", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+
+    when(() =>
+      mockWs.send(
+        '{"type":"cursor","data":[{"id":"unique-user-id","color":"#00f","position":{"x":100,"y":100},"lastUpdated":"2023-03-19T09:31:49.722Z"}]}'
+      )
+    )
+      .thenReturn()
+      .anyTimes();
+
+    when(() => mockWs.readyState).thenReturn(WebSocket.OPEN);
+
+    const { result } = renderHook(() =>
+      useHistoryRender(mockWs, appStateStub, "unique-user-id")
+    );
+    const [history] = result.current;
+    history.sendCursor(100, 100, "2023-03-19T09:31:49.722Z");
   });
 });
