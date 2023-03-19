@@ -42,13 +42,14 @@ export default class History {
   constructor(
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-    ws: WebSocket = new WebSocket("ws://localhost:8080")
+    ws: WebSocket = new WebSocket("ws://localhost:8080"),
+    userId: string = uuidv4()
   ) {
     this.changes = {};
     this.redoStack = [];
     this.undoStack = [];
 
-    this.currentUserId = uuidv4(); // TODO: Add uuid's
+    this.currentUserId = userId;
     this.versionVector = {};
     this.appState = appState;
     this.setAppState = setAppState;
@@ -120,7 +121,7 @@ export default class History {
     changes.forEach((change) => this.addLocalChange(change, true));
   }
 
-  sendThrottledCursor(x: number, y: number) {
+  sendThrottledCursor(x: number, y: number, lastUpdated: string) {
     const cursor: Cursor = {
       id: this.currentUserId,
       color: "#00f",
@@ -128,9 +129,9 @@ export default class History {
         x,
         y,
       },
-      lastUpdated: new Date().toISOString(),
+      lastUpdated,
     };
-    if (this.ws.readyState === this.ws.OPEN) {
+    if (this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
         JSON.stringify({
           type: "cursor",
@@ -140,8 +141,12 @@ export default class History {
     }
   }
 
-  sendCursor(x: number, y: number) {
-    this.throttledCursor(x, y);
+  sendCursor(
+    x: number,
+    y: number,
+    lastUpdated: string = new Date().toISOString()
+  ) {
+    this.throttledCursor(x, y, lastUpdated);
   }
 
   receiveCursors(cursors: Cursor[]) {
