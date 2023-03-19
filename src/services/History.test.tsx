@@ -1,6 +1,6 @@
-import History, { CursorEvent } from "./History";
-import { It, mock, when } from "strong-mock";
-import { AppState, Cursor } from "../types";
+import History from "./History";
+import { It, mock, resetAll, verifyAll, when } from "strong-mock";
+import { AppState } from "../types";
 import { createRectAction, updateRectAction } from "./Actions/Rect";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useMemo, useState } from "react";
@@ -36,6 +36,10 @@ const useHistoryRender = (
 };
 
 describe("History", () => {
+  afterEach(() => {
+    resetAll();
+  });
+
   it("Should handle adding local changes to appState", async () => {
     const mockWs = mock<WebSocket>();
     when(() => mockWs.addEventListener("message", It.isAny(), false))
@@ -57,6 +61,43 @@ describe("History", () => {
     waitFor(() => {
       expect(state).toEqual(appStateStub);
     });
+
+    verifyAll();
+  });
+
+  it("Should send change event to server", async () => {
+    const mockWs = mock<WebSocket>();
+    when(() => mockWs.addEventListener("message", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("open", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+    when(() => mockWs.addEventListener("close", It.isAny(), false))
+      .thenReturn()
+      .anyTimes();
+
+    when(() =>
+      mockWs.send(
+        '{"type":"changes","data":[{"elementType":"rect","object":{"id":"unique-id","type":"rect","text":" ","width":0,"height":0,"x":0,"y":0,"state":"creation","rotate":0,"renderingOrder":1,"style":{"fill":"#FDFD96"},"userVersion":{"userId":"b","version":1}},"changeType":"create","ephemeral":false}]}'
+      )
+    )
+      .thenReturn()
+      .atLeast(1);
+
+    when(() => mockWs.readyState).thenReturn(WebSocket.OPEN);
+
+    const { result } = renderHook(() => useHistoryRender(mockWs));
+    const [history, state] = result.current;
+
+    act(() => {
+      history.addLocalChange(createRect, false);
+    });
+    waitFor(() => {
+      expect(state).toEqual(appStateStub);
+    });
+
+    verifyAll();
   });
 
   it("Should handle updating existing changes to appState", async () => {
@@ -83,6 +124,8 @@ describe("History", () => {
         cursors: {},
       });
     });
+
+    verifyAll();
   });
 
   it("Should reject updating existing changes if version is behind", async () => {
@@ -121,6 +164,8 @@ describe("History", () => {
         cursors: {},
       });
     });
+
+    verifyAll();
   });
 
   it("Should updating concurrent change if user id is lexicographically higher", async () => {
@@ -163,9 +208,11 @@ describe("History", () => {
         cursors: {},
       });
     });
+
+    verifyAll();
   });
 
-  it("Should send a cursor to other users", async () => {
+  it("Should send a local cursor update to other users", async () => {
     const mockWs = mock<WebSocket>();
     when(() => mockWs.addEventListener("message", It.isAny(), false))
       .thenReturn()
@@ -192,9 +239,11 @@ describe("History", () => {
     );
     const [history] = result.current;
     history.sendCursor(100, 100, "2023-03-19T09:31:49.722Z");
+
+    verifyAll();
   });
 
-  it("Should receive cursor updates and updates internal state", async () => {
+  it("Should receive cursor updates and update internal state", async () => {
     const mockWs = mock<WebSocket>();
     when(() => mockWs.addEventListener("message", It.isAny(), false))
       .thenReturn()
@@ -221,5 +270,7 @@ describe("History", () => {
         },
       });
     });
+
+    verifyAll();
   });
 });

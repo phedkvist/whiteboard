@@ -1,25 +1,8 @@
 import { AppState, Cursor } from "../types";
-import { ChangeAction, ChangeActions, VersionVector } from "./ChangeTypes";
+import { ChangeActions, SocketEvent, VersionVector } from "./ChangeTypes";
 import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
 import { copy, isNewerVersion } from "../utility";
-
-function isChangeAction(action: any): action is ChangeActions {
-  // TODO: Add more checks here.
-  return typeof action.changeType === "string";
-}
-
-export interface CursorEvent {
-  type: "cursor";
-  data: Cursor[];
-}
-
-export interface ChangeEvent {
-  type: "changes";
-  data: ChangeActions[];
-}
-
-type SocketEvent = CursorEvent | ChangeEvent;
 
 export default class History {
   changes: {

@@ -1,6 +1,6 @@
 import { isAfter, subMinutes } from "date-fns";
 import { Cursor } from "../../types";
-import React, { useLayoutEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
   const [activeCursors, setActiveCursors] = useState<Cursor[]>([]);
@@ -10,6 +10,7 @@ const Cursors = ({ cursors }: { cursors: Cursor[] }) => {
         isAfter(new Date(c.lastUpdated), subMinutes(new Date(), 1))
       )
     );
+    // eslint-disable-next-line
   }, [JSON.stringify(cursors)]);
 
   return (

@@ -1,4 +1,12 @@
-import { Element, ElementType, Ellipse, Polyline, Rect, Text } from "../types";
+import {
+  Cursor,
+  Element,
+  ElementType,
+  Ellipse,
+  Polyline,
+  Rect,
+  Text,
+} from "../types";
 import { updateEllipseAction } from "./Actions/Ellipse";
 import { updatePolylineAction } from "./Actions/Polyline";
 import { updateRectAction } from "./Actions/Rect";
@@ -121,3 +129,15 @@ export const createUpdateChangeAction = (
     );
   }
 };
+
+export interface CursorEvent {
+  type: "cursor";
+  data: Cursor[];
+}
+
+export interface ChangeEvent {
+  type: "changes";
+  data: ChangeActions[];
+}
+
+export type SocketEvent = CursorEvent | ChangeEvent;
