@@ -1,4 +1,4 @@
-import { CursorEvent } from "./services/History";
+import { CursorEvent } from "./services/ChangeTypes";
 import { Cursor } from "./types";
 
 export const cursorStub: Cursor = {
