@@ -9,12 +9,12 @@ function isChangeAction(action: any): action is ChangeActions {
   return typeof action.changeType === "string";
 }
 
-interface CursorEvent {
+export interface CursorEvent {
   type: "cursor";
   data: Cursor[];
 }
 
-interface ChangeEvent {
+export interface ChangeEvent {
   type: "changes";
   data: ChangeActions[];
 }
