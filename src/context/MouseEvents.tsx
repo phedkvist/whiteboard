@@ -399,7 +399,6 @@ export const MouseEventsProvider = ({
       initialHeight: height,
     });
     const selectedElement = selectedElements[0];
-
     if (!selectedElement) return;
     const element = appState.elements[selectedElement];
     setSelectionMode({

@@ -75,6 +75,7 @@ const addDraggableCorners = (
           style={{ cursor: "grabbing" }}
           fill={"white"}
           stroke={"lightblue"}
+          data-testid="rotate"
         />
         <rect
           id={`${id}-resize-top-left`}
@@ -98,6 +99,7 @@ const addDraggableCorners = (
         />
         <rect
           id={`${id}-resize-bottom-right`}
+          data-testid={"resize-bottom-right"}
           width={8}
           height={8}
           x={bR.x}
@@ -155,6 +157,7 @@ const EditableInput = ({
         <style dangerouslySetInnerHTML={{ __html: fontFamily }} />
         <div
           className="textInput"
+          data-testid="editableInput"
           id={id}
           //disabled={isEditable}
           contentEditable={isEditable}
@@ -192,6 +195,7 @@ const RectRenderer = ({
 
   const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     // setText(e.currentTarget.textContent || "");
+    console.log(e);
     const element = copy(rect);
     if (element && history) {
       const changeAction = updateRectAction(
