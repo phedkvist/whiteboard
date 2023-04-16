@@ -50,7 +50,7 @@ describe("MouseEvents", () => {
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
 
-    screen.getByTestId("rect-svg");
+    expect(screen.getByTestId("rect-svg")).toBeDefined();
   });
 
   it("Should move an existing rect", () => {
@@ -190,6 +190,107 @@ describe("MouseEvents", () => {
     expect(Number(circle.getAttribute("cy"))).toEqual(250);
   });
 
+  it("Should add text to circle", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Circle"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    const circle = screen.getByTestId("circle-svg");
+
+    fireEvent.doubleClick(circle);
+    fireEvent.change(circle, {
+      target: { innerHTML: "abc" },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("abc"));
+    });
+  });
+
+  it("Should resize a circle", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Circle"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    const circle = screen.getByTestId("circle-svg");
+    mouseDragEvent(circle, { x: 100, y: 100 }, { x: 100, y: 100 });
+
+    const resizeBtn = screen.getByTestId("resize-bottom-right");
+    const gElement = resizeBtn.parentElement?.children[0];
+
+    if (gElement) {
+      // getBoundingClientRect is not part of jsdom and needs to be mocked
+      gElement.getBoundingClientRect = jest.fn(() => ({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+        top: 100,
+        bottom: 200,
+        right: 200,
+        left: 100,
+        toJSON: () => {},
+      }));
+    }
+
+    expect(Number(circle.getAttribute("rx"))).toEqual(50);
+    expect(Number(circle.getAttribute("ry"))).toEqual(50);
+    expect(Number(circle.getAttribute("cx"))).toEqual(150);
+    expect(Number(circle.getAttribute("cy"))).toEqual(150);
+
+    mouseDragEvent(resizeBtn, { x: 205, y: 205 }, { x: 300, y: 300 });
+
+    await waitFor(() => {
+      expect(Number(circle.getAttribute("rx"))).toEqual(100);
+      expect(Number(circle.getAttribute("ry"))).toEqual(100);
+      expect(Number(circle.getAttribute("cx"))).toEqual(200);
+      expect(Number(circle.getAttribute("cy"))).toEqual(200);
+    });
+  });
+
+  it("Should rotate a circle", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Circle"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+    const circle = screen.getByTestId("circle-svg");
+    mouseDragEvent(circle, { x: 100, y: 100 }, { x: 100, y: 100 });
+
+    const rotation = screen.getByTestId("rotate");
+
+    const gElement = rotation.parentElement?.children[0];
+
+    if (gElement) {
+      // getBoundingClientRect is not part of jsdom and needs to be mocked
+      gElement.getBoundingClientRect = jest.fn(() => ({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+        top: 100,
+        bottom: 200,
+        right: 200,
+        left: 100,
+        toJSON: () => {},
+      }));
+    }
+    mouseDragEvent(rotation, { x: 150, y: 84 }, { x: 84, y: 150 });
+
+    await waitFor(() => {
+      expect(
+        circle.parentElement?.parentElement?.getAttribute("transform")
+      ).toEqual("rotate(270, 150, 150)");
+    });
+  });
+
   it("Should create a line", () => {
     const screen = renderWrapper();
 
@@ -255,6 +356,102 @@ describe("MouseEvents", () => {
     });
   });
 
+  it("Should add text to text element", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Text"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    const text = screen.getByTestId("text");
+
+    fireEvent.doubleClick(text);
+    fireEvent.change(text, {
+      target: { innerHTML: "abc" },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("abc"));
+    });
+  });
+
+  it("Should resize a text element", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Text"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    const text = screen.getByTestId("text");
+    mouseDragEvent(text, { x: 100, y: 100 }, { x: 100, y: 100 });
+
+    const resizeBtn = screen.getByTestId("resize-bottom-right");
+    const gElement = resizeBtn.parentElement?.children[0];
+
+    if (gElement) {
+      // getBoundingClientRect is not part of jsdom and needs to be mocked
+      gElement.getBoundingClientRect = jest.fn(() => ({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+        top: 100,
+        bottom: 200,
+        right: 200,
+        left: 100,
+        toJSON: () => {},
+      }));
+    }
+
+    mouseDragEvent(resizeBtn, { x: 205, y: 205 }, { x: 300, y: 300 });
+
+    await waitFor(() => {
+      expect(Number(text.getAttribute("x"))).toEqual(100);
+      expect(Number(text.getAttribute("y"))).toEqual(100);
+      expect(Number(text.getAttribute("width"))).toEqual(200);
+      expect(Number(text.getAttribute("height"))).toEqual(200);
+    });
+  });
+
+  it("Should rotate a text element", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Text"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+    const text = screen.getByTestId("text");
+    mouseDragEvent(text, { x: 100, y: 100 }, { x: 100, y: 100 });
+
+    const rotation = screen.getByTestId("rotate");
+
+    const gElement = rotation.parentElement?.children[0];
+
+    if (gElement) {
+      // getBoundingClientRect is not part of jsdom and needs to be mocked
+      gElement.getBoundingClientRect = jest.fn(() => ({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+        top: 100,
+        bottom: 200,
+        right: 200,
+        left: 100,
+        toJSON: () => {},
+      }));
+    }
+    mouseDragEvent(rotation, { x: 150, y: 84 }, { x: 84, y: 150 });
+
+    await waitFor(() => {
+      expect(
+        text.parentElement?.parentElement?.getAttribute("transform")
+      ).toEqual("rotate(239, 150, 110)");
+    });
+  });
+
   it("Should select multiple elements when holding click and dragging mouse", () => {
     const screen = renderWrapper();
     const canvas = screen.getByTestId("canvas");
@@ -282,6 +479,6 @@ describe("MouseEvents", () => {
     const line = screen.getByTestId("polyline");
     expect(line).toBeDefined();
 
-    // TODO: Select all elements and move them in one go.
+    // TODO: Check that they are selected.
   });
 });
