@@ -393,15 +393,16 @@ export const MouseEventsProvider = ({
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
-    // TODO: Send out ephemeral mouse movement action
-    history?.sendCursor(e.clientX + viewBox.x, e.clientY + viewBox.y);
+    const { clientX, clientY, movementX, movementY } = e;
+    history?.sendCursor(clientX + viewBox.x, clientY + viewBox.y);
+    const isEphemeral = true;
 
     if (e.button !== MouseButtons.LEFT) return;
 
     switch (selectionMode.type) {
       case SelectionModes.Panning: {
         const { startPoint, scale } = viewBox;
-        const endPoint = { x: e.movementX, y: e.movementY };
+        const endPoint = { x: movementX, y: movementY };
         const dx = (startPoint.x - endPoint.x) / scale;
         const dy = (startPoint.y - endPoint.y) / scale;
         const movedViewBox = {
@@ -440,8 +441,8 @@ export const MouseEventsProvider = ({
 
         if (selectedElement && startX && startY && originElement) {
           e.preventDefault();
-          const diffX = e.clientX - startX;
-          const diffY = e.clientY - startY;
+          const diffX = clientX - startX;
+          const diffY = clientY - startY;
 
           const changeAction = setElementCoords(
             appState.elements[selectedElement],
@@ -468,8 +469,8 @@ export const MouseEventsProvider = ({
           newAppState.elements[selectedElement]
         );
         if (creationElement.type === ElementType.Rect) {
-          const width = e.clientX + viewBox.x - creationElement.x;
-          const height = e.clientY + viewBox.y - creationElement.y;
+          const width = clientX + viewBox.x - creationElement.x;
+          const height = clientY + viewBox.y - creationElement.y;
           history?.addLocalChange(
             updateRectAction(
               {
@@ -478,7 +479,7 @@ export const MouseEventsProvider = ({
                 height,
                 state: ElementState.Creation,
               },
-              true,
+              isEphemeral,
               history?.currentUserId
             )
           );
@@ -487,8 +488,8 @@ export const MouseEventsProvider = ({
           if (!(initialX && initialY)) return;
           const [rx, ry, cx, cy] = resizeEllipse(
             Corner.BottomRight,
-            e.clientX + viewBox.x,
-            e.clientY + viewBox.y,
+            clientX + viewBox.x,
+            clientY + viewBox.y,
             creationElement
           );
           history?.addLocalChange(
@@ -501,7 +502,7 @@ export const MouseEventsProvider = ({
                 cy,
                 state: ElementState.Creation,
               },
-              true,
+              isEphemeral,
               history?.currentUserId
             )
           );
@@ -509,13 +510,13 @@ export const MouseEventsProvider = ({
           const points = [
             creationElement.points[0],
             creationElement.points[1],
-            e.clientX + viewBox.x,
-            e.clientY + viewBox.y,
+            clientX + viewBox.x,
+            clientY + viewBox.y,
           ];
           history?.addLocalChange(
             updatePolylineAction(
               { ...creationElement, points, state: ElementState.Creation },
-              true,
+              isEphemeral,
               history?.currentUserId
             )
           );
@@ -536,8 +537,8 @@ export const MouseEventsProvider = ({
                 | Text;
               const [width, height, x, y] = resizeRect(
                 selectedCorner,
-                e.clientX + viewBox.x,
-                e.clientY + viewBox.y,
+                clientX + viewBox.x,
+                clientY + viewBox.y,
                 el
               );
               if (el.type === ElementType.Rect) {
@@ -550,7 +551,7 @@ export const MouseEventsProvider = ({
                       x,
                       y,
                     },
-                    true,
+                    isEphemeral,
                     history?.currentUserId
                   )
                 );
@@ -564,7 +565,7 @@ export const MouseEventsProvider = ({
                       x,
                       y,
                     },
-                    true,
+                    isEphemeral,
                     history?.currentUserId
                   )
                 );
@@ -578,8 +579,8 @@ export const MouseEventsProvider = ({
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [rx, ry, cx, cy] = resizeEllipse(
                 selectedCorner,
-                e.clientX + viewBox.x,
-                e.clientY + viewBox.y,
+                clientX + viewBox.x,
+                clientY + viewBox.y,
                 obj
               );
               history?.addLocalChange(
@@ -591,7 +592,7 @@ export const MouseEventsProvider = ({
                     cx,
                     cy,
                   },
-                  true,
+                  isEphemeral,
                   history?.currentUserId
                 )
               );
@@ -600,8 +601,8 @@ export const MouseEventsProvider = ({
             case ElementType.Polyline: {
               // TODO: Need to know which points are being dragged.
               // selected corner, set this to some kind of index?
-              const newX = e.clientX + viewBox.x;
-              const newY = e.clientY + viewBox.y;
+              const newX = clientX + viewBox.x;
+              const newY = clientY + viewBox.y;
               const selectedElement = selectedElements[0];
               if (!selectedElement) return;
               const el = appState.elements[selectedElement];
@@ -619,7 +620,7 @@ export const MouseEventsProvider = ({
                     ...el,
                     points: newPoints,
                   },
-                  true,
+                  isEphemeral,
                   history?.currentUserId
                 )
               );
@@ -636,7 +637,6 @@ export const MouseEventsProvider = ({
         // Take into account different types of elements.
         const selectedElement = selectedElements[0];
         if (!selectedElement) return;
-        const { clientX, clientY } = e;
         let element = copy(appState.elements[selectedElement]);
         const [midX, midY] = getMidPoints(element);
         const deltaX = clientX + viewBox.x - midX;
@@ -650,19 +650,19 @@ export const MouseEventsProvider = ({
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Text) {
           changeAction = updateTextAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         }
@@ -672,6 +672,7 @@ export const MouseEventsProvider = ({
   };
 
   const onMouseUp: MouseEventHandler<SVGSVGElement> = (e) => {
+    const isEphemeral = false;
     if (e.button !== MouseButtons.LEFT) return;
     const selectedElement = selectedElements[0];
 
@@ -686,25 +687,25 @@ export const MouseEventsProvider = ({
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Text) {
           changeAction = updateTextAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Polyline) {
           changeAction = updatePolylineAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         }
@@ -725,19 +726,19 @@ export const MouseEventsProvider = ({
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Text) {
           changeAction = updateTextAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         }
@@ -764,26 +765,26 @@ export const MouseEventsProvider = ({
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Text) {
           changeAction = updateTextAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         } else if (element.type === ElementType.Polyline) {
           // todo last update (non ephemeral):
           changeAction = updatePolylineAction(
             element,
-            false,
+            isEphemeral,
             history?.currentUserId
           );
         }

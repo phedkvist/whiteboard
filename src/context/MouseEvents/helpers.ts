@@ -10,7 +10,6 @@ import {
   SelectionMode,
   Element as IElement,
   ElementType,
-  AppState,
 } from "../../types";
 import { copy, getClosestCorner } from "../../utility";
 
@@ -27,8 +26,8 @@ export const setupResizeElement = (
 ) => {
   if (!(e.target instanceof Element)) return;
   const {
-    x: xOffset = 0,
-    y: yOffset = 0,
+    x: xOffset,
+    y: yOffset,
     width,
     height,
   } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
