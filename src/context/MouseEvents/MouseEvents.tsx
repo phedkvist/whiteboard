@@ -10,11 +10,14 @@ import {
   SelectionModes,
   ElementType,
   ElementState,
-  Element as WhiteboardElement,
+  Element as IElement,
   Corner,
   Rect,
   Text,
-} from "../types";
+  ViewBox,
+  SelectionCoordinates,
+  SelectionMode,
+} from "../../types";
 import {
   getClosestCorner,
   resizeRect,
@@ -22,21 +25,28 @@ import {
   getMidPoints,
   MouseButtons,
   copy,
-} from "../utility";
-import { useAppState } from "./AppState";
+} from "../../utility";
+import { useAppState } from "../AppState";
 import { v4 as uuid } from "uuid";
-import { createRectAction, updateRectAction } from "../services/Actions/Rect";
+import {
+  createRectAction,
+  updateRectAction,
+} from "../../services/Actions/Rect";
 import {
   createEllipseAction,
   updateEllipseAction,
-} from "../services/Actions/Ellipse";
-import { createTextAction, updateTextAction } from "../services/Actions/Text";
+} from "../../services/Actions/Ellipse";
+import {
+  createTextAction,
+  updateTextAction,
+} from "../../services/Actions/Text";
 import {
   createPolylineAction,
   updatePolylineAction,
-} from "../services/Actions/Polyline";
-import { isLineInsideRect, isRectsIntersecting } from "../helpers/intersect";
+} from "../../services/Actions/Polyline";
+import { isLineInsideRect, isRectsIntersecting } from "../../helpers/intersect";
 import * as KeyCode from "keycode-js";
+import { setupResizeElement, setupRotateElement } from "./helpers";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -193,10 +203,27 @@ export const MouseEventsProvider = ({
         const id = e.target.id;
 
         if (id.includes("resize")) {
-          setupResizeElement(e);
+          const element = appState.elements[selectedElements[0]];
+          setupResizeElement(
+            e,
+            element,
+            viewBox,
+            setSelectionCoordinates,
+            selectionCoordinates,
+            setSelectionMode,
+            selectionMode
+          );
           break;
         } else if (id.includes("rotate")) {
-          setupRotateElement(e);
+          const element = appState.elements[selectedElements[0]];
+          setupRotateElement(
+            e,
+            element,
+            setSelectionCoordinates,
+            selectionCoordinates,
+            setSelectionMode,
+            selectionMode
+          );
           break;
         }
 
@@ -320,7 +347,16 @@ export const MouseEventsProvider = ({
           return;
         }
         if (e.target.id.includes("resize")) {
-          setupResizeElement(e);
+          const element = appState.elements[selectedElements[0]];
+          setupResizeElement(
+            e,
+            element,
+            viewBox,
+            setSelectionCoordinates,
+            selectionCoordinates,
+            setSelectionMode,
+            selectionMode
+          );
           break;
         }
 
@@ -339,76 +375,9 @@ export const MouseEventsProvider = ({
     }
   };
 
-  // Non-pure function
-  // Extract all the "logic" into separate functions that can be easily tested.
-  const setupResizeElement: MouseEventHandler<SVGSVGElement> = (e) => {
-    if (!(e.target instanceof Element)) return;
-    const {
-      x: xOffset = 0,
-      y: yOffset = 0,
-      width,
-      height,
-    } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
-      x: null,
-      y: null,
-    };
-    if (xOffset === null || yOffset === null) return;
-    if (width === undefined || height === undefined) return;
-
-    const initialX = e.clientX / viewBox.scale + viewBox.x;
-    const initialY = e.clientY / viewBox.scale + viewBox.y;
-    if (!(selectedElements.length > 0)) return;
-
-    const element = copy(appState.elements[selectedElements[0]]);
-    const selectedCorner = getClosestCorner(element, initialX, initialY);
-    if (!selectedCorner) return;
-    setSelectionCoordinates({
-      ...selectionCoordinates,
-      xOffset,
-      yOffset,
-      initialX,
-      initialY,
-      initialWidth: width,
-      initialHeight: height,
-      selectedCorner,
-    });
-    setSelectionMode({
-      ...selectionMode,
-      elementType: element.type,
-      type: SelectionModes.Resizing,
-    });
-  };
-
-  // Non-pure function
-  // Extract all the "logic" into separate functions that can be easily tested.
-  const setupRotateElement: MouseEventHandler<SVGSVGElement> = (e) => {
-    if (!(e.target instanceof Element)) return;
-    const { width, height } =
-      e.target?.parentElement?.children[0].getBoundingClientRect() || {
-        x: null,
-        y: null,
-      };
-    if (!(width && height)) return;
-    const initialX = e.clientX;
-    const initialY = e.clientY;
-    setSelectionCoordinates({
-      ...selectionCoordinates,
-      initialX,
-      initialY,
-      initialWidth: width,
-      initialHeight: height,
-    });
-    const selectedElement = selectedElements[0];
-    if (!selectedElement) return;
-    const element = appState.elements[selectedElement];
-    setSelectionMode({
-      ...selectionMode,
-      elementType: element.type,
-      type: SelectionModes.Rotating,
-    });
-  };
-
-  const setupMovingElement: MouseEventHandler<SVGSVGElement> = (e) => {
+  const setupMovingElement = (
+    e: React.MouseEvent<SVGSVGElement, MouseEvent>
+  ) => {
     if (!(e.target instanceof Element)) return;
     const id = e.target.id;
 
@@ -902,7 +871,7 @@ export const MouseEventsProvider = ({
     id: string,
     diffX: number,
     diffY: number,
-    originElement: WhiteboardElement
+    originElement: IElement
   ) => {
     const obj = copy(appState.elements[id]);
     let changeAction;
