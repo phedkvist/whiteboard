@@ -10,16 +10,12 @@ import {
   SelectionModes,
   ElementType,
   ElementState,
-  Element as IElement,
   Corner,
   Rect,
   Text,
-  ViewBox,
   SelectionCoordinates,
-  SelectionMode,
 } from "../../types";
 import {
-  getClosestCorner,
   resizeRect,
   resizeEllipse,
   getMidPoints,
@@ -44,10 +40,11 @@ import {
   createPolylineAction,
   updatePolylineAction,
 } from "../../services/Actions/Polyline";
-import { isLineInsideRect, isRectsIntersecting } from "../../helpers/intersect";
 import * as KeyCode from "keycode-js";
 import {
   findSelectedElements,
+  setElementCoords,
+  setupMovingElement,
   setupResizeElement,
   setupRotateElement,
 } from "./helpers";
@@ -244,7 +241,16 @@ export const MouseEventsProvider = ({
           }
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
-        setupMovingElement(e);
+        const element = appState.elements[id];
+        setupMovingElement(
+          e,
+          element,
+          selectedElements,
+          setSelectedElements,
+          removeSelection,
+          setSelectionCoordinates,
+          selectionCoordinates
+        );
         break;
       }
       case SelectionModes.Add: {
@@ -371,36 +377,19 @@ export const MouseEventsProvider = ({
           });
         }
 
-        // DRAGGING ELEMENT
-        setupMovingElement(e);
-
+        const element = appState.elements[selectedElements[0]];
+        setupMovingElement(
+          e,
+          element,
+          selectedElements,
+          setSelectedElements,
+          removeSelection,
+          setSelectionCoordinates,
+          selectionCoordinates
+        );
         break;
       }
     }
-  };
-
-  const setupMovingElement = (
-    e: React.MouseEvent<SVGSVGElement, MouseEvent>
-  ) => {
-    if (!(e.target instanceof Element)) return;
-    const id = e.target.id;
-
-    if (selectedElements.includes(id)) {
-      removeSelection();
-    }
-    const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-    setSelectedElements([id]);
-    const initialX = e.clientX - xOffset;
-    const initialY = e.clientY - yOffset;
-    const originElement = copy(appState.elements[id]);
-    setSelectionCoordinates({
-      ...selectionCoordinates,
-      initialX,
-      initialY,
-      startX: e.clientX,
-      startY: e.clientY,
-      originElement,
-    });
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
@@ -454,12 +443,15 @@ export const MouseEventsProvider = ({
           const diffX = e.clientX - startX;
           const diffY = e.clientY - startY;
 
-          setElementCoords(
-            selectedElement,
+          const changeAction = setElementCoords(
+            appState.elements[selectedElement],
             diffX / viewBox.scale,
             diffY / viewBox.scale,
-            originElement
+            originElement,
+            history?.currentUserId!
           );
+          history?.addLocalChange(changeAction);
+
           setSelectionCoordinates({
             ...selectionCoordinates,
           });
@@ -832,56 +824,6 @@ export const MouseEventsProvider = ({
   };
 
   // const onMouseLeave: MouseEventHandler<SVGSVGElement> = (e) => {};
-
-  const setElementCoords = (
-    id: string,
-    diffX: number,
-    diffY: number,
-    originElement: IElement
-  ) => {
-    const obj = copy(appState.elements[id]);
-    let changeAction;
-    if (!obj || !history) {
-      throw new Error(`Can't find element with id: ${id} on the screen.`);
-    }
-    if (
-      obj.type === ElementType.Ellipse &&
-      originElement.type === ElementType.Ellipse
-    ) {
-      obj.cx = diffX + originElement.cx;
-      obj.cy = diffY + originElement.cy;
-      changeAction = updateEllipseAction(obj, true, history?.currentUserId);
-    } else if (
-      obj.type === ElementType.Rect &&
-      originElement.type === ElementType.Rect
-    ) {
-      obj.x = originElement.x + diffX;
-      obj.y = originElement.y + diffY;
-      changeAction = updateRectAction(obj, true, history?.currentUserId);
-    } else if (
-      obj.type === ElementType.Text &&
-      originElement.type === ElementType.Text
-    ) {
-      obj.x = originElement.x + diffX;
-      obj.y = originElement.y + diffY;
-      changeAction = updateTextAction(obj, true, history?.currentUserId);
-    } else if (
-      obj.type === ElementType.Polyline &&
-      originElement.type === ElementType.Polyline
-    ) {
-      const newPoints = originElement.points.map((v, i) =>
-        i % 2 === 0 || i === 0 ? v + diffX : v + diffY
-      );
-      obj.points = newPoints;
-      changeAction = updatePolylineAction(obj, true, history?.currentUserId);
-    } else {
-      throw new Error("Something went wrong in set element coords");
-    }
-
-    if (changeAction) {
-      history?.addLocalChange(changeAction);
-    }
-  };
 
   const removeSelection = () => {
     setSelectedElements([]);
