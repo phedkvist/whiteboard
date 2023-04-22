@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import Canvas from "../components/Canvas/Canvas";
-import Toolbar from "../components/Toolbar/Toolbar";
-import { AppStateProvider } from "./AppState";
+import Canvas from "../../components/Canvas/Canvas";
+import Toolbar from "../../components/Toolbar/Toolbar";
+import { AppStateProvider } from "../AppState";
 import { MouseEventsProvider } from "./MouseEvents";
 import userEvent from "@testing-library/user-event";
 

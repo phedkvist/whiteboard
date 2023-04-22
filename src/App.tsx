@@ -4,7 +4,7 @@ import Edit from "./components/Edit/Edit";
 import Toolbar from "./components/Toolbar/Toolbar";
 import { Properties } from "./components/Properties/Properties";
 import { Debugger } from "./components/Debugger/Debugger";
-import { MouseEventsProvider } from "./context/MouseEvents";
+import { MouseEventsProvider } from "./context/MouseEvents/MouseEvents";
 import ContextMenu from "./components/ContextMenu/ContextMenu";
 import { useEffect } from "react";
 import useWindowDimensions from "./hooks/useWindowDimensions";

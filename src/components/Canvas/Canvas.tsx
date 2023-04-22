@@ -2,7 +2,7 @@ import "./Canvas.css";
 import React from "react";
 import { SelectionModes, ElementType, SelectionCoordinates } from "../../types";
 import { useAppState } from "../../context/AppState";
-import { useMouseEvents } from "../../context/MouseEvents";
+import { useMouseEvents } from "../../context/MouseEvents/MouseEvents";
 import Elements from "./Elements";
 import Cursors from "../Cursors/Cursors";
 
