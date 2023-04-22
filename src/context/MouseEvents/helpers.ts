@@ -10,6 +10,7 @@ import {
   SelectionMode,
   Element as IElement,
   ElementType,
+  AppState,
 } from "../../types";
 import { copy, getClosestCorner } from "../../utility";
 
@@ -173,7 +174,6 @@ export const findSelectedElements = (
 
 export const setElementCoords = (
   element: IElement,
-  id: string,
   diffX: number,
   diffY: number,
   originElement: IElement,
@@ -181,9 +181,7 @@ export const setElementCoords = (
 ) => {
   const obj = copy(element);
   let changeAction;
-  if (!obj) {
-    throw new Error(`Can't find element with id: ${id} on the screen.`);
-  }
+
   if (
     obj.type === ElementType.Ellipse &&
     originElement.type === ElementType.Ellipse
