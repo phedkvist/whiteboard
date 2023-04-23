@@ -4,8 +4,8 @@ import { ChangeActions } from "../../src/services/ChangeTypes";
 import { IncomingMessage } from "http";
 import { isMessage } from "./Helpers";
 
-export const toBuffer = (changeActions: ChangeActions[]) =>
-  Buffer.from(JSON.stringify(changeActions));
+export const toBuffer = (message: { type: string; data: any }) =>
+  Buffer.from(JSON.stringify(message));
 
 export function onMessage(sync: Sync, ws: WebSocket, wss: WebSocketServer) {
   return function (data: RawData) {
@@ -25,7 +25,7 @@ export function onMessage(sync: Sync, ws: WebSocket, wss: WebSocketServer) {
       sendToOthers(data);
     } else if (message.type === "changes") {
       sync.addRemoteChange(message.data, (data) =>
-        sendToOthers(toBuffer(data))
+        sendToOthers(toBuffer({ type: "changes", data }))
       );
     }
 
@@ -40,11 +40,14 @@ export function createConnection(sync: Sync, wss: WebSocketServer) {
   return function (ws: WebSocket, req: IncomingMessage) {
     console.log("ON CONNECTION", req.socket.remoteAddress);
 
-    sync.syncUser({}, (changes) => ws.send(JSON.stringify(changes)));
+    // THIS IS JUST TO SYNC FROM CLEAN SLATE, IF IT IS A RECONNECT, WE SHOULD HANDLE IT BETTER?
+    sync.syncUser({}, (changes) =>
+      ws.send(toBuffer({ type: "changes", data: changes }))
+    );
     ws.on("message", onMessage(sync, ws, wss));
   };
 }
 
-// const sync = new Sync();
-// const wss = new WebSocketServer({ port: 8080, host: "localhost" });
-// wss.on("connection", createConnection(sync, wss));
+const sync = new Sync();
+const wss = new WebSocketServer({ port: 8080, host: "localhost" });
+wss.on("connection", createConnection(sync, wss));

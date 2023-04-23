@@ -195,7 +195,7 @@ const RectRenderer = ({
 
   const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     // setText(e.currentTarget.textContent || "");
-    console.log(e);
+
     const element = copy(rect);
     if (element && history) {
       const changeAction = updateRectAction(
