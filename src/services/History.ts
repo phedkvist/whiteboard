@@ -39,8 +39,8 @@ export default class History {
 
     this.ws = ws;
     this.ws.addEventListener("message", this.onMessage.bind(this), false);
-    this.ws.addEventListener("close", this.onClose, false);
-    this.ws.addEventListener("open", this.onOpen, false);
+    this.ws.addEventListener("close", this.onClose.bind(this), false);
+    this.ws.addEventListener("open", this.onOpen.bind(this), false);
   }
 
   onSend(changeActions: ChangeActions[]) {
@@ -57,10 +57,9 @@ export default class History {
     // Should always receive an array of change actions. Easiest to deal with.
     try {
       const event = JSON.parse(await ev.data.text()) as SocketEvent;
-
       if (event.type === "changes") {
         const changeActions = event.data;
-        changeActions.forEach((change) => this.addLocalChange(change, true));
+        this.addRemoteChanges(changeActions);
       } else if (event.type === "cursor") {
         const cursors = event.data;
         this.receiveCursors(cursors);
@@ -70,13 +69,14 @@ export default class History {
     }
   }
 
-  onClose(this: WebSocket, ev: CloseEvent) {
-    console.log("On close", ev);
+  onClose() {
+    this.ws = new WebSocket("ws://localhost:8080");
+    this.ws.addEventListener("message", this.onMessage.bind(this), false);
+    this.ws.addEventListener("close", this.onClose.bind(this), false);
+    this.ws.addEventListener("open", this.onOpen.bind(this), false);
   }
 
-  onOpen(this: WebSocket, ev: Event) {
-    console.log("On open", ev);
-  }
+  onOpen() {}
 
   addLocalChange(change: ChangeActions, skipSending: boolean = false) {
     // Add corresponding changes to the undoStack.
@@ -99,7 +99,7 @@ export default class History {
     });
   }
 
-  addRemoteChange(changes: ChangeActions[]) {
+  addRemoteChanges(changes: ChangeActions[]) {
     // Add change without submitting to server
     changes.forEach((change) => this.addLocalChange(change, true));
   }
@@ -144,6 +144,6 @@ export default class History {
         }),
         { ...this.appState.cursors }
       );
-    this.setAppState({ ...this.appState, cursors: newCursors });
+    this.setAppState((oldState) => ({ ...oldState, cursors: newCursors }));
   }
 }
