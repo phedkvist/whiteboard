@@ -3,6 +3,7 @@ import { Cursor } from "./types";
 
 export const cursorStub: Cursor = {
   id: "unique-id",
+  username: "John Doe",
   position: {
     x: 0,
     y: 0,
@@ -67,8 +68,11 @@ export const eventStub: MessageEvent = {
   stopPropagation: function (): void {
     throw new Error("Function not implemented.");
   },
+  // @ts-ignore
   AT_TARGET: 0,
+  // @ts-ignore
   BUBBLING_PHASE: 0,
+  // @ts-ignore
   CAPTURING_PHASE: 0,
   NONE: 0,
 };

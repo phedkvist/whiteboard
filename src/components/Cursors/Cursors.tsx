@@ -27,10 +27,12 @@ const RenderCursor = ({
   color,
   position,
   id,
+  username,
 }: {
   color: string;
   position: { x: number; y: number };
   id: string;
+  username: string;
 }) => {
   return (
     <svg>
@@ -41,9 +43,9 @@ const RenderCursor = ({
           transition: "transform 120ms linear",
         }}
       >
-        <CursorSvg color={color} name={"John Doe"} />
+        <CursorSvg color={color} />
         <text fill={color} style={{ fontSize: 14 }} x={10} y={30}>
-          {"John Doe"}
+          {username}
         </text>
       </g>
     </svg>
@@ -51,7 +53,7 @@ const RenderCursor = ({
 };
 
 // SVG cursor shape
-function CursorSvg({ color, name }: { color: string; name: string }) {
+function CursorSvg({ color }: { color: string }) {
   return (
     <svg width="32" height="44" viewBox="0 0 24 36" fill="none">
       <path

@@ -3,6 +3,7 @@ import { ChangeActions, SocketEvent, VersionVector } from "./ChangeTypes";
 import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
 import { copy, isNewerVersion } from "../utility";
+import { getDarkColor, getUsername } from "../helpers/user";
 
 export default class History {
   changes: {
@@ -12,6 +13,8 @@ export default class History {
   undoStack: ChangeActions[];
 
   currentUserId: string;
+  username: string;
+  color: string;
   versionVector: VersionVector;
   appState: AppState;
   setAppState: React.Dispatch<React.SetStateAction<AppState>>;
@@ -26,13 +29,17 @@ export default class History {
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
     ws: WebSocket = new WebSocket("ws://localhost:8080"),
-    userId: string = uuidv4()
+    userId: string = uuidv4(),
+    username: string = getUsername(),
+    color: string = getDarkColor()
   ) {
     this.changes = {};
     this.redoStack = [];
     this.undoStack = [];
 
     this.currentUserId = userId;
+    this.username = username;
+    this.color = color;
     this.versionVector = {};
     this.appState = appState;
     this.setAppState = setAppState;
@@ -107,7 +114,8 @@ export default class History {
   sendThrottledCursor(x: number, y: number, lastUpdated: string) {
     const cursor: Cursor = {
       id: this.currentUserId,
-      color: "#00f",
+      username: this.username,
+      color: this.color,
       position: {
         x,
         y,
@@ -144,6 +152,9 @@ export default class History {
         }),
         { ...this.appState.cursors }
       );
-    this.setAppState((oldState) => ({ ...oldState, cursors: newCursors }));
+    this.setAppState((oldState) => ({
+      ...oldState,
+      cursors: { ...oldState.cursors, ...newCursors },
+    }));
   }
 }
