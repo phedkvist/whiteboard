@@ -10,6 +10,7 @@ describe("Cursors", () => {
       {
         id: "blue-cursor",
         color: "#00f",
+        username: "John Doe",
         lastUpdated: new Date().toISOString(),
         position: {
           x: 0,
@@ -25,6 +26,7 @@ describe("Cursors", () => {
     const cursors: Cursor[] = [
       {
         id: "blue-cursor",
+        username: "John Doe",
         color: "#00f",
         lastUpdated: subMinutes(new Date(), 2).toISOString(),
         position: {

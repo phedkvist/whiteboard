@@ -138,6 +138,7 @@ export interface ViewBox {
 
 export interface Cursor {
   id: string;
+  username: string;
   position: {
     x: number;
     y: number;
