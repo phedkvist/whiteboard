@@ -48,6 +48,8 @@ export function createConnection(sync: Sync, wss: WebSocketServer) {
   };
 }
 
-const sync = new Sync();
-const wss = new WebSocketServer({ port: 8080, host: "localhost" });
-wss.on("connection", createConnection(sync, wss));
+if (process.env.TEST_ENV !== "true") {
+  const sync = new Sync();
+  const wss = new WebSocketServer({ port: 8080, host: "localhost" });
+  wss.on("connection", createConnection(sync, wss));
+}
