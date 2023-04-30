@@ -2,5 +2,6 @@
   "bail": 1,
   "verbose": true,
   "preset": "ts-jest",
-  "testEnvironment": "node"
+  "testEnvironment": "node",
+  "setupFiles": ["<rootDir>/.jest/setEnvVars.ts"]
 }

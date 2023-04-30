@@ -28,7 +28,7 @@ const useHistoryRender = (
 ): [History, AppState] => {
   const [appState, setAppState] = useState<AppState>(initialState);
   const history = useMemo(
-    () => new History(appState, setAppState, ws, userId),
+    () => new History(appState, setAppState, ws, userId, "John Doe", "#fff"),
     []
   );
 
@@ -226,7 +226,7 @@ describe("History", () => {
 
     when(() =>
       mockWs.send(
-        '{"type":"cursor","data":[{"id":"unique-user-id","color":"#00f","position":{"x":100,"y":100},"lastUpdated":"2023-03-19T09:31:49.722Z"}]}'
+        '{"type":"cursor","data":[{"id":"unique-user-id","username":"John Doe","color":"#fff","position":{"x":100,"y":100},"lastUpdated":"2023-03-19T09:31:49.722Z"}]}'
       )
     )
       .thenReturn()

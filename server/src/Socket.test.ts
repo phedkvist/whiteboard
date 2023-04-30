@@ -26,7 +26,9 @@ describe("Socket", () => {
 
     const mockWsReceiver = mock<WebSocket>();
     when(() =>
-      mockWsReceiver.send(Buffer.from(JSON.stringify([rect])))
+      mockWsReceiver.send(
+        Buffer.from(JSON.stringify({ type: "changes", data: [rect] }))
+      )
     ).thenReturn();
 
     const clients = new Set<WebSocket>();
