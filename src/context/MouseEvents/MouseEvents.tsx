@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   MouseEventHandler,
   useContext,
@@ -13,7 +13,6 @@ import {
   Corner,
   Rect,
   Text,
-  SelectionCoordinates,
 } from "../../types";
 import {
   resizeRect,
