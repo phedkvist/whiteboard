@@ -11,37 +11,37 @@ export function bresenham(
 
   const dx = endX - startX;
   const dy = endY - startY;
-  const absdx = Math.abs(dx);
-  const absdy = Math.abs(dy);
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
 
   let x = startX;
   let y = startY;
   outputArray.push({ x, y }); // add starting points
 
   // slope < 1
-  if (absdx > absdy) {
-    let d = 2 * absdy - absdx;
+  if (absDx > absDy) {
+    let d = 2 * absDy - absDx;
 
-    for (let i = 0; i < absdx; i++) {
+    for (let i = 0; i < absDx; i++) {
       x = dx < 0 ? x - 1 : x + 1;
       if (d < 0) {
-        d = d + 2 * absdy;
+        d = d + 2 * absDy;
       } else {
         y = dy < 0 ? y - 1 : y + 1;
-        d = d + (2 * absdy - 2 * absdx);
+        d = d + (2 * absDy - 2 * absDx);
       }
       outputArray.push({ x, y });
     }
   } else {
     // case when slope is greater than or equals to 1
-    let d = 2 * absdx - absdy;
+    let d = 2 * absDx - absDy;
 
-    for (let i = 0; i < absdy; i++) {
+    for (let i = 0; i < absDy; i++) {
       y = dy < 0 ? y - 1 : y + 1;
-      if (d < 0) d = d + 2 * absdx;
+      if (d < 0) d = d + 2 * absDx;
       else {
         x = dx < 0 ? x - 1 : x + 1;
-        d = d + 2 * absdx - 2 * absdy;
+        d = d + 2 * absDx - 2 * absDy;
       }
       outputArray.push({ x, y });
     }
