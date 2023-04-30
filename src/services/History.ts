@@ -5,6 +5,8 @@ import _ from "lodash";
 import { copy, isNewerVersion } from "../utility";
 import { getDarkColor, getUsername } from "../helpers/user";
 
+const WS_URL = "ws://localhost:8080";
+
 export default class History {
   changes: {
     [userId: string]: ChangeActions[];
@@ -28,7 +30,7 @@ export default class History {
   constructor(
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-    ws: WebSocket = new WebSocket("ws://localhost:8080"),
+    ws: WebSocket = new WebSocket(WS_URL),
     userId: string = uuidv4(),
     username: string = getUsername(),
     color: string = getDarkColor()
@@ -77,7 +79,7 @@ export default class History {
   }
 
   onClose() {
-    this.ws = new WebSocket("ws://localhost:8080");
+    this.ws = new WebSocket(WS_URL);
     this.ws.addEventListener("message", this.onMessage.bind(this), false);
     this.ws.addEventListener("close", this.onClose.bind(this), false);
     this.ws.addEventListener("open", this.onOpen.bind(this), false);

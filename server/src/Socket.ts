@@ -49,7 +49,10 @@ export function createConnection(sync: Sync, wss: WebSocketServer) {
 }
 
 if (process.env.TEST_ENV !== "true") {
+  console.log("STARTED SERVER");
   const sync = new Sync();
   const wss = new WebSocketServer({ port: 8080, host: "localhost" });
   wss.on("connection", createConnection(sync, wss));
+} else {
+  console.log("NOT STARTING SERVER");
 }
