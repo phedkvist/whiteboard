@@ -8,6 +8,7 @@ import { Cursor } from "../../src/types";
 const rect = createRectAction(100, 100, 1, "unique-id-1", "1");
 const cursor: Cursor = {
   id: "",
+  username: "John Doe",
   position: {
     x: 0,
     y: 0,
