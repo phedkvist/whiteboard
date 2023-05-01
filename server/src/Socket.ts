@@ -1,6 +1,5 @@
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { Sync } from "./Sync";
-import { ChangeActions } from "../../src/services/ChangeTypes";
 import { IncomingMessage } from "http";
 import { isMessage } from "./Helpers";
 
@@ -51,7 +50,7 @@ export function createConnection(sync: Sync, wss: WebSocketServer) {
 if (process.env.TEST_ENV !== "true") {
   console.log("STARTED SERVER");
   const sync = new Sync();
-  const wss = new WebSocketServer({ port: 8080, host: "localhost" });
+  const wss = new WebSocketServer({ port: 8080 });
   wss.on("connection", createConnection(sync, wss));
 } else {
   console.log("NOT STARTING SERVER");
