@@ -12,3 +12,8 @@ variable "elasticContainerRegistryName" {
   default = "whiteboard-app-registry"
   type = string
 }
+
+variable "appRunnerName" {
+  default = "whiteboard-app-runner"
+  type = string
+}
