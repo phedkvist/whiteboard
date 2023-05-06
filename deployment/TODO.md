@@ -1,7 +1,7 @@
 - Create the following resources using Terraform:
-  App Runner
-  ECR
-  S3 bucket
+  ✅ App Runner
+  ✅ ECR
+  ✅ S3 bucket
   Route 53
 
 - Add Github Action that creates a new Container image and published to above ECR, and let App Runner auto deploy.

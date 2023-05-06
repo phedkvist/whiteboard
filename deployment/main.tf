@@ -85,3 +85,21 @@ resource "aws_s3_bucket_policy" "example-policy" {
     aws_s3_bucket_acl.example
   ] 
 }
+
+resource "aws_ecr_repository" "foo" {
+  name = var.elasticContainerRegistryName
+}
+
+resource "aws_ecr_lifecycle_policy" "foopolicy" {
+  repository = aws_ecr_repository.foo.name
+
+  policy = templatefile("ecr-policy.json", {})
+  depends_on = [
+    aws_ecr_repository.foo
+   ]
+}
+
+output "aws_ecr_repository_service" {
+  value = aws_ecr_repository.foo
+  
+}
