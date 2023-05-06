@@ -12,33 +12,33 @@ provider "aws" {
   region = "eu-central-1"
 }
 
-resource "aws_apprunner_auto_scaling_configuration_version" "hello" {                            
+resource "aws_apprunner_auto_scaling_configuration_version" "hello" {
   auto_scaling_configuration_name = "hello"
   # scale between 1-5 containers
   min_size = 1
   max_size = 1
 }
 
-resource "aws_apprunner_service" "hello" {                            
-  auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.hello.arn                          
-         
-  service_name = "hello-app-runner"                          
-                            
-  source_configuration {                              
-    image_repository {                                
-      image_configuration {                                  
-        port = "8000"                                
-      }                                
-      
-      image_identifier       = "public.ecr.aws/aws-containers/hello-app-runner:latest"                                
-      image_repository_type = "ECR_PUBLIC"                              
-    }                          
-                              
-    auto_deployments_enabled = false                            
-  }                          
+resource "aws_apprunner_service" "hello" {
+  auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.hello.arn
+
+  service_name = var.appRunnerName
+
+  source_configuration {
+    image_repository {
+      image_configuration {
+        port = "8000"
+      }
+
+      image_identifier       = "public.ecr.aws/aws-containers/hello-app-runner:latest"
+      image_repository_type = "ECR_PUBLIC"
+    }
+
+    auto_deployments_enabled = false
+  }
 }
-output "apprunner_service_hello" {                            
-  value = aws_apprunner_service.hello                          
+output "apprunner_service_hello" {
+  value = aws_apprunner_service.hello
 }
 
 resource "aws_s3_bucket" "example" {
@@ -101,5 +101,5 @@ resource "aws_ecr_lifecycle_policy" "foopolicy" {
 
 output "aws_ecr_repository_service" {
   value = aws_ecr_repository.foo
-  
+
 }
