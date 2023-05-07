@@ -4,12 +4,12 @@ variable "domainName" {
 }
 
 variable "bucketName" {
-  default = "collaborative-whiteboard-app-test-1234"
+  default = "whiteboard-app-bucket"
   type    = string
 }
 
 variable "elasticContainerRegistryName" {
-  default = "whiteboard-app-registry"
+  default = "whiteboard-app-container-registry"
   type = string
 }
 
