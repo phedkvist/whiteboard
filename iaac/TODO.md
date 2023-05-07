@@ -9,3 +9,5 @@
 
 - Add Github action that publishes to this bucket. (Make sure it never published any server related data).
   https://blog.devgenius.io/deploy-a-react-app-to-amazon-s3-using-github-actions-and-bitbucket-pipelines-74791ae10a7c
+
+Name all resources to something appropriate
