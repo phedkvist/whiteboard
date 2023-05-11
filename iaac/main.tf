@@ -74,70 +74,70 @@ output "aws_ecr_repository_service" {
   value = aws_ecr_repository.server_container_registry
 }
 
-resource "aws_apprunner_auto_scaling_configuration_version" "scaling_config" {
-  auto_scaling_configuration_name = "auto_scaling_config"
-  # scale between 1-5 containers
-  min_size = 1
-  max_size = 1
-}
+# resource "aws_apprunner_auto_scaling_configuration_version" "scaling_config" {
+#   auto_scaling_configuration_name = "auto_scaling_config"
+#   # scale between 1-5 containers
+#   min_size = 1
+#   max_size = 1
+# }
 
-resource "aws_apprunner_service" "server" {
-  auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.scaling_config.arn
+# resource "aws_apprunner_service" "server" {
+#   auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.scaling_config.arn
 
-  service_name = var.appRunnerName
+#   service_name = var.appRunnerName
 
-  source_configuration {
-    image_repository {
-      image_configuration {
-        port = "8080"
-      }
+#   source_configuration {
+#     image_repository {
+#       image_configuration {
+#         port = "8080"
+#       }
 
-      image_identifier       = "${aws_ecr_repository.server_container_registry.repository_url}:latest"
-      image_repository_type = "ECR" // Private repository
-    }
+#       image_identifier       = "${aws_ecr_repository.server_container_registry.repository_url}:latest"
+#       image_repository_type = "ECR" // Private repository
+#     }
 
-    authentication_configuration {
-      access_role_arn =  aws_iam_role.app_runner.arn
-    }
+#     authentication_configuration {
+#       access_role_arn =  aws_iam_role.app_runner.arn
+#     }
 
-    auto_deployments_enabled = true
-  }
+#     auto_deployments_enabled = true
+#   }
 
-  instance_configuration {
-    cpu = "1 vCPU"
-    memory = "2 GB"
-  }
+#   instance_configuration {
+#     cpu = "1 vCPU"
+#     memory = "2 GB"
+#   }
 
-  depends_on = [
-    aws_ecr_repository.server_container_registry,
-    aws_ecr_lifecycle_policy.lifecycle_policy,
-    aws_apprunner_auto_scaling_configuration_version.scaling_config,
-  ]
-}
+#   depends_on = [
+#     aws_ecr_repository.server_container_registry,
+#     aws_ecr_lifecycle_policy.lifecycle_policy,
+#     aws_apprunner_auto_scaling_configuration_version.scaling_config,
+#   ]
+# }
 
-resource "aws_iam_role" "app_runner" {
-  name = "MyAppRunnerServiceRole"
+# resource "aws_iam_role" "app_runner" {
+#   name = "MyAppRunnerServiceRole"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "build.apprunner.amazonaws.com"
-        }
-      },
-    ]
-  })
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Action = "sts:AssumeRole"
+#         Effect = "Allow"
+#         Sid    = ""
+#         Principal = {
+#           Service = "build.apprunner.amazonaws.com"
+#         }
+#       },
+#     ]
+#   })
+# }
 
-resource "aws_iam_role_policy_attachment" "app_runner" {
-  role       = aws_iam_role.app_runner.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
-}
+# resource "aws_iam_role_policy_attachment" "app_runner" {
+#   role       = aws_iam_role.app_runner.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+# }
 
-output "apprunner_service_server" {
-  value = aws_apprunner_service.server
-}
+# output "apprunner_service_server" {
+#   value = aws_apprunner_service.server
+# }
