@@ -5,7 +5,7 @@ import _ from "lodash";
 import { copy, isNewerVersion } from "../utility";
 import { getDarkColor, getUsername } from "../helpers/user";
 
-const WS_URL = "ws://xbpmgxmv6j.eu-central-1.awsapprunner.com:8080";
+const WS_URL = "wss://whiteboard-server.fly.dev";
 
 export default class History {
   changes: {
