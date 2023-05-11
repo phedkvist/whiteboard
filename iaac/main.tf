@@ -16,6 +16,10 @@ resource "aws_s3_bucket" "client" {
   bucket = var.bucketName
 }
 
+output "s3-bucket" {
+  value = aws_s3_bucket.client
+}
+
 resource "aws_s3_bucket_website_configuration" "bucket_web_config" {
   bucket = aws_s3_bucket.client.bucket
   index_document {
@@ -57,22 +61,23 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
   ] 
 }
 
-resource "aws_ecr_repository" "server_container_registry" {
-  name = var.elasticContainerRegistryName
-}
 
-resource "aws_ecr_lifecycle_policy" "lifecycle_policy" {
-  repository = aws_ecr_repository.server_container_registry.name
+# resource "aws_ecr_repository" "server_container_registry" {
+#   name = var.elasticContainerRegistryName
+# }
 
-  policy = templatefile("ecr-policy.json", {})
-  depends_on = [
-    aws_ecr_repository.server_container_registry
-   ]
-}
+# resource "aws_ecr_lifecycle_policy" "lifecycle_policy" {
+#   repository = aws_ecr_repository.server_container_registry.name
 
-output "aws_ecr_repository_service" {
-  value = aws_ecr_repository.server_container_registry
-}
+#   policy = templatefile("ecr-policy.json", {})
+#   depends_on = [
+#     aws_ecr_repository.server_container_registry
+#    ]
+# }
+
+# output "aws_ecr_repository_service" {
+#   value = aws_ecr_repository.server_container_registry
+# }
 
 # resource "aws_apprunner_auto_scaling_configuration_version" "scaling_config" {
 #   auto_scaling_configuration_name = "auto_scaling_config"
