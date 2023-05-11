@@ -96,9 +96,9 @@ resource "aws_apprunner_service" "server" {
       image_repository_type = "ECR" // Private repository
     }
 
-    # authentication_configuration {
-    #   access_role_arn = aws_iam_role.apprunner_iam_role.arn
-    # }
+    authentication_configuration {
+      access_role_arn =  aws_iam_role.app_runner.arn
+    }
 
     auto_deployments_enabled = true
   }
@@ -115,10 +115,28 @@ resource "aws_apprunner_service" "server" {
   ]
 }
 
-# resource "aws_iam_role" "apprunner_iam_role" {
-#   name = "app_runner_role"
-#   assume_role_policy = templatefile("apprunner-policy.json", {})
-# }
+resource "aws_iam_role" "app_runner" {
+  name = "MyAppRunnerServiceRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "build.apprunner.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "app_runner" {
+  role       = aws_iam_role.app_runner.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+}
 
 output "apprunner_service_server" {
   value = aws_apprunner_service.server
