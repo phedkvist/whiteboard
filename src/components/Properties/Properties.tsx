@@ -1,15 +1,48 @@
 import React from "react";
-import "./Properties.css";
 import { ElementType, Element, COLORS } from "../../types";
 import { useAppState } from "../../context/AppState";
 import { copy } from "../../utility";
 import { createUpdateChangeAction } from "../../services/ChangeTypes";
+import styled, { css } from "styled-components";
 
-// When there is a selected element.
-// Find its state and respective properties.
-// Make it possible to change these properties.
-// Update state whenever the element has changed.
-// Different settings for different elements
+const PropertiesContainer = styled.div`
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 2;
+  background-color: #f3f2f2;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid lightgray;
+`;
+
+const transparentStyles = `
+  background-image: linear-gradient(45deg, #808080 25%, transparent 25%),
+    linear-gradient(-45deg, #808080 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #808080 75%),
+    linear-gradient(-45deg, transparent 75%, #808080 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+  `;
+
+const ColorButton = styled.button<{
+  isTransparent: boolean;
+  isActive: boolean;
+}>`
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 2px;
+  ${(props) =>
+    props.isTransparent
+      ? css`
+          ${transparentStyles}
+        `
+      : {}}
+  outline: ${(props) => (props.isActive ? "3px dashed skyblue" : "")};
+`;
 
 export const Properties = () => {
   const {
@@ -31,12 +64,10 @@ export const Properties = () => {
           <>
             <p>Background</p>
             {Object.values(COLORS).map((color) => (
-              <button
+              <ColorButton
                 key={color}
-                className={`color-btn ${
-                  color === "transparent" ? "transparent" : ""
-                } ${element?.style?.fill === color ? "active" : ""}`}
-                // @ts-ignore
+                isActive={element?.style?.fill === color}
+                isTransparent={color === "transparent"}
                 style={
                   color === "transparent" ? {} : { backgroundColor: color }
                 }
@@ -50,12 +81,10 @@ export const Properties = () => {
             ))}
             <p>Stroke color</p>
             {Object.values(COLORS).map((color) => (
-              <button
+              <ColorButton
                 key={color}
-                className={`color-btn ${
-                  color === "transparent" ? "transparent" : ""
-                } ${element?.style?.stroke === color ? "active" : ""}`}
-                // @ts-ignore
+                isActive={element?.style?.stroke === color}
+                isTransparent={color === "transparent"}
                 style={
                   color === "transparent" ? {} : { backgroundColor: color }
                 }
@@ -110,10 +139,5 @@ export const Properties = () => {
     return settings;
   };
 
-  return (
-    <div className="properties" id="properties">
-      <b>Properties {element?.type}</b>
-      {properties(element)}
-    </div>
-  );
+  return <PropertiesContainer>{properties(element)}</PropertiesContainer>;
 };
