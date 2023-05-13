@@ -1,13 +1,66 @@
-import "./Toolbar.css";
-import { SelectionModes, ElementType } from "../../types";
+import { SelectionModes, SelectionMode, ElementType } from "../../types";
 import { useAppState } from "../../context/AppState";
+import styled from "styled-components";
 
-const Toolbar = () => {
-  const { setSelectedElements, setSelectionMode } = useAppState();
+const Toolbar = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 2;
+  background-color: #f3f2f2;
+  border-radius: 4px;
+  border: 1px solid lightgray;
+  padding: 10px;
+`;
+
+const Button = styled.button<{ active: boolean }>`
+  border: none;
+  background-color: ${(props) => (props.active ? "white" : "transparent")};
+  padding: 10px;
+`;
+
+class SelectionModeHelper {
+  static isNone(selectionMode: SelectionMode) {
+    return Boolean(selectionMode.type === SelectionModes.None);
+  }
+  static isAddingRect(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Rect &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
+  static isAddingEllipse(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Ellipse &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
+  static isAddingText(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Text &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
+  static isAddingPolyline(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Polyline &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+}
+
+const ToolbarComponent = () => {
+  const { setSelectedElements, setSelectionMode, selectionMode } =
+    useAppState();
   return (
-    <div className="toolbar" id="toolbar">
-      <button
+    <Toolbar id="toolbar">
+      <Button
         id="toolbar_select"
+        active={SelectionModeHelper.isNone(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -17,9 +70,10 @@ const Toolbar = () => {
         }}
       >
         Pointer
-      </button>
-      <button
+      </Button>
+      <Button
         id="toolbar_rect"
+        active={SelectionModeHelper.isAddingRect(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
 
@@ -30,9 +84,10 @@ const Toolbar = () => {
         }}
       >
         Rect
-      </button>
-      <button
+      </Button>
+      <Button
         id="toolbar_ellipse"
+        active={SelectionModeHelper.isAddingEllipse(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -42,9 +97,10 @@ const Toolbar = () => {
         }}
       >
         Circle
-      </button>
-      <button
+      </Button>
+      <Button
         id="toolbar_text"
+        active={SelectionModeHelper.isAddingText(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -54,9 +110,10 @@ const Toolbar = () => {
         }}
       >
         Text
-      </button>
-      <button
+      </Button>
+      <Button
         id="toolbar_polyline"
+        active={SelectionModeHelper.isAddingPolyline(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -66,9 +123,9 @@ const Toolbar = () => {
         }}
       >
         Line
-      </button>
-    </div>
+      </Button>
+    </Toolbar>
   );
 };
 
-export default Toolbar;
+export default ToolbarComponent;
