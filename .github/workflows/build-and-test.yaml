@@ -1,4 +1,4 @@
-name: Application tests
+name: Application test & build
 
 on:
   push:
@@ -16,18 +16,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Test frontend
+      - name: Build client
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: cd client && npm ci
-      - run: npm run build --if-present
-      - run: npm test
-      - name: Test backend
+      - run: npm run build:client
+      - name: Test client
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: cd server
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm test
+      - run: npm run test:client
+      - name: Build server
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm run build:server
+      - name: Test server
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm run test:server
