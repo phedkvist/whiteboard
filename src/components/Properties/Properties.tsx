@@ -139,5 +139,9 @@ export const Properties = () => {
     return settings;
   };
 
-  return <PropertiesContainer>{properties(element)}</PropertiesContainer>;
+  const elementProperties = properties(element);
+  if (!elementProperties) {
+    return null;
+  }
+  return <PropertiesContainer>{elementProperties}</PropertiesContainer>;
 };

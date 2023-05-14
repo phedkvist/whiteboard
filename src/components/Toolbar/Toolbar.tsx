@@ -14,9 +14,11 @@ const Toolbar = styled.div`
   padding: 10px;
 `;
 
-const Button = styled.button<{ active: boolean }>`
+const Button = styled.button<{ isActive: boolean }>`
   border: none;
-  background-color: ${(props) => (props.active ? "white" : "transparent")};
+  border-bottom: ${(props) =>
+    props.isActive ? "1px solid lightblue" : "none"};
+  color: ${(props) => (props.isActive ? "lightblue" : "black")};
   padding: 10px;
 `;
 
@@ -60,7 +62,7 @@ const ToolbarComponent = () => {
     <Toolbar id="toolbar">
       <Button
         id="toolbar_select"
-        active={SelectionModeHelper.isNone(selectionMode)}
+        isActive={SelectionModeHelper.isNone(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -73,7 +75,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_rect"
-        active={SelectionModeHelper.isAddingRect(selectionMode)}
+        isActive={SelectionModeHelper.isAddingRect(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
 
@@ -87,7 +89,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_ellipse"
-        active={SelectionModeHelper.isAddingEllipse(selectionMode)}
+        isActive={SelectionModeHelper.isAddingEllipse(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -100,7 +102,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_text"
-        active={SelectionModeHelper.isAddingText(selectionMode)}
+        isActive={SelectionModeHelper.isAddingText(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -113,7 +115,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_polyline"
-        active={SelectionModeHelper.isAddingPolyline(selectionMode)}
+        isActive={SelectionModeHelper.isAddingPolyline(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
