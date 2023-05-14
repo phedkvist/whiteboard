@@ -1,9 +1,6 @@
 {
   "scripts": {
-    "build:client": "cd client && npm run build",
-    "build:server": "cd client && npm run build && cd ../server && npm run build",
-    "test": "cd client && npm run test:ci && cd ../server && npm run test",
-    "test:server": "cd server && npm run test",
-    "test:client": "cd client && npm run test:ci"
+    "build-and-test:client": "cd client && npm ci && npm run build && npm run test",
+    "build-and-test:server": "cd client && npm ci && cd ../server && npm install && npm run test"
   }
 }
