@@ -16,23 +16,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Build client
+      - name: Build and test client
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm run build:client
-      - name: Test client
+      - run: npm run build-and-test:client
+      - name: Build and test server
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm run test:client
-      - name: Build server
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm run build:server
-      - name: Test server
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm run test:server
+      - run: npm run build-and-test:server
