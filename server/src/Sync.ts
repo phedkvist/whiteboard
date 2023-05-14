@@ -1,5 +1,8 @@
-import { ChangeActions, VersionVector } from "./../../src/services/ChangeTypes";
-import { copy } from "../../src/utility";
+import {
+  ChangeActions,
+  VersionVector,
+} from "../../client/src/services/ChangeTypes";
+import { copy } from "../../client/src/utility";
 
 type Changes = {
   [userId: string]: ChangeActions[];

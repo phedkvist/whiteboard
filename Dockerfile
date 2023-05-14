@@ -1,9 +1,9 @@
 FROM node:16-alpine
-WORKDIR /usr/src/app
-COPY package*.json ./
+WORKDIR /usr/src/app/client
+COPY client/ .
 RUN npm i
-COPY . .
 WORKDIR /usr/src/app/server
+COPY server/ .
 RUN npm i
 RUN npm run build
 EXPOSE 8080
