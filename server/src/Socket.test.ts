@@ -2,8 +2,8 @@ import { mock, when } from "strong-mock";
 import { onMessage } from "./Socket";
 import { Sync } from "./Sync";
 import { WebSocketServer, WebSocket } from "ws";
-import { createRectAction } from "../../src/services/Actions/Rect";
-import { Cursor } from "../../src/types";
+import { createRectAction } from "../../client/src/services/Actions/Rect";
+import { Cursor } from "../../client/src/types";
 
 const rect = createRectAction(100, 100, 1, "unique-id-1", "1");
 const cursor: Cursor = {

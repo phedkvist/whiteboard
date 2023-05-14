@@ -1,5 +1,5 @@
-import { ChangeActions } from "../../src/services/ChangeTypes";
-import { Cursor } from "../../src/types";
+import { ChangeActions } from "../../client/src/services/ChangeTypes";
+import { Cursor } from "../../client/src/types";
 
 export interface CursorMessage {
   type: "cursor";

@@ -1,5 +1,8 @@
-import { createRectAction } from "./../../src/services/Actions/Rect";
-import { ChangeActions, VersionVector } from "./../../src/services/ChangeTypes";
+import { createRectAction } from "../../client/src/services/Actions/Rect";
+import {
+  ChangeActions,
+  VersionVector,
+} from "../../client/src/services/ChangeTypes";
 import { Sync } from "./Sync";
 import { mock, verify, when } from "strong-mock";
 
