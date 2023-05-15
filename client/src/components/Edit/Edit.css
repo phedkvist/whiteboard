@@ -1,8 +1,0 @@
-.editBar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  background-color: lightcyan;
-  padding: 5px 10px;
-}
