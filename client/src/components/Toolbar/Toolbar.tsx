@@ -16,9 +16,9 @@ const Toolbar = styled.div`
 
 const Button = styled.button<{ isActive: boolean }>`
   border: none;
-  border-bottom: ${(props) =>
-    props.isActive ? "1px solid lightblue" : "none"};
-  color: ${(props) => (props.isActive ? "lightblue" : "black")};
+  border-bottom: ${(props) => (props.isActive ? "1px solid #66bdee" : "none")};
+  color: ${(props) => (props.isActive ? "#66bdee" : "black")};
+  background-color: transparent;
   padding: 10px;
 `;
 
