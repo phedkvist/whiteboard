@@ -165,6 +165,36 @@ describe("MouseEvents", () => {
     });
   });
 
+  const elements = [
+    { btn: "Rect", testId: "rect-svg" },
+    { btn: "Circle", testId: "circle-svg" },
+    { btn: "Text", testId: "text" },
+    { btn: "Line", testId: "polyline" },
+  ];
+  elements.forEach(({ btn, testId }) => {
+    it(`Should delete a ${btn}`, async () => {
+      renderWrapper();
+
+      fireEvent.click(screen.getByText(btn));
+
+      const canvas = screen.getByTestId("canvas");
+      mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 200 });
+      if (btn === "Line") {
+        mouseDragEvent(canvas, { x: 200, y: 200 }, { x: 200, y: 200 });
+      }
+
+      expect(screen.getByTestId(testId)).toBeDefined();
+      const rect = screen.getByTestId(testId);
+      mouseDragEvent(rect, { x: 100, y: 150 }, { x: 100, y: 150 });
+
+      fireEvent.keyDown(window, { code: "Backspace" });
+      await waitFor(async () => {
+        const rect = screen.queryByTestId(testId);
+        expect(rect).toBeNull();
+      });
+    });
+  });
+
   it("Should create a circle", () => {
     const screen = renderWrapper();
 
