@@ -2,6 +2,7 @@ import { ElementState, ElementType, Polyline } from "../../types";
 import {
   ChangeType,
   CreatePolylineAction,
+  DeletePolylineAction,
   UpdatePolylineAction,
 } from "../ChangeTypes";
 
@@ -55,4 +56,20 @@ export const updatePolylineAction = (
   };
 };
 
-export {};
+export const deletePolylineAction = (
+  object: Polyline,
+  userId: string
+): DeletePolylineAction => {
+  return {
+    elementType: ElementType.Polyline,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
+    },
+    changeType: ChangeType.Delete,
+    ephemeral: false,
+  };
+};

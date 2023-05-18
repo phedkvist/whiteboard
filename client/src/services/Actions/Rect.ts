@@ -1,5 +1,10 @@
 import { ElementState, ElementType, Rect } from "../../types";
-import { ChangeType, CreateRectAction, UpdateRectAction } from "../ChangeTypes";
+import {
+  ChangeType,
+  CreateRectAction,
+  DeleteRectAction,
+  UpdateRectAction,
+} from "../ChangeTypes";
 
 export const createRectAction = (
   initialX: number,
@@ -52,5 +57,23 @@ export const updateRectAction = (
     },
     changeType: ChangeType.Update,
     ephemeral,
+  };
+};
+
+export const deleteRectAction = (
+  object: Rect,
+  userId: string
+): DeleteRectAction => {
+  return {
+    elementType: ElementType.Rect,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
+    },
+    changeType: ChangeType.Delete,
+    ephemeral: false,
   };
 };

@@ -1,5 +1,10 @@
 import { ElementState, ElementType, Text } from "../../types";
-import { ChangeType, CreateTextAction, UpdateTextAction } from "../ChangeTypes";
+import {
+  ChangeType,
+  CreateTextAction,
+  DeleteTextAction,
+  UpdateTextAction,
+} from "../ChangeTypes";
 
 export const createTextAction = (
   initialX: number,
@@ -55,4 +60,20 @@ export const updateTextAction = (
   };
 };
 
-export {};
+export const deleteTextAction = (
+  object: Text,
+  userId: string
+): DeleteTextAction => {
+  return {
+    elementType: ElementType.Text,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
+    },
+    changeType: ChangeType.Delete,
+    ephemeral: false,
+  };
+};
