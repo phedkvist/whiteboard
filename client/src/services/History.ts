@@ -114,10 +114,7 @@ export default class History {
         }
       }
       // Deletions always take precedent over any other changes.
-      if (
-        change.changeType === ChangeType.Delete &&
-        !this.tombstones.has(newElement.id)
-      ) {
+      if (change.changeType === ChangeType.Delete) {
         this.tombstones.add(newElement.id);
         delete appState.elements[newElement.id];
       }
