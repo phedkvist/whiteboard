@@ -2,6 +2,7 @@ import { ElementState, ElementType, Ellipse } from "../../types";
 import {
   ChangeType,
   CreateEllipseAction,
+  DeleteEllipseAction,
   UpdateEllipseAction,
 } from "../ChangeTypes";
 
@@ -53,5 +54,23 @@ export const updateEllipseAction = (
     },
     changeType: ChangeType.Update,
     ephemeral,
+  };
+};
+
+export const deleteEllipseAction = (
+  object: Ellipse,
+  userId: string
+): DeleteEllipseAction => {
+  return {
+    elementType: ElementType.Ellipse,
+    object: {
+      ...object,
+      userVersion: {
+        userId,
+        version: object.userVersion.version + 1,
+      },
+    },
+    changeType: ChangeType.Delete,
+    ephemeral: false,
   };
 };

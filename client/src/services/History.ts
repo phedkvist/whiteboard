@@ -1,5 +1,10 @@
 import { AppState, Cursor } from "../types";
-import { ChangeActions, SocketEvent, VersionVector } from "./ChangeTypes";
+import {
+  ChangeActions,
+  ChangeType,
+  SocketEvent,
+  VersionVector,
+} from "./ChangeTypes";
 import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
 import { copy, isNewerVersion } from "../utility";
@@ -11,6 +16,7 @@ export default class History {
   changes: {
     [userId: string]: ChangeActions[];
   };
+  tombstones: Set<string>;
   redoStack: ChangeActions[];
   undoStack: ChangeActions[];
 
@@ -36,6 +42,7 @@ export default class History {
     color: string = getDarkColor()
   ) {
     this.changes = {};
+    this.tombstones = new Set();
     this.redoStack = [];
     this.undoStack = [];
 
@@ -95,14 +102,24 @@ export default class History {
       const { object: newElement } = change;
 
       const prevElement = appState.elements[newElement.id];
-      if (
-        prevElement === undefined ||
-        isNewerVersion(newElement.userVersion, prevElement.userVersion)
-      ) {
+      const shouldUpdate =
+        !this.tombstones.has(newElement.id) &&
+        (prevElement === undefined ||
+          isNewerVersion(newElement.userVersion, prevElement.userVersion));
+
+      if (shouldUpdate) {
         appState.elements[newElement.id] = newElement;
         if (!skipSending) {
           this.onSend([change]);
         }
+      }
+      // Deletions always take precedent over any other changes.
+      if (
+        change.changeType === ChangeType.Delete &&
+        !this.tombstones.has(newElement.id)
+      ) {
+        this.tombstones.add(newElement.id);
+        delete appState.elements[newElement.id];
       }
       return appState;
     });

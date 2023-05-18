@@ -47,6 +47,7 @@ import {
   setupResizeElement,
   setupRotateElement,
 } from "./helpers";
+import { createDeleteChange } from "../../services/Actions";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -101,6 +102,14 @@ export const MouseEventsProvider = ({
     }
     if (e.code === KeyCode.CODE_SPACE) {
       setIsSpacePressed(true);
+    }
+    if (e.code === KeyCode.CODE_BACK_SPACE) {
+      const changes = selectedElements.map((id) => {
+        const element = appState.elements[id];
+        return createDeleteChange(element, history?.currentUserId!);
+      });
+      changes.forEach((c) => history?.addLocalChange(c));
+      setSelectedElements([]);
     }
   };
 
