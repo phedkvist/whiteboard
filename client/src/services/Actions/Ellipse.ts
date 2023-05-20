@@ -24,6 +24,9 @@ export const createEllipseAction = (
     state: ElementState.Creation,
     rotate: 0,
     renderingOrder,
+    style: {
+      fill: "#FDFD96",
+    },
     userVersion: {
       userId,
       version: 1,

@@ -104,6 +104,7 @@ export const MouseEventsProvider = ({
       setIsSpacePressed(true);
     }
     if (e.code === KeyCode.CODE_BACK_SPACE) {
+      if (selectionMode.type === SelectionModes.TextEditing) return;
       const changes = selectedElements.map((id) => {
         const element = appState.elements[id];
         return createDeleteChange(element, history?.currentUserId!);

@@ -12,6 +12,7 @@
 - [ ] Select multiple elements with the mouse and move the elements
 - [x] View-box should be updated to be of the same width and height of current screen.
 - [ ] Add support for several rooms
+- [x] Add ability to delete elements
 
 ## Advanced features
 
