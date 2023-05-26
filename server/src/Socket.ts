@@ -2,6 +2,41 @@ import { WebSocketServer, WebSocket, RawData } from "ws";
 import { Sync } from "./Sync";
 import { IncomingMessage } from "http";
 import { isMessage } from "./Helpers";
+import * as dotenv from "dotenv";
+import { createRoom, initializeDatabase } from "./db";
+import { Client } from "pg";
+import * as E from "fp-ts/lib/Either";
+
+dotenv.config();
+
+const createDbClient = async () => {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+  });
+
+  console.log(process.env.DATABASE_URL);
+  await client.connect();
+
+  // client.query("SELECT NOW()", (err, res) => {
+  //   console.log(err, res);
+  //   client.end();
+  // });
+
+  await initializeDatabase(client);
+  const res = await createRoom(client, {
+    roomId: "e792d262-ed09-4561-b315-50b535c0be5e",
+    name: "First room",
+  });
+
+  if (E.isRight(res)) {
+    const room = res.right;
+  } else {
+    const error = res.left;
+    console.log("HANDLE ERROR");
+  }
+};
+
+createDbClient();
 
 export const toBuffer = (message: { type: string; data: any }) =>
   Buffer.from(JSON.stringify(message));
@@ -27,11 +62,6 @@ export function onMessage(sync: Sync, ws: WebSocket, wss: WebSocketServer) {
         sendToOthers(toBuffer({ type: "changes", data }))
       );
     }
-
-    // Parse incoming message
-    // Client might want to do syncing
-    // Client might want to send updates
-    // Client might send ephemeral changes
   };
 }
 
