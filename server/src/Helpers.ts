@@ -41,12 +41,30 @@ export function isMessage(data: any): data is Message {
   return false;
 }
 
-export const snakeToCamel = (str: string) =>
+export const snakeToCamel = (obj: object) => {
+  return Object.keys(obj).reduce((acc, key) => {
+    return {
+      ...acc,
+      [strSnakeToCamel(key)]: obj[key],
+    };
+  }, {});
+};
+
+export const strSnakeToCamel = (str: string) =>
   str
     .toLowerCase()
     .replace(/([-_][a-z])/g, (group) =>
       group.toUpperCase().replace("-", "").replace("_", "")
     );
 
-export const camelToSnakeCase = (str: string) =>
+export const camelToSnake = (obj: object) => {
+  return Object.keys(obj).reduce((acc, key) => {
+    return {
+      ...acc,
+      [strCamelToSnakeCase(key)]: obj[key],
+    };
+  }, {});
+};
+
+export const strCamelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
