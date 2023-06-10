@@ -1,10 +1,5 @@
 import { ElementState, ElementType, Ellipse } from "../../types";
-import {
-  ChangeType,
-  CreateEllipseAction,
-  DeleteEllipseAction,
-  UpdateEllipseAction,
-} from "../ChangeTypes";
+import { Change, ChangeType } from "../ChangeTypes";
 
 export const createEllipseAction = (
   initialX: number,
@@ -12,7 +7,7 @@ export const createEllipseAction = (
   renderingOrder: number,
   id: string,
   userId: string
-): CreateEllipseAction => {
+): Change => {
   const object: Ellipse = {
     id,
     type: ElementType.Ellipse,
@@ -34,6 +29,7 @@ export const createEllipseAction = (
   };
 
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Ellipse,
     object,
     changeType: ChangeType.Create,
@@ -45,8 +41,9 @@ export const updateEllipseAction = (
   object: Ellipse,
   ephemeral: boolean,
   userId: string
-): UpdateEllipseAction => {
+): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Ellipse,
     object: {
       ...object,
@@ -63,8 +60,9 @@ export const updateEllipseAction = (
 export const deleteEllipseAction = (
   object: Ellipse,
   userId: string
-): DeleteEllipseAction => {
+): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Ellipse,
     object: {
       ...object,

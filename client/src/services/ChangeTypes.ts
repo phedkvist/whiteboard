@@ -1,12 +1,4 @@
-import {
-  Cursor,
-  Element,
-  ElementType,
-  Ellipse,
-  Polyline,
-  Rect,
-  Text,
-} from "../types";
+import { Cursor, Element, ElementType } from "../types";
 import { updateEllipseAction } from "./Actions/Ellipse";
 import { updatePolylineAction } from "./Actions/Polyline";
 import { updateRectAction } from "./Actions/Rect";
@@ -19,74 +11,15 @@ export enum ChangeType {
   Delete = "delete",
 }
 
-export interface ChangeAction {
-  // userVersion: UserVersion;
-  ephemeral: boolean; // Ephemeral changes should not be stored in memory.
-}
-
-// Actions
-interface Create {
-  changeType: ChangeType.Create;
-}
-
-interface Update {
-  changeType: ChangeType.Update;
-}
-
-interface Delete {
-  changeType: ChangeType.Delete;
-}
-
-// Rect Actions
-interface RectAction extends ChangeAction {
-  elementType: ElementType.Rect;
-  object: Rect;
-}
-export interface CreateRectAction extends RectAction, Create {}
-export interface UpdateRectAction extends RectAction, Update {}
-export interface DeleteRectAction extends RectAction, Delete {}
-
-// Ellipse Actions
-interface EllipseAction extends ChangeAction {
-  elementType: ElementType.Ellipse;
-  object: Ellipse;
-}
-export interface CreateEllipseAction extends EllipseAction, Create {}
-export interface UpdateEllipseAction extends EllipseAction, Update {}
-export interface DeleteEllipseAction extends EllipseAction, Delete {}
-
-// Polyline Actions
-interface PolylineAction extends ChangeAction {
-  elementType: ElementType.Polyline;
-  object: Polyline;
-}
-export interface CreatePolylineAction extends PolylineAction, Create {}
-export interface UpdatePolylineAction extends PolylineAction, Update {}
-export interface DeletePolylineAction extends PolylineAction, Delete {}
-
-// Text Actions
-interface TextAction extends ChangeAction {
-  elementType: ElementType.Text;
-  object: Text;
-}
-export interface CreateTextAction extends TextAction, Create {}
-export interface UpdateTextAction extends TextAction, Update {}
-export interface DeleteTextAction extends TextAction, Delete {}
-
-export type ChangeActions =
-  | CreateRectAction
-  | UpdateRectAction
-  | DeleteRectAction
-  | CreateEllipseAction
-  | UpdateEllipseAction
-  | DeleteEllipseAction
-  | CreatePolylineAction
-  | UpdatePolylineAction
-  | DeletePolylineAction
-  | CreateTextAction
-  | UpdateTextAction
-  | UpdateTextAction
-  | DeleteTextAction;
+export type Change = {
+  changeId?: number;
+  roomId?: string;
+  createdAt: string;
+  changeType: ChangeType;
+  elementType: ElementType;
+  object: Element;
+  ephemeral: boolean;
+};
 
 export interface UserVersion {
   userId: string;
@@ -125,7 +58,7 @@ export interface CursorEvent {
 
 export interface ChangeEvent {
   type: "changes";
-  data: ChangeActions[];
+  data: Change[];
 }
 
 export type SocketEvent = CursorEvent | ChangeEvent;

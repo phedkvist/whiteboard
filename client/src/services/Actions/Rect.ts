@@ -1,10 +1,5 @@
 import { ElementState, ElementType, Rect } from "../../types";
-import {
-  ChangeType,
-  CreateRectAction,
-  DeleteRectAction,
-  UpdateRectAction,
-} from "../ChangeTypes";
+import { Change, ChangeType } from "../ChangeTypes";
 
 export const createRectAction = (
   initialX: number,
@@ -12,7 +7,7 @@ export const createRectAction = (
   renderingOrder: number,
   id: string,
   userId: string
-): CreateRectAction => {
+): Change => {
   const rect: Rect = {
     id,
     type: ElementType.Rect,
@@ -34,6 +29,8 @@ export const createRectAction = (
   };
 
   return {
+    createdAt: new Date().toISOString(),
+
     elementType: ElementType.Rect,
     object: rect,
     changeType: ChangeType.Create,
@@ -45,8 +42,9 @@ export const updateRectAction = (
   object: Rect,
   ephemeral: boolean,
   userId: string
-): UpdateRectAction => {
+): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Rect,
     object: {
       ...object,
@@ -60,11 +58,9 @@ export const updateRectAction = (
   };
 };
 
-export const deleteRectAction = (
-  object: Rect,
-  userId: string
-): DeleteRectAction => {
+export const deleteRectAction = (object: Rect, userId: string): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Rect,
     object: {
       ...object,

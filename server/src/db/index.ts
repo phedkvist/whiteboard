@@ -1,7 +1,4 @@
-import { ElementType } from "./../../../client/src/types";
 import { Client } from "pg";
-import { ChangeType } from "../../../client/src/services/ChangeTypes";
-import { Element } from "../../../client/src/types";
 import { createChangesTable, createRoomsTable } from "./migration";
 
 export interface Room {
@@ -9,17 +6,19 @@ export interface Room {
   roomId: string;
 }
 
-export interface Change {
-  changeId?: number;
-  roomId: string;
-  createdAt: Date;
-  changeType: ChangeType;
-  elementType: ElementType;
-  object: Element;
-}
-
 export const initializeDatabase = async (client: Client) => {
   // await createUserTable(client);
   await createRoomsTable(client);
   await createChangesTable(client);
+};
+
+export const createDbClient = async () => {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+  });
+  await client
+    .connect()
+    .then(() => console.log("Connected to database"))
+    .catch((err) => console.error("Failed to connect to database: ", err));
+  return client;
 };

@@ -1,10 +1,5 @@
 import { ElementState, ElementType, Text } from "../../types";
-import {
-  ChangeType,
-  CreateTextAction,
-  DeleteTextAction,
-  UpdateTextAction,
-} from "../ChangeTypes";
+import { Change, ChangeType } from "../ChangeTypes";
 
 export const createTextAction = (
   initialX: number,
@@ -12,7 +7,7 @@ export const createTextAction = (
   renderingOrder: number,
   id: string,
   userId: string
-): CreateTextAction => {
+): Change => {
   const object: Text = {
     id,
     type: ElementType.Text,
@@ -34,6 +29,7 @@ export const createTextAction = (
   };
 
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Text,
     object,
     changeType: ChangeType.Create,
@@ -45,8 +41,9 @@ export const updateTextAction = (
   object: Text,
   ephemeral: boolean,
   userId: string
-): UpdateTextAction => {
+): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Text,
     object: {
       ...object,
@@ -60,11 +57,9 @@ export const updateTextAction = (
   };
 };
 
-export const deleteTextAction = (
-  object: Text,
-  userId: string
-): DeleteTextAction => {
+export const deleteTextAction = (object: Text, userId: string): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Text,
     object: {
       ...object,

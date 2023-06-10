@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useMemo } from "react";
 import {
   initialState,
   SelectionCoordinates,
@@ -59,7 +59,7 @@ export const AppStateProvider = (props: {
     | undefined;
 }) => {
   const [appState, setAppState] = useState<AppState>(initialState);
-  const [history] = useState(() => new History(appState, setAppState));
+  const history = useMemo(() => new History(appState, setAppState), []);
   const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const [hoverElement, setHoverElement] = useState<string | null>(null);
   const [selectionCoordinates, setSelectionCoordinates] =

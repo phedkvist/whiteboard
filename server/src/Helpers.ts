@@ -1,4 +1,4 @@
-import { ChangeActions } from "../../client/src/services/ChangeTypes";
+import { Change } from "../../client/src/services/ChangeTypes";
 import { Cursor } from "../../client/src/types";
 
 export interface CursorMessage {
@@ -8,7 +8,7 @@ export interface CursorMessage {
 
 export interface ChangeMessage {
   type: "changes";
-  data: ChangeActions[];
+  data: Change[];
 }
 
 export type Message = CursorMessage | ChangeMessage;
@@ -33,7 +33,7 @@ export function isMessage(data: any): data is Message {
     Array.isArray(data.data) &&
     data.data.length > 0
   ) {
-    const c = data.data[0] as ChangeActions;
+    const c = data.data[0] as Change;
     return typeof c.changeType === "string" && typeof c.ephemeral === "boolean";
   }
 
@@ -68,3 +68,36 @@ export const camelToSnake = (obj: object) => {
 
 export const strCamelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+export function extractQueryParams(url: string): { [key: string]: string } {
+  const queryParams: { [key: string]: string } = {};
+  const queryString = url.split("?")[1];
+
+  if (queryString) {
+    const params = queryString.split("&");
+    for (const param of params) {
+      const [key, value] = param.split("=");
+      queryParams[key] = decodeURIComponent(value);
+    }
+  }
+
+  return queryParams;
+}
+
+export const mapToUserChanges = (
+  acc: { [userId: string]: Change[] },
+  cur: Change
+) => {
+  const userId = cur.object.userVersion.userId;
+  if (userId in acc) {
+    return {
+      ...acc,
+      [userId]: [...acc[userId], cur],
+    };
+  } else {
+    return {
+      ...acc,
+      [userId]: [cur],
+    };
+  }
+};

@@ -1,6 +1,6 @@
 import History from "./History";
 import { It, mock, resetAll, verifyAll, when } from "strong-mock";
-import { AppState } from "../types";
+import { AppState, Rect } from "../types";
 import { createRectAction, updateRectAction } from "./Actions/Rect";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useMemo, useState } from "react";
@@ -8,7 +8,7 @@ import { cursorStub, eventStub } from "../stubs";
 
 const createRect = createRectAction(0, 0, 1, "unique-id", "b");
 const updatedRect = updateRectAction(
-  createRect.object,
+  createRect.object as Rect,
   false,
   createRect.object.userVersion.userId
 );
