@@ -10,6 +10,8 @@ import {
   initialViewBox,
 } from "../types";
 import History from "../services/History";
+import { useSearchParams } from "react-router-dom";
+import { getRoomId } from "../helpers/user";
 
 interface IAppStateContext {
   appState: AppState;
@@ -58,8 +60,10 @@ export const AppStateProvider = (props: {
     | null
     | undefined;
 }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const roomId = getRoomId(searchParams, setSearchParams);
   const [appState, setAppState] = useState<AppState>(initialState);
-  const history = useMemo(() => new History(appState, setAppState), []);
+  const history = useMemo(() => new History(appState, setAppState, roomId), []);
   const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const [hoverElement, setHoverElement] = useState<string | null>(null);
   const [selectionCoordinates, setSelectionCoordinates] =

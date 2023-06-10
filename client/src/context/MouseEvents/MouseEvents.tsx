@@ -20,7 +20,7 @@ import {
   getMidPoints,
   MouseButtons,
   copy,
-} from "../../utility";
+} from "../../helpers/utility";
 import { useAppState } from "../AppState";
 import { v4 as uuid } from "uuid";
 import {

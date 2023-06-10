@@ -11,7 +11,7 @@ import {
   Element as IElement,
   ElementType,
 } from "../../types";
-import { copy, getClosestCorner } from "../../utility";
+import { copy, getClosestCorner } from "../../helpers/utility";
 
 export const setupResizeElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,

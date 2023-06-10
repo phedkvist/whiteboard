@@ -2,7 +2,7 @@ import React from "react";
 import { useAppState } from "../../context/AppState";
 import useContextMenu from "../../hooks/useContextMenu";
 import "./ContextMenu.css";
-import { copy } from "../../utility";
+import { copy } from "../../helpers/utility";
 import { createUpdateChangeAction } from "../../services/ChangeTypes";
 
 const ContextMenu = () => {

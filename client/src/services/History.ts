@@ -2,17 +2,18 @@ import { AppState, Cursor } from "../types";
 import { Change, ChangeType, SocketEvent, VersionVector } from "./ChangeTypes";
 import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
-import { copy, isNewerVersion } from "../utility";
+import { copy, isNewerVersion } from "../helpers/utility";
 import { getDarkColor, getUsername } from "../helpers/user";
 
 const ROOM_ID = "a7d0e056-6096-491c-a976-623ccaab0f9c";
 
-const WS_URL = "ws://localhost:8080?roomId=" + ROOM_ID;
+const WS_URL = "ws://localhost:8080?roomId=";
 
 export default class History {
   changes: {
     [userId: string]: Change[];
   };
+  roomId: string;
   tombstones: Set<string>;
   redoStack: Change[];
   undoStack: Change[];
@@ -33,12 +34,14 @@ export default class History {
   constructor(
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-    ws: WebSocket = new WebSocket(WS_URL),
+    roomId: string,
+    ws: WebSocket = new WebSocket(WS_URL + roomId),
     userId: string = uuidv4(),
     username: string = getUsername(),
     color: string = getDarkColor()
   ) {
     this.changes = {};
+    this.roomId = roomId;
     this.tombstones = new Set();
     this.redoStack = [];
     this.undoStack = [];

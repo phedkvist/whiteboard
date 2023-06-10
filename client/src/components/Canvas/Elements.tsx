@@ -9,7 +9,7 @@ import {
   Polyline,
   Text,
 } from "../../types";
-import { angleBetweenPoints, copy } from "../../utility";
+import { angleBetweenPoints, copy } from "../../helpers/utility";
 import { updateRectAction } from "../../services/Actions/Rect";
 import History from "../../services/History";
 import { updateEllipseAction } from "../../services/Actions/Ellipse";

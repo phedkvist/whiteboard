@@ -1,4 +1,4 @@
-import { UserVersion } from "./services/ChangeTypes";
+import { UserVersion } from "../services/ChangeTypes";
 import { angleBetweenPoints, isNewerVersion } from "./utility";
 
 describe("Utility functions", () => {
