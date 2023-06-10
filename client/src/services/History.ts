@@ -1,24 +1,21 @@
 import { AppState, Cursor } from "../types";
-import {
-  ChangeActions,
-  ChangeType,
-  SocketEvent,
-  VersionVector,
-} from "./ChangeTypes";
+import { Change, ChangeType, SocketEvent, VersionVector } from "./ChangeTypes";
 import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
 import { copy, isNewerVersion } from "../utility";
 import { getDarkColor, getUsername } from "../helpers/user";
 
-const WS_URL = "wss://whiteboard-server.fly.dev";
+const ROOM_ID = "a7d0e056-6096-491c-a976-623ccaab0f9c";
+
+const WS_URL = "ws://localhost:8080?roomId=" + ROOM_ID;
 
 export default class History {
   changes: {
-    [userId: string]: ChangeActions[];
+    [userId: string]: Change[];
   };
   tombstones: Set<string>;
-  redoStack: ChangeActions[];
-  undoStack: ChangeActions[];
+  redoStack: Change[];
+  undoStack: Change[];
 
   currentUserId: string;
   username: string;
@@ -59,10 +56,15 @@ export default class History {
     this.ws.addEventListener("open", this.onOpen.bind(this), false);
   }
 
-  onSend(changeActions: ChangeActions[]) {
+  onSend(changeActions: Change[]) {
     // Always send an array of changes
     if (this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type: "changes", data: changeActions }));
+      this.ws.send(
+        JSON.stringify({
+          type: "changes",
+          data: changeActions.map((c) => ({ ...c, roomId: ROOM_ID })),
+        })
+      );
     } else {
       // TODO: Place in a queue?
     }
@@ -74,6 +76,7 @@ export default class History {
     try {
       const event = JSON.parse(await ev.data.text()) as SocketEvent;
       if (event.type === "changes") {
+        console.log("RECEIVIING CHANGES: ", event.data);
         const changeActions = event.data;
         this.addRemoteChanges(changeActions);
       } else if (event.type === "cursor") {
@@ -94,7 +97,7 @@ export default class History {
 
   onOpen() {}
 
-  addLocalChange(change: ChangeActions, skipSending: boolean = false) {
+  addLocalChange(change: Change, skipSending: boolean = false) {
     // Add corresponding changes to the undoStack.
     // If we have disconnected, then try submitting later
     this.setAppState((oldAppState) => {
@@ -122,7 +125,7 @@ export default class History {
     });
   }
 
-  addRemoteChanges(changes: ChangeActions[]) {
+  addRemoteChanges(changes: Change[]) {
     // Add change without submitting to server
     changes.forEach((change) => this.addLocalChange(change, true));
   }

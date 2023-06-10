@@ -1,22 +1,26 @@
-import {
-  ChangeActions,
-  VersionVector,
-} from "../../client/src/services/ChangeTypes";
+import { Either, isRight } from "fp-ts/lib/Either";
+import { Change, VersionVector } from "../../client/src/services/ChangeTypes";
 import { copy } from "../../client/src/utility";
+import { insertChanges } from "./db/queries";
 
-type Changes = {
-  [userId: string]: ChangeActions[];
+type UserChanges = {
+  [userId: string]: Change[];
 };
 export class Sync {
-  changes: Changes;
+  userChanges: UserChanges;
+  onSaveToStorage: ReturnType<typeof insertChanges>;
 
-  constructor(initialChanges: Changes = {}) {
-    this.changes = initialChanges;
+  constructor(
+    initialChanges: UserChanges = {},
+    onSaveToStorage: ReturnType<typeof insertChanges>
+  ) {
+    this.userChanges = initialChanges;
+    this.onSaveToStorage = onSaveToStorage;
   }
 
-  addRemoteChange(
-    changes: ChangeActions[],
-    onSend: (changes: ChangeActions[]) => void
+  async addRemoteChange(
+    changes: Change[],
+    onSend: (changes: Change[]) => void
   ) {
     // Only store non ephemeral changes
     const nonEphemeralChanges = changes.filter((c) => !c.ephemeral);
@@ -24,9 +28,14 @@ export class Sync {
       const userId = change.object.userVersion.userId;
       acc[userId] = userId in acc ? [...acc[userId], change] : [change];
       return acc;
-    }, copy(this.changes));
+    }, copy(this.userChanges));
 
-    this.changes = newChanges;
+    this.userChanges = newChanges;
+    const res = await Promise.all(this.onSaveToStorage(nonEphemeralChanges));
+    console.log(
+      "INSERT RES",
+      res.map((r) => console.log(isRight(r)))
+    );
 
     // Send all changes incl non ephemeral changes
     onSend(changes);
@@ -34,9 +43,9 @@ export class Sync {
 
   syncUser(
     clientVersionVector: VersionVector,
-    onSend: (changes: ChangeActions[]) => void
+    onSend: (changes: Change[]) => void
   ) {
-    const serverUserIds = Object.keys(this.changes);
+    const serverUserIds = Object.keys(this.userChanges);
 
     const mergedVector = serverUserIds.reduce((acc, userId) => {
       if (!(userId in acc)) {
@@ -49,11 +58,11 @@ export class Sync {
     }, copy(clientVersionVector));
 
     const missingChanges = Object.keys(mergedVector).reduce(
-      (acc: ChangeActions[], userId) => {
+      (acc: Change[], userId) => {
         if (mergedVector[userId].version === 0) {
-          return [...acc, ...this.changes[userId]];
+          return [...acc, ...this.userChanges[userId]];
         } else {
-          const missingActions = this.changes[userId].slice(
+          const missingActions = this.userChanges[userId].slice(
             mergedVector[userId].version
           );
           return [...acc, ...missingActions];

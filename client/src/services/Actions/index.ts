@@ -1,10 +1,5 @@
 import { Element, ElementType } from "../../types";
-import {
-  DeleteEllipseAction,
-  DeletePolylineAction,
-  DeleteRectAction,
-  DeleteTextAction,
-} from "../ChangeTypes";
+import { Change } from "../ChangeTypes";
 import { deleteEllipseAction } from "./Ellipse";
 import { deletePolylineAction } from "./Polyline";
 import { deleteRectAction } from "./Rect";
@@ -13,11 +8,7 @@ import { deleteTextAction } from "./Text";
 export const createDeleteChange = (
   element: Element,
   userId: string
-):
-  | DeleteRectAction
-  | DeleteEllipseAction
-  | DeletePolylineAction
-  | DeleteTextAction => {
+): Change => {
   if (element.type === ElementType.Rect) {
     return deleteRectAction(element, userId);
   } else if (element.type === ElementType.Ellipse) {

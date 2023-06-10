@@ -1,8 +1,5 @@
 import { createRectAction } from "../../client/src/services/Actions/Rect";
-import {
-  ChangeActions,
-  VersionVector,
-} from "../../client/src/services/ChangeTypes";
+import { Change, VersionVector } from "../../client/src/services/ChangeTypes";
 import { Sync } from "./Sync";
 import { mock, verify, when } from "strong-mock";
 
@@ -12,8 +9,8 @@ const rect3 = createRectAction(200, 200, 3, "unique-id-3", "2");
 
 describe("Sync", () => {
   it("Should send changes from a user to others", () => {
-    const mockOnSend = mock<(changes: ChangeActions[]) => void>();
-    const changesStub: ChangeActions[] = [rect];
+    const mockOnSend = mock<(changes: Change[]) => void>();
+    const changesStub: Change[] = [rect];
     const sync = new Sync();
     when(() => mockOnSend([rect])).thenReturn(undefined);
 
@@ -23,7 +20,7 @@ describe("Sync", () => {
   });
 
   it("Should sync all changes from a version vector", () => {
-    const mockOnSend = mock<(changes: ChangeActions[]) => void>();
+    const mockOnSend = mock<(changes: Change[]) => void>();
 
     const sync = new Sync({
       "1": [rect],
@@ -37,7 +34,7 @@ describe("Sync", () => {
   });
 
   it("Should sync partial changes from version vector", () => {
-    const mockOnSend = mock<(changes: ChangeActions[]) => void>();
+    const mockOnSend = mock<(changes: Change[]) => void>();
 
     const sync = new Sync({
       "1": [rect],

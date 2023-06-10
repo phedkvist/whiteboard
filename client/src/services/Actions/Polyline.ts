@@ -1,10 +1,5 @@
 import { ElementState, ElementType, Polyline } from "../../types";
-import {
-  ChangeType,
-  CreatePolylineAction,
-  DeletePolylineAction,
-  UpdatePolylineAction,
-} from "../ChangeTypes";
+import { Change, ChangeType } from "../ChangeTypes";
 
 export const createPolylineAction = (
   initialX: number,
@@ -12,7 +7,7 @@ export const createPolylineAction = (
   renderingOrder: number,
   id: string,
   userId: string
-): CreatePolylineAction => {
+): Change => {
   const object: Polyline = {
     id,
     type: ElementType.Polyline,
@@ -30,6 +25,7 @@ export const createPolylineAction = (
   };
 
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Polyline,
     object,
     changeType: ChangeType.Create,
@@ -41,8 +37,9 @@ export const updatePolylineAction = (
   object: Polyline,
   ephemeral: boolean,
   userId: string
-): UpdatePolylineAction => {
+): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Polyline,
     object: {
       ...object,
@@ -59,8 +56,9 @@ export const updatePolylineAction = (
 export const deletePolylineAction = (
   object: Polyline,
   userId: string
-): DeletePolylineAction => {
+): Change => {
   return {
+    createdAt: new Date().toISOString(),
     elementType: ElementType.Polyline,
     object: {
       ...object,

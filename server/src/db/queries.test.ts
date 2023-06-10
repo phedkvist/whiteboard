@@ -6,8 +6,8 @@ import {
   insertChange,
   insertRoom,
 } from "./queries";
-import { Change, Room } from ".";
-import { ChangeType } from "../../../client/src/services/ChangeTypes";
+import { Room } from ".";
+import { Change, ChangeType } from "../../../client/src/services/ChangeTypes";
 import { ElementType, ElementState } from "../../../client/src/types";
 import { isRight } from "fp-ts/lib/Either";
 import { camelToSnake } from "../Helpers";
@@ -20,7 +20,8 @@ const roomStub: Room = {
 const CREATED_AT = new Date();
 const changeStub: Change = {
   roomId: roomStub.roomId,
-  createdAt: CREATED_AT,
+  createdAt: CREATED_AT.toISOString(),
+  ephemeral: false,
   changeType: ChangeType.Create,
   elementType: ElementType.Rect,
   object: {

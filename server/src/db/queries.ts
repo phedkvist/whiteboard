@@ -1,7 +1,8 @@
 import { Either, left, right } from "fp-ts/lib/Either";
 import { Client } from "pg";
-import { Room, Change } from ".";
+import { Room } from ".";
 import { snakeToCamel } from "../Helpers";
+import { Change } from "../../../client/src/services/ChangeTypes";
 
 export const insertRoom = async (
   client: Client,
@@ -13,9 +14,9 @@ export const insertRoom = async (
       console.log("TEST: ", test);
       return right(room);
     })
-    .catch((error: Error) => {
-      console.error(error.message);
-      return left(error);
+    .catch((err: Error) => {
+      console.error("Failed to insert room ", room, err);
+      return left(err);
     });
 };
 
@@ -33,9 +34,13 @@ export const getRoomById = async (
       return left(new Error("Unable to find room with id: " + roomId));
     })
     .catch((err) => {
-      console.error(err);
+      console.error("Failed to get room by roomId: " + roomId, err);
       return left(err);
     });
+};
+
+export const insertChanges = (client: Client) => {
+  return (changes: Change[]) => changes.map((c) => insertChange(client, c));
 };
 
 export const insertChange = async (
@@ -44,7 +49,7 @@ export const insertChange = async (
 ): Promise<Either<Error, Change>> => {
   const values = [
     change.roomId,
-    change.createdAt.toISOString(),
+    change.createdAt,
     change.changeType,
     change.elementType,
     JSON.stringify(change.object),
@@ -59,9 +64,9 @@ export const insertChange = async (
       console.log("TEST: ", test);
       return right(change);
     })
-    .catch((error: Error) => {
-      console.error(error);
-      return left(error);
+    .catch((err: Error) => {
+      console.error("Failed to insert change", err);
+      return left(err);
     });
 };
 
@@ -78,7 +83,7 @@ export const getChangesByRoomId = async (
       return right(changes.map((c) => snakeToCamel(c) as unknown as Change));
     })
     .catch((err) => {
-      console.error(err);
+      console.error("Failed to fetch changes by roomId: " + roomId, err);
       return left(err);
     });
 };
