@@ -1,7 +1,7 @@
 import React from "react";
 import { ElementType, Element, COLORS } from "../../types";
 import { useAppState } from "../../context/AppState";
-import { copy } from "../../utility";
+import { copy } from "../../helpers/utility";
 import { createUpdateChangeAction } from "../../services/ChangeTypes";
 import styled, { css } from "styled-components";
 

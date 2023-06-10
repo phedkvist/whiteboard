@@ -5,6 +5,7 @@ import { createRectAction, updateRectAction } from "./Actions/Rect";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useMemo, useState } from "react";
 import { cursorStub, eventStub } from "../stubs";
+import { v4 as uuidv4 } from "uuid";
 
 const createRect = createRectAction(0, 0, 1, "unique-id", "b");
 const updatedRect = updateRectAction(
@@ -12,6 +13,8 @@ const updatedRect = updateRectAction(
   false,
   createRect.object.userVersion.userId
 );
+
+const roomId = uuidv4();
 
 const appStateStub: AppState = {
   elements: { ["unique-id"]: createRect.object },
@@ -28,7 +31,16 @@ const useHistoryRender = (
 ): [History, AppState] => {
   const [appState, setAppState] = useState<AppState>(initialState);
   const history = useMemo(
-    () => new History(appState, setAppState, ws, userId, "John Doe", "#fff"),
+    () =>
+      new History(
+        appState,
+        setAppState,
+        roomId,
+        ws,
+        userId,
+        "John Doe",
+        "#fff"
+      ),
     []
   );
 

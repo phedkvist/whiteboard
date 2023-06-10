@@ -1,5 +1,5 @@
-import { UserVersion } from "./services/ChangeTypes";
-import { Corner, Element, ElementType, Ellipse, Rect, Text } from "./types";
+import { UserVersion } from "../services/ChangeTypes";
+import { Corner, Element, ElementType, Ellipse, Rect, Text } from "../types";
 
 export enum MouseButtons {
   LEFT = 0,

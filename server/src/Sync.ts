@@ -1,6 +1,6 @@
 import { Either, isRight } from "fp-ts/lib/Either";
 import { Change, VersionVector } from "../../client/src/services/ChangeTypes";
-import { copy } from "../../client/src/utility";
+import { copy } from "../../client/src/helpers/utility";
 import { insertChanges } from "./db/queries";
 
 type UserChanges = {
