@@ -32,10 +32,6 @@ export class Sync {
 
     this.userChanges = newChanges;
     const res = await Promise.all(this.onSaveToStorage(nonEphemeralChanges));
-    console.log(
-      "INSERT RES",
-      res.map((r) => console.log(isRight(r)))
-    );
 
     // Send all changes incl non ephemeral changes
     onSend(changes);

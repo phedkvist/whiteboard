@@ -11,7 +11,6 @@ export const insertRoom = async (
   return client
     .query(`INSERT INTO rooms VALUES ('${room.roomId}', '${room.name}');`)
     .then((test) => {
-      console.log("TEST: ", test);
       return right(room);
     })
     .catch((err: Error) => {
@@ -61,7 +60,6 @@ export const insertChange = async (
       `INSERT INTO changes (room_id, created_at, change_type, element_type, object) VALUES (${values});`
     )
     .then((test) => {
-      console.log("TEST: ", test);
       return right(change);
     })
     .catch((err: Error) => {
