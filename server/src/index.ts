@@ -41,7 +41,6 @@ export function onMessage(
     if (message.type === "cursor") {
       sendToOthers(data);
     } else if (message.type === "changes") {
-      console.log("SENDING CHANGES TO OTHERS: ");
       activeRoom.sync.addRemoteChange(message.data, (data) =>
         sendToOthers(toBuffer({ type: "changes", data }))
       );

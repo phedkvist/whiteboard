@@ -65,7 +65,7 @@ export default class History {
       this.ws.send(
         JSON.stringify({
           type: "changes",
-          data: changeActions.map((c) => ({ ...c, roomId: ROOM_ID })),
+          data: changeActions.map((c) => ({ ...c, roomId: this.roomId })),
         })
       );
     } else {
@@ -79,7 +79,6 @@ export default class History {
     try {
       const event = JSON.parse(await ev.data.text()) as SocketEvent;
       if (event.type === "changes") {
-        console.log("RECEIVIING CHANGES: ", event.data);
         const changeActions = event.data;
         this.addRemoteChanges(changeActions);
       } else if (event.type === "cursor") {
@@ -92,13 +91,18 @@ export default class History {
   }
 
   onClose() {
-    this.ws = new WebSocket(WS_URL);
-    this.ws.addEventListener("message", this.onMessage.bind(this), false);
-    this.ws.addEventListener("close", this.onClose.bind(this), false);
-    this.ws.addEventListener("open", this.onOpen.bind(this), false);
+    setTimeout(() => {
+      console.log("Trying to reconnect");
+      this.ws = new WebSocket(WS_URL + this.roomId);
+      this.ws.addEventListener("message", this.onMessage.bind(this), false);
+      this.ws.addEventListener("close", this.onClose.bind(this), false);
+      this.ws.addEventListener("open", this.onOpen.bind(this), false);
+    }, 1000);
   }
 
-  onOpen() {}
+  onOpen() {
+    // TODO: Send sync payload, ie version vector. Then make sure to respond to a request from server to sync up any local changes.
+  }
 
   addLocalChange(change: Change, skipSending: boolean = false) {
     // Add corresponding changes to the undoStack.
