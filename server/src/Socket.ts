@@ -7,7 +7,7 @@ export const toBuffer = (message: { type: string; data: any }) =>
   Buffer.from(JSON.stringify(message));
 
 export function onMessage(sync: Sync, ws: WebSocket, wss: WebSocketServer) {
-  return function (data: RawData) {
+  return async function (data: RawData) {
     const parsedData = JSON.parse(data.toString());
     const message = isMessage(parsedData) ? parsedData : null;
 
@@ -23,7 +23,7 @@ export function onMessage(sync: Sync, ws: WebSocket, wss: WebSocketServer) {
     if (message.type === "cursor") {
       sendToOthers(data);
     } else if (message.type === "changes") {
-      sync.addRemoteChange(message.data, (data) =>
+      await sync.addRemoteChange(message.data, (data) =>
         sendToOthers(toBuffer({ type: "changes", data }))
       );
     }
