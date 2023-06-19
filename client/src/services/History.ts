@@ -5,8 +5,6 @@ import _ from "lodash";
 import { copy, isNewerVersion } from "../helpers/utility";
 import { getDarkColor, getUsername } from "../helpers/user";
 
-const ROOM_ID = "a7d0e056-6096-491c-a976-623ccaab0f9c";
-
 const WS_URL = "ws://localhost:8080?roomId=";
 
 export default class History {
