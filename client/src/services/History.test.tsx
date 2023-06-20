@@ -54,15 +54,13 @@ describe("History", () => {
 
   it("Should handle adding local changes to appState", async () => {
     const mockWs = mock<WebSocket>();
-    when(() => mockWs.addEventListener("message", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("open", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("close", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
+    when(() =>
+      mockWs.addEventListener("message", It.isAny(), false)
+    ).thenReturn();
+    when(() => mockWs.addEventListener("open", It.isAny(), false)).thenReturn();
+    when(() =>
+      mockWs.addEventListener("close", It.isAny(), false)
+    ).thenReturn();
 
     const { result } = renderHook(() => useHistoryRender(mockWs));
     const [history, state] = result.current;
@@ -79,31 +77,32 @@ describe("History", () => {
 
   it("Should send change event to server", async () => {
     const mockWs = mock<WebSocket>();
-    when(() => mockWs.addEventListener("message", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("open", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("close", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
+    when(() =>
+      mockWs.addEventListener("message", It.isAny(), false)
+    ).thenReturn();
+
+    when(() => mockWs.addEventListener("open", It.isAny(), false)).thenReturn();
+
+    when(() =>
+      mockWs.addEventListener("close", It.isAny(), false)
+    ).thenReturn();
+
+    when(() => mockWs.readyState).thenReturn(1);
 
     when(() =>
       mockWs.send(
-        '{"type":"changes","data":[{"elementType":"rect","object":{"id":"unique-id","type":"rect","text":" ","width":0,"height":0,"x":0,"y":0,"state":"creation","rotate":0,"renderingOrder":1,"style":{"fill":"#FDFD96"},"userVersion":{"userId":"b","version":1}},"changeType":"create","ephemeral":false}]}'
+        JSON.stringify({
+          type: "changes",
+          data: [{ ...createRect, roomId }],
+        })
       )
-    )
-      .thenReturn()
-      .atLeast(1);
-
-    when(() => mockWs.readyState).thenReturn(WebSocket.OPEN);
+    ).thenReturn();
 
     const { result } = renderHook(() => useHistoryRender(mockWs));
     const [history, state] = result.current;
 
     act(() => {
-      history.addLocalChange(createRect, false);
+      history.addLocalChange(createRect);
     });
     waitFor(() => {
       expect(state).toEqual(appStateStub);
@@ -114,15 +113,13 @@ describe("History", () => {
 
   it("Should handle updating existing changes to appState", async () => {
     const mockWs = mock<WebSocket>();
-    when(() => mockWs.addEventListener("message", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("open", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("close", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
+    when(() =>
+      mockWs.addEventListener("message", It.isAny(), false)
+    ).thenReturn();
+    when(() => mockWs.addEventListener("open", It.isAny(), false)).thenReturn();
+    when(() =>
+      mockWs.addEventListener("close", It.isAny(), false)
+    ).thenReturn();
 
     const { result } = renderHook(() => useHistoryRender(mockWs, appStateStub));
     const [history, state] = result.current;
@@ -142,15 +139,13 @@ describe("History", () => {
 
   it("Should reject updating existing changes if version is behind", async () => {
     const mockWs = mock<WebSocket>();
-    when(() => mockWs.addEventListener("message", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("open", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("close", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
+    when(() =>
+      mockWs.addEventListener("message", It.isAny(), false)
+    ).thenReturn();
+    when(() => mockWs.addEventListener("open", It.isAny(), false)).thenReturn();
+    when(() =>
+      mockWs.addEventListener("close", It.isAny(), false)
+    ).thenReturn();
 
     const { result } = renderHook(() => useHistoryRender(mockWs, appStateStub));
     const [history, state] = result.current;
@@ -182,15 +177,13 @@ describe("History", () => {
 
   it("Should updating concurrent change if user id is lexicographically higher", async () => {
     const mockWs = mock<WebSocket>();
-    when(() => mockWs.addEventListener("message", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("open", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("close", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
+    when(() =>
+      mockWs.addEventListener("message", It.isAny(), false)
+    ).thenReturn();
+    when(() => mockWs.addEventListener("open", It.isAny(), false)).thenReturn();
+    when(() =>
+      mockWs.addEventListener("close", It.isAny(), false)
+    ).thenReturn();
 
     const { result } = renderHook(() => useHistoryRender(mockWs, appStateStub));
     const [history, state] = result.current;
@@ -226,23 +219,19 @@ describe("History", () => {
 
   it("Should send a local cursor update to other users", async () => {
     const mockWs = mock<WebSocket>();
-    when(() => mockWs.addEventListener("message", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("open", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("close", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
+    when(() =>
+      mockWs.addEventListener("message", It.isAny(), false)
+    ).thenReturn();
+    when(() => mockWs.addEventListener("open", It.isAny(), false)).thenReturn();
+    when(() =>
+      mockWs.addEventListener("close", It.isAny(), false)
+    ).thenReturn();
 
     when(() =>
       mockWs.send(
         '{"type":"cursor","data":[{"id":"unique-user-id","username":"John Doe","color":"#fff","position":{"x":100,"y":100},"lastUpdated":"2023-03-19T09:31:49.722Z"}]}'
       )
-    )
-      .thenReturn()
-      .anyTimes();
+    ).thenReturn();
 
     when(() => mockWs.readyState).thenReturn(WebSocket.OPEN);
 
@@ -257,15 +246,13 @@ describe("History", () => {
 
   it("Should receive cursor updates and update internal state", async () => {
     const mockWs = mock<WebSocket>();
-    when(() => mockWs.addEventListener("message", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("open", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
-    when(() => mockWs.addEventListener("close", It.isAny(), false))
-      .thenReturn()
-      .anyTimes();
+    when(() =>
+      mockWs.addEventListener("message", It.isAny(), false)
+    ).thenReturn();
+    when(() => mockWs.addEventListener("open", It.isAny(), false)).thenReturn();
+    when(() =>
+      mockWs.addEventListener("close", It.isAny(), false)
+    ).thenReturn();
 
     const { result } = renderHook(() =>
       useHistoryRender(mockWs, appStateStub, "unique-user-id")

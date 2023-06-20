@@ -11,7 +11,7 @@ import {
 } from "../types";
 import History from "../services/History";
 import { useSearchParams } from "react-router-dom";
-import { getRoomId } from "../helpers/user";
+import { getRoomId as getRoomIdImport } from "../helpers/user";
 
 interface IAppStateContext {
   appState: AppState;
@@ -51,7 +51,7 @@ export const AppStateContext = createContext<IAppStateContext>({
 
 export const useAppState = () => useContext(AppStateContext);
 
-export const AppStateProvider = (props: {
+type AppStateProviderProps = {
   children:
     | boolean
     | JSX.Element
@@ -59,7 +59,13 @@ export const AppStateProvider = (props: {
     | React.ReactPortal
     | null
     | undefined;
-}) => {
+  getRoomId?: typeof getRoomIdImport;
+};
+
+export const AppStateProvider = ({
+  getRoomId = getRoomIdImport,
+  children,
+}: AppStateProviderProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const roomId = getRoomId(searchParams, setSearchParams);
   const [appState, setAppState] = useState<AppState>(initialState);
@@ -92,7 +98,7 @@ export const AppStateProvider = (props: {
         setViewBox,
       }}
     >
-      {props.children}
+      {children}
     </AppStateContext.Provider>
   );
 };

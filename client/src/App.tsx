@@ -8,9 +8,10 @@ import { MouseEventsProvider } from "./context/MouseEvents/MouseEvents";
 import ContextMenu from "./components/ContextMenu/ContextMenu";
 import { useEffect } from "react";
 import useWindowDimensions from "./hooks/useWindowDimensions";
-import { useAppState } from "./context/AppState";
+import { AppStateProvider, useAppState } from "./context/AppState";
+import { getRoomId as getRoomIdImport } from "./helpers/user";
 
-function App() {
+function App({ getRoomId }: { getRoomId?: typeof getRoomIdImport }) {
   const { height: h, width: w } = useWindowDimensions();
   const { viewBox, setViewBox } = useAppState();
   useEffect(() => {
@@ -21,14 +22,16 @@ function App() {
 
   return (
     <div className="App">
-      <Toolbar />
-      <Properties />
-      <MouseEventsProvider>
-        <Canvas />
-      </MouseEventsProvider>
-      <Edit />
-      <Debugger />
-      <ContextMenu />
+      <AppStateProvider getRoomId={getRoomId}>
+        <Toolbar />
+        <Properties />
+        <MouseEventsProvider>
+          <Canvas />
+        </MouseEventsProvider>
+        <Edit />
+        <Debugger />
+        <ContextMenu />
+      </AppStateProvider>
     </div>
   );
 }

@@ -21,7 +21,7 @@ const cursor: Cursor = {
   color: "",
 };
 
-describe.only("Socket", () => {
+describe("Socket", () => {
   const mockOnSave = mock<ReturnType<typeof insertChanges>>();
   afterEach(resetAll);
 
