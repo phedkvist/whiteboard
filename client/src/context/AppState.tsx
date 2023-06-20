@@ -69,6 +69,7 @@ export const AppStateProvider = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const roomId = getRoomId(searchParams, setSearchParams);
   const [appState, setAppState] = useState<AppState>(initialState);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const history = useMemo(() => new History(appState, setAppState, roomId), []);
   const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const [hoverElement, setHoverElement] = useState<string | null>(null);
