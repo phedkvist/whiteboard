@@ -6,9 +6,9 @@ import { copy, isNewerVersion } from "../helpers/utility";
 import { getDarkColor, getUsername } from "../helpers/user";
 
 const BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "wss://whiteboard-server.fly.dev"
-    : "ws://localhost:8080";
+  process.env.NODE_ENV === "development"
+    ? "ws://localhost:8080"
+    : "wss://whiteboard-server.fly.dev";
 const WS_URL = BASE_URL + "?roomId=";
 
 export default class History {
