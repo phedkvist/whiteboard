@@ -3,7 +3,7 @@ import { getChangesByRoomId, insertChanges } from "./db/queries";
 import WebSocket, { RawData, WebSocketServer } from "ws";
 import { extractQueryParams, isMessage, mapToUserChanges } from "./Helpers";
 import { Sync } from "./Sync";
-import { createDbClient } from "./db";
+import { createDbClient, initializeDatabase } from "./db";
 import { IncomingMessage } from "http";
 import { toBuffer } from "./Socket";
 import { Client } from "pg";
@@ -93,6 +93,7 @@ const onConnection = (wss: WebSocketServer, client: Client) => {
 
 const startServices = async () => {
   const client = await createDbClient();
+  await initializeDatabase(client);
 
   const wss = new WebSocket.Server({ port: 8080 });
   wss.on("connection", onConnection(wss, client));
