@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
-  BrowserRouter,
+  MemoryRouter,
   Route,
   Routes,
   SetURLSearchParams,
@@ -13,11 +13,11 @@ const mockGetRoomId = (
 ) => "1234";
 export const renderWrapper = () => {
   return render(
-    <BrowserRouter basename="/">
+    <MemoryRouter basename="/">
       <Routes>
         <Route path="/" element={<App getRoomId={mockGetRoomId} />} />
       </Routes>
-    </BrowserRouter>
+    </MemoryRouter>
   );
 };
 
