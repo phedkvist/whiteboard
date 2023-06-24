@@ -5,7 +5,10 @@ import _ from "lodash";
 import { copy, isNewerVersion } from "../helpers/utility";
 import { getDarkColor, getUsername } from "../helpers/user";
 
-const WS_URL = "ws://localhost:8080?roomId=";
+const BASE_URL = true
+  ? "wss://whiteboard-server.fly.dev"
+  : "ws://localhost:8080";
+const WS_URL = BASE_URL + "?roomId=";
 
 export default class History {
   changes: {
