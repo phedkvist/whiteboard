@@ -12,14 +12,6 @@ import { AppStateProvider, useAppState } from "./context/AppState";
 import { getRoomId as getRoomIdImport } from "./helpers/user";
 
 function App({ getRoomId }: { getRoomId?: typeof getRoomIdImport }) {
-  const { height: h, width: w } = useWindowDimensions();
-  const { viewBox, setViewBox } = useAppState();
-  useEffect(() => {
-    if (viewBox.h !== h || viewBox.w !== w) {
-      setViewBox({ ...viewBox, h, w });
-    }
-  }, [h, w, viewBox, setViewBox]);
-
   return (
     <div className="App">
       <AppStateProvider getRoomId={getRoomId}>
