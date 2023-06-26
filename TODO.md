@@ -2,22 +2,6 @@
 
 ## Current task
 
-- [ ] Add support for several rooms
-
-Need endpoint for creating a new room.
-Get a uuid that maps to the room.
-Then you should be able to connect to the room.
-
-Either the UUID is created by the user or a request is made so that the room is created by the server.
-Doing the former is more of a local first approach.
-
-Once connected to a room, the sync class either all changes in memory, or if it doesn't, has to fetch all changes from db. Should the sync class always be instantiated or should it always keep things in memory.
-
-Stateless vs stateful?
-
-Stateful requires one server to be "active".
-Stateless requires something lik
-
 # Backlog
 
 ## Basic features
@@ -32,6 +16,9 @@ Stateless requires something lik
 - [ ] Select multiple elements with the mouse and move the elements
 - [x] View-box should be updated to be of the same width and height of current screen.
 - [x] Add ability to delete elements
+- [ ] Add ability to draw lines between shapes
+- [ ] Add multi-point lines that have a rounded corner
+- [x] Add support for several rooms
 
 ## Advanced features
 
