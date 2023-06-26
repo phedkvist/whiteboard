@@ -6,9 +6,7 @@ import { Properties } from "./components/Properties/Properties";
 import { Debugger } from "./components/Debugger/Debugger";
 import { MouseEventsProvider } from "./context/MouseEvents/MouseEvents";
 import ContextMenu from "./components/ContextMenu/ContextMenu";
-import { useEffect } from "react";
-import useWindowDimensions from "./hooks/useWindowDimensions";
-import { AppStateProvider, useAppState } from "./context/AppState";
+import { AppStateProvider } from "./context/AppState";
 import { getRoomId as getRoomIdImport } from "./helpers/user";
 
 function App({ getRoomId }: { getRoomId?: typeof getRoomIdImport }) {
