@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useMemo,
-  useEffect,
-} from "react";
+import React, { createContext, useState, useContext } from "react";
 import {
   initialState,
   SelectionCoordinates,
@@ -18,7 +12,6 @@ import {
 import History from "../services/History";
 import { useSearchParams } from "react-router-dom";
 import { getRoomId as getRoomIdImport } from "../helpers/user";
-import useWindowDimensions from "../hooks/useWindowDimensions";
 import { useViewBox } from "../hooks/useViewBox";
 
 interface IAppStateContext {
