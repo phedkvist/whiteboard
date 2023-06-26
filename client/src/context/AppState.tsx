@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, useMemo } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useMemo,
+  useEffect,
+} from "react";
 import {
   initialState,
   SelectionCoordinates,
@@ -12,6 +18,8 @@ import {
 import History from "../services/History";
 import { useSearchParams } from "react-router-dom";
 import { getRoomId as getRoomIdImport } from "../helpers/user";
+import useWindowDimensions from "../hooks/useWindowDimensions";
+import { useViewBox } from "../hooks/useViewBox";
 
 interface IAppStateContext {
   appState: AppState;
@@ -70,7 +78,7 @@ export const AppStateProvider = ({
   const roomId = getRoomId(searchParams, setSearchParams);
   const [appState, setAppState] = useState<AppState>(initialState);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const history = useMemo(() => new History(appState, setAppState, roomId), []);
+  const [history] = useState(() => new History(appState, setAppState, roomId));
   const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const [hoverElement, setHoverElement] = useState<string | null>(null);
   const [selectionCoordinates, setSelectionCoordinates] =
@@ -79,8 +87,7 @@ export const AppStateProvider = ({
     type: SelectionModes.None,
   });
   const [showDebugger] = useState(false);
-  const [viewBox, setViewBox] = useState(initialViewBox);
-
+  const [viewBox, setViewBox] = useViewBox();
   return (
     <AppStateContext.Provider
       value={{
