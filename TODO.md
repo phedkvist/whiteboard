@@ -2,6 +2,20 @@
 
 ## Current task
 
+Select multiple elements with the mouse and move the elements
+
+Already have the multiple select functionality in place. Now its a matter of making the commands work together with them.
+
+- [x] Delete multiple elements at once.
+- [ ] Move several elements at once.
+- [ ] Resize multiple elements at once.
+
+Can get moving multiple elements at once to work, but need to tweak the resizing of elements as well.
+For group resize the group should be resized but with keeping the width/height ratio.
+
+Consider creating a class for elements, or enforce a certain spec each element has to follow. How they should grow, shrink etc.
+Right now its easy to just completely miss one functionality for a given element, the tests should cover each case, but still, would be cleaner code.
+
 # Backlog
 
 ## Basic features

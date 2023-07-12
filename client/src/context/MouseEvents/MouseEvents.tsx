@@ -13,6 +13,7 @@ import {
   Corner,
   Rect,
   Text,
+  Element as IElement,
 } from "../../types";
 import {
   resizeRect,
@@ -250,10 +251,10 @@ export const MouseEventsProvider = ({
           }
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
-        const element = appState.elements[id];
+        const elements = selectedElements.map((id) => appState.elements[id]);
         setupMovingElement(
           e,
-          element,
+          elements,
           selectedElements,
           setSelectedElements,
           removeSelection,
@@ -360,6 +361,7 @@ export const MouseEventsProvider = ({
       case SelectionModes.MultiSelecting:
       case SelectionModes.TextEditing:
       case SelectionModes.Selected: {
+        console.log("in here");
         if (!(e.target instanceof Element) || e.target.id === "container") {
           setSelectionMode({ ...selectionMode, type: SelectionModes.None });
           setSelectedElements([]);
@@ -386,10 +388,24 @@ export const MouseEventsProvider = ({
           });
         }
 
-        const element = appState.elements[selectedElements[0]];
+        if (selectedElements.includes(e.target.id)) {
+          // pressing already selected element
+          // make sure this works for multi select.
+          // might need another state for MovingMultiSelected.
+          // consider combining multi select and simple select.
+          // TODO: To continue with existing approach we need to store originalElements for all selected elements, its doable.
+          setSelectionMode({
+            ...selectionMode,
+            type: SelectionModes.Selected,
+          });
+        }
+
+        const elements = selectedElements.map((id) =>
+          copy(appState.elements[id])
+        );
         setupMovingElement(
           e,
-          element,
+          elements,
           selectedElements,
           setSelectedElements,
           removeSelection,
@@ -408,6 +424,7 @@ export const MouseEventsProvider = ({
 
     if (e.button !== MouseButtons.LEFT) return;
 
+    console.log(selectionMode.type);
     switch (selectionMode.type) {
       case SelectionModes.Panning: {
         const { startPoint, scale } = viewBox;
@@ -445,27 +462,32 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Selected: {
-        const { startX, startY, originElement } = selectionCoordinates;
-        const selectedElement = selectedElements[0];
-
-        if (selectedElement && startX && startY && originElement) {
-          e.preventDefault();
-          const diffX = clientX - startX;
-          const diffY = clientY - startY;
-
-          const changeAction = setElementCoords(
-            appState.elements[selectedElement],
-            diffX / viewBox.scale,
-            diffY / viewBox.scale,
-            originElement,
-            history?.currentUserId!
+        const { startX, startY, originElements } = selectionCoordinates;
+        console.log(selectedElements.length);
+        selectedElements.forEach((selectedElement) => {
+          const originElement = originElements.find(
+            ({ id }) => id === selectedElement
           );
-          history?.addLocalChange(changeAction);
+          console.log(originElement);
+          if (selectedElement && startX && startY && originElement) {
+            e.preventDefault();
+            const diffX = clientX - startX;
+            const diffY = clientY - startY;
 
-          setSelectionCoordinates({
-            ...selectionCoordinates,
-          });
-        }
+            const changeAction = setElementCoords(
+              appState.elements[selectedElement],
+              diffX / viewBox.scale,
+              diffY / viewBox.scale,
+              originElement,
+              history?.currentUserId!
+            );
+            history?.addLocalChange(changeAction);
+
+            // setSelectionCoordinates({
+            //   ...selectionCoordinates,
+            // });
+          }
+        });
         break;
       }
       case SelectionModes.Add: {
