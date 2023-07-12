@@ -10,7 +10,7 @@ export interface SelectionCoordinates {
   startY: null | number;
   initialWidth: null | number;
   initialHeight: null | number;
-  originElement: null | Element;
+  originElements: Element[];
   xOffset: number;
   yOffset: number;
   selectedCorner: null | Corner;
@@ -177,7 +177,7 @@ export const initialSelectionCoordinates = {
   startX: null,
   initialHeight: null,
   initialWidth: null,
-  originElement: null,
+  originElements: [],
   xOffset: 0,
   yOffset: 0,
   selectedCorner: null,

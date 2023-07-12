@@ -94,7 +94,7 @@ export const setupRotateElement = (
 
 export const setupMovingElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,
-  element: IElement | undefined,
+  originElements: IElement[],
   selectedElements: string[],
   setSelectedElements: (value: React.SetStateAction<string[]>) => void,
   removeSelection: () => void,
@@ -106,21 +106,21 @@ export const setupMovingElement = (
   if (!(e.target instanceof Element)) return;
   const id = e.target.id;
 
-  if (selectedElements.includes(id)) {
-    removeSelection();
-  }
+  // if (selectedElements.includes(id)) {
+  //   console.log("why remove here?");
+  //   removeSelection();
+  // }
   const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-  setSelectedElements([id]);
+  // setSelectedElements([id]);
   const initialX = e.clientX - xOffset;
   const initialY = e.clientY - yOffset;
-  const originElement = element ? copy(element) : null;
   setSelectionCoordinates({
     ...selectionCoordinates,
     initialX,
     initialY,
     startX: e.clientX,
     startY: e.clientY,
-    originElement,
+    originElements,
   });
 };
 
