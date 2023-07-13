@@ -103,7 +103,6 @@ export const setupMovingElement = (
   if (!(e.target instanceof Element)) return;
 
   const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-  // setSelectedElements([id]);
   const initialX = e.clientX - xOffset;
   const initialY = e.clientY - yOffset;
   setSelectionCoordinates({

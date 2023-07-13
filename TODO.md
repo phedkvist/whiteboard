@@ -2,9 +2,10 @@
 
 ## Current task
 
+- [ ] Add ability to draw lines between shapes
+
 - [ ] Resize multiple elements at once.
 
-Can get moving multiple elements at once to work, but need to tweak the resizing of elements as well.
 For group resize the group should be resized but with keeping the width/height ratio.
 
 # Backlog
@@ -22,7 +23,6 @@ For group resize the group should be resized but with keeping the width/height r
 - [x] Move several elements at once.
 - [x] View-box should be updated to be of the same width and height of current screen.
 - [x] Add ability to delete elements
-- [ ] Add ability to draw lines between shapes
 - [ ] Add multi-point lines that have a rounded corner
 - [x] Add support for several rooms
 

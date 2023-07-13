@@ -410,11 +410,6 @@ export const MouseEventsProvider = ({
         }
 
         if (selectedElements.includes(e.target.id)) {
-          // pressing already selected element
-          // make sure this works for multi select.
-          // might need another state for MovingMultiSelected.
-          // consider combining multi select and simple select.
-          // TODO: To continue with existing approach we need to store originalElements for all selected elements, its doable.
           setSelectionMode({
             ...selectionMode,
             type: SelectionModes.Selected,
@@ -497,10 +492,6 @@ export const MouseEventsProvider = ({
               history?.currentUserId!
             );
             history?.addLocalChange(changeAction);
-
-            // setSelectionCoordinates({
-            //   ...selectionCoordinates,
-            // });
           }
         });
         break;
