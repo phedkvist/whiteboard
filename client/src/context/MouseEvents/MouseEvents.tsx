@@ -214,7 +214,10 @@ export const MouseEventsProvider = ({
         const id = e.target.id;
 
         if (id.includes("resize")) {
-          const element = appState.elements[selectedElements[0]];
+          const elementId = id.split("-resize-")[0];
+          const element = appState.elements[elementId];
+          // For now only one element at a time can be resized
+          setSelectedElements([elementId]);
           setupResizeElement(
             e,
             element,
@@ -226,7 +229,10 @@ export const MouseEventsProvider = ({
           );
           break;
         } else if (id.includes("rotate")) {
-          const element = appState.elements[selectedElements[0]];
+          const elementId = id.split("-rotate")[0];
+          const element = appState.elements[elementId];
+          // For now only one element at a time can be resized
+          setSelectedElements([elementId]);
           setupRotateElement(
             e,
             element,
@@ -366,11 +372,28 @@ export const MouseEventsProvider = ({
           return;
         }
         if (e.target.id.includes("resize")) {
-          const element = appState.elements[selectedElements[0]];
+          const elementId = e.target.id.split("-resize")[0];
+          const element = appState.elements[elementId];
+          // For now only one element at a time can be resized
+          setSelectedElements([elementId]);
           setupResizeElement(
             e,
             element,
             viewBox,
+            setSelectionCoordinates,
+            selectionCoordinates,
+            setSelectionMode,
+            selectionMode
+          );
+          break;
+        } else if (e.target.id.includes("rotate")) {
+          const elementId = e.target.id.split("-rotate")[0];
+          const element = appState.elements[elementId];
+          // For now only one element at a time can be resized
+          setSelectedElements([elementId]);
+          setupRotateElement(
+            e,
+            element,
             setSelectionCoordinates,
             selectionCoordinates,
             setSelectionMode,
