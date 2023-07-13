@@ -13,7 +13,6 @@ import {
   Corner,
   Rect,
   Text,
-  Element as IElement,
 } from "../../types";
 import {
   resizeRect,
