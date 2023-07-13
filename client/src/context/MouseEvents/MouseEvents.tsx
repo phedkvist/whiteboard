@@ -251,13 +251,12 @@ export const MouseEventsProvider = ({
           }
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
-        const elements = selectedElements.map((id) => appState.elements[id]);
+        // This path is only for single select
+        setSelectedElements([id]);
+        const elements = [appState.elements[id]];
         setupMovingElement(
           e,
           elements,
-          selectedElements,
-          setSelectedElements,
-          removeSelection,
           setSelectionCoordinates,
           selectionCoordinates
         );
@@ -361,7 +360,6 @@ export const MouseEventsProvider = ({
       case SelectionModes.MultiSelecting:
       case SelectionModes.TextEditing:
       case SelectionModes.Selected: {
-        console.log("in here");
         if (!(e.target instanceof Element) || e.target.id === "container") {
           setSelectionMode({ ...selectionMode, type: SelectionModes.None });
           setSelectedElements([]);
@@ -406,9 +404,6 @@ export const MouseEventsProvider = ({
         setupMovingElement(
           e,
           elements,
-          selectedElements,
-          setSelectedElements,
-          removeSelection,
           setSelectionCoordinates,
           selectionCoordinates
         );
@@ -424,7 +419,6 @@ export const MouseEventsProvider = ({
 
     if (e.button !== MouseButtons.LEFT) return;
 
-    console.log(selectionMode.type);
     switch (selectionMode.type) {
       case SelectionModes.Panning: {
         const { startPoint, scale } = viewBox;
@@ -463,12 +457,10 @@ export const MouseEventsProvider = ({
       }
       case SelectionModes.Selected: {
         const { startX, startY, originElements } = selectionCoordinates;
-        console.log(selectedElements.length);
         selectedElements.forEach((selectedElement) => {
           const originElement = originElements.find(
             ({ id }) => id === selectedElement
           );
-          console.log(originElement);
           if (selectedElement && startX && startY && originElement) {
             e.preventDefault();
             const diffX = clientX - startX;
