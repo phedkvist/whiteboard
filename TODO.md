@@ -2,7 +2,10 @@
 
 ## Current task
 
-- [ ] Add ability to draw lines between shapes
+- [ ] Add ability to draw lines connecting to shapes
+
+Would require the polyline to keep track of whether or not a certain point is connecting to an element, and whereabout on the element?
+Consider how the line would change as the element or the line moves.
 
 - [ ] Resize multiple elements at once.
 

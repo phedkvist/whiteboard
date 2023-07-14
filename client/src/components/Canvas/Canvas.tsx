@@ -85,6 +85,11 @@ const Canvas = () => {
     return Number(a.id > b.id);
   });
 
+  const isEditingPolyline = selectedElements.some(
+    (id) => appState.elements[id].type === ElementType.Polyline
+  );
+  console.log({ isEditingPolyline });
+
   const renderElements = sortedElements.map((e) => {
     const isSelected = selectedElements.includes(e.id);
     const isSelectedCss = isSelected ? "isSelected" : "";
@@ -99,6 +104,7 @@ const Canvas = () => {
           selectionMode={selectionMode}
           rect={e}
           history={history}
+          isEditingPolyline={isEditingPolyline}
         />
       );
     } else if (e.type === ElementType.Ellipse) {
