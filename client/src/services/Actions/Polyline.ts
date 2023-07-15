@@ -12,7 +12,7 @@ export const createPolylineAction = (
     id,
     type: ElementType.Polyline,
     text: "",
-    points: [initialX, initialY],
+    points: [{ x: initialX, y: initialY }],
     rotate: 0,
     stroke: "black",
     state: ElementState.Creation,

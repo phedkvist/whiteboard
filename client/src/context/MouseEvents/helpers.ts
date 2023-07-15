@@ -135,10 +135,10 @@ export const findSelectedElements = (
     switch (element.type) {
       case ElementType.Polyline:
         return isLineInsideRect(
-          element.points[0],
-          element.points[1],
-          element.points[2],
-          element.points[3],
+          element.points[0].x,
+          element.points[0].y,
+          element.points[1].x,
+          element.points[1].y,
           selectRect
         );
       case ElementType.Rect:
@@ -197,9 +197,11 @@ export const setElementCoords = (
     obj.type === ElementType.Polyline &&
     originElement.type === ElementType.Polyline
   ) {
-    const newPoints = originElement.points.map((v, i) =>
-      i % 2 === 0 || i === 0 ? v + diffX : v + diffY
-    );
+    const newPoints = originElement.points.map((v) => {
+      const newX = v.x + diffX;
+      const newY = v.y + diffY;
+      return { ...v, x: newX, y: newY };
+    });
     obj.points = newPoints;
     changeAction = updatePolylineAction(obj, true, currentUserId);
   } else {
