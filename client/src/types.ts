@@ -81,9 +81,29 @@ export interface Text extends ElementBase {
   y: number;
 }
 
+/*
+  ALGO:
+  just connect to a point on the element, and always stick to that point?
+  but just draw the line so it stops right before the overlapping with element when rotated?
+  once the element is rotated, keep rotating this point using a vector towards center, similar to
+  getElementCorners, probably the easiest.
+
+  What happens when the elements grows/shrinks?
+  Adjust point with dx or dy.
+
+  Once the point has been created, it should be easy to redraw the line as the element moves.
+*/
+
+export interface Point {
+  x: number;
+  y: number;
+  connectingElementId?: string;
+  connectingPoint?: number; // 0-100
+}
+
 export interface Polyline extends ElementBase {
   type: ElementType.Polyline;
-  points: number[];
+  points: Point[];
   fill?: string;
   stroke: string;
   strokeWidth: string;

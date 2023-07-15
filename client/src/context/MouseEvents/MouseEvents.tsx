@@ -13,6 +13,7 @@ import {
   Corner,
   Rect,
   Text,
+  Point,
 } from "../../types";
 import {
   resizeRect,
@@ -543,12 +544,11 @@ export const MouseEventsProvider = ({
             )
           );
         } else if (creationElement.type === ElementType.Polyline) {
-          const points = [
-            creationElement.points[0],
-            creationElement.points[1],
-            clientX + viewBox.x,
-            clientY + viewBox.y,
-          ];
+          const endPoint: Point = {
+            x: clientX + viewBox.x,
+            y: clientY + viewBox.y,
+          };
+          const points = [creationElement.points[0], endPoint];
           history?.addLocalChange(
             updatePolylineAction(
               { ...creationElement, points, state: ElementState.Creation },
@@ -646,10 +646,9 @@ export const MouseEventsProvider = ({
                 return;
               }
               const newPoints = [...el.points];
-              const x = selectedCorner === Corner.TopLeft ? 0 : 2;
-              const y = selectedCorner === Corner.TopLeft ? 1 : 3;
-              newPoints[x] = newX;
-              newPoints[y] = newY;
+              const pos = selectedCorner === Corner.TopLeft ? 0 : 1;
+              newPoints[pos].x = newX;
+              newPoints[pos].y = newY;
               history?.addLocalChange(
                 updatePolylineAction(
                   {

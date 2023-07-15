@@ -80,9 +80,9 @@ export const getClosestCorner = (
     // TODO: Ideally polyline and rect should not share this func
     const matchRadius = 10;
     const inLeftPoint =
-      Math.abs(e.points[0] + e.points[1] - (xPos + yPos)) < matchRadius;
+      Math.abs(e.points[0].x + e.points[0].y - (xPos + yPos)) < matchRadius;
     const inRightPoint =
-      Math.abs(e.points[2] + e.points[3] - (xPos + yPos)) < matchRadius;
+      Math.abs(e.points[1].x + e.points[1].y - (xPos + yPos)) < matchRadius;
     if (inLeftPoint) {
       return Corner.TopLeft;
     }

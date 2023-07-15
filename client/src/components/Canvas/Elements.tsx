@@ -392,7 +392,13 @@ const PolylineRenderer = ({
 }) => {
   const { type, renderingOrder, points, id, userVersion, ...props } = polyline;
   const arrowStyle = { fill: props.style?.stroke || "" };
-  const rotate = angleBetweenPoints(points[0], points[1], points[2], points[3]);
+  console.log({ points });
+  const rotate = angleBetweenPoints(
+    points[0].x,
+    points[0].y,
+    points[1]?.x,
+    points[1]?.y
+  );
   return (
     <g id={`g-${id}`}>
       <defs>
@@ -423,7 +429,10 @@ const PolylineRenderer = ({
         key={id}
         id={id}
         {...props}
-        points={points.toString()}
+        points={points
+          .map((p) => [p.x.toString(), p.y.toString()])
+          .flat()
+          .join(" ")}
         className={classes}
         markerStart="url(#arrow-reverse)"
         markerEnd="url(#arrow)"
@@ -431,32 +440,20 @@ const PolylineRenderer = ({
       ></polyline>
       {isSelected && (
         <>
-          <rect
-            id={`${id}-resize-left`}
-            width={8}
-            height={8}
-            x={points[0] - 4}
-            y={points[1] - 4}
-            style={{ cursor: "nwse-resize" }}
-            transform={`rotate(${rotate} ${points[0]} ${points[1]})`}
-            fill={"white"}
-            stroke={"lightblue"}
-            strokeWidth={1}
-          />
-          {points.length > 2 && (
+          {points.map((p) => (
             <rect
-              id={`${id}-resize-right`}
+              id={`${id}-resize-left`}
               width={8}
               height={8}
-              x={points[2] - 4}
-              y={points[3] - 4}
+              x={p.x - 4}
+              y={p.y - 4}
               style={{ cursor: "nwse-resize" }}
-              transform={`rotate(${rotate} ${points[2]} ${points[3]})`}
+              transform={`rotate(${rotate} ${p.x} ${p.y})`}
               fill={"white"}
               stroke={"lightblue"}
               strokeWidth={1}
             />
-          )}
+          ))}
         </>
       )}
     </g>
