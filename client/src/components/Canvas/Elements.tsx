@@ -47,6 +47,136 @@ const getCornerCoords = (e: Element) => {
   }
 };
 
+const renderConnectingBorder = (e: Element) => {
+  const { tL, tR, bR, bL } = getCornerCoords(e);
+  switch (e.type) {
+    case ElementType.Rect:
+    case ElementType.Text:
+      return (
+        <>
+          <line
+            id={`${e.id}-connecting-border-top`}
+            x1={tL.x}
+            x2={tR.x}
+            y1={tL.y - CONNECTING_BORDER_SIZE / 2}
+            y2={tR.y - CONNECTING_BORDER_SIZE / 2}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            stroke-width={CONNECTING_BORDER_SIZE}
+            stroke-linecap={CONNECTING_BORDER_STYLE}
+          />
+          <line
+            id={`${e.id}-connecting-border-bottom`}
+            x1={bL.x}
+            x2={bR.x}
+            y1={bL.y + CONNECTING_BORDER_SIZE / 2}
+            y2={bR.y + CONNECTING_BORDER_SIZE / 2}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            stroke-width={CONNECTING_BORDER_SIZE}
+            stroke-linecap={CONNECTING_BORDER_STYLE}
+          />
+          <line
+            id={`${e.id}-connecting-border-right`}
+            x1={tR.x + CONNECTING_BORDER_SIZE / 2}
+            x2={bR.x + CONNECTING_BORDER_SIZE / 2}
+            y1={tR.y - CONNECTING_BORDER_SIZE}
+            y2={bR.y + CONNECTING_BORDER_SIZE}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            stroke-width={CONNECTING_BORDER_SIZE}
+            stroke-linecap={CONNECTING_BORDER_STYLE}
+          />
+          <line
+            id={`${e.id}-connecting-border-left`}
+            x1={tL.x - CONNECTING_BORDER_SIZE / 2}
+            x2={bL.x - CONNECTING_BORDER_SIZE / 2}
+            y1={tL.y - CONNECTING_BORDER_SIZE}
+            y2={bL.y + CONNECTING_BORDER_SIZE}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            stroke-width={CONNECTING_BORDER_SIZE}
+            stroke-linecap={CONNECTING_BORDER_STYLE}
+          />
+        </>
+      );
+    case ElementType.Ellipse:
+      return (
+        <ellipse
+          rx={e.rx + CONNECTING_BORDER_SIZE}
+          ry={e.ry + CONNECTING_BORDER_SIZE}
+          cx={e.cx}
+          cy={e.cy}
+          fill={"none"}
+          stroke={CONNECTING_BORDER_STROKE}
+          opacity={CONNECTING_BORDER_OPACITY}
+          strokeWidth={CONNECTING_BORDER_SIZE}
+        />
+      );
+    default:
+      return null;
+  }
+};
+
+const renderCornerSelectors = (e: Element) => {
+  const { tL, tR, bR, bL } = getCornerCoords(e);
+  return (
+    <>
+      <circle
+        id={`${e.id}-rotate`}
+        r={5}
+        cx={(tL.x + tR.x) / 2}
+        cy={tL.y - 2 * CORNER_OFFSET}
+        style={{ cursor: "grabbing" }}
+        fill={"white"}
+        stroke={"lightblue"}
+        data-testid="rotate"
+      />
+      <rect
+        id={`${e.id}-resize-top-left`}
+        width={8}
+        height={8}
+        x={tL.x - CORNER_OFFSET}
+        y={tL.y - CORNER_OFFSET}
+        style={{ cursor: "nwse-resize" }}
+        fill={"white"}
+        stroke={"lightblue"}
+      />
+      <rect
+        id={`${e.id}-resize-top-right`}
+        width={8}
+        height={8}
+        x={tR.x}
+        y={tR.y - CORNER_OFFSET}
+        style={{ cursor: "nesw-resize" }}
+        fill={"white"}
+        stroke={"lightblue"}
+      />
+      <rect
+        id={`${e.id}-resize-bottom-right`}
+        data-testid={"resize-bottom-right"}
+        width={8}
+        height={8}
+        x={bR.x}
+        y={bR.y}
+        style={{ cursor: "nwse-resize" }}
+        fill={"white"}
+        stroke={"lightblue"}
+      />
+      <rect
+        id={`${e.id}-resize-bottom-left`}
+        width={8}
+        height={8}
+        x={bL.x - CORNER_OFFSET}
+        y={bL.y}
+        style={{ cursor: "nesw-resize" }}
+        fill={"white"}
+        stroke={"lightblue"}
+      />
+    </>
+  );
+};
+
 const fontFamily = `
 @font-face {
   font-family: 'Kalam';
@@ -61,119 +191,15 @@ const addDraggableCorners = (
   id: string,
   midX: number,
   midY: number,
-  tL: { x: number; y: number },
-  tR: { x: number; y: number },
-  bR: { x: number; y: number },
-  bL: { x: number; y: number },
   rotate: number,
   isSelected: boolean,
+  e: Element,
   isEditingPolyline: boolean = false
 ) => (
   <g key={`g-${id}`} transform={`rotate(${rotate}, ${midX}, ${midY})`}>
-    {renderElement}{" "}
-    {isEditingPolyline && (
-      <>
-        <line
-          id={`${id}-connecting-border-top`}
-          x1={tL.x}
-          x2={tR.x}
-          y1={tL.y - CONNECTING_BORDER_SIZE / 2}
-          y2={tR.y - CONNECTING_BORDER_SIZE / 2}
-          stroke={CONNECTING_BORDER_STROKE}
-          opacity={CONNECTING_BORDER_OPACITY}
-          stroke-width={CONNECTING_BORDER_SIZE}
-          stroke-linecap={CONNECTING_BORDER_STYLE}
-        />
-        <line
-          id={`${id}-connecting-border-bottom`}
-          x1={bL.x}
-          x2={bR.x}
-          y1={bL.y + CONNECTING_BORDER_SIZE / 2}
-          y2={bR.y + CONNECTING_BORDER_SIZE / 2}
-          stroke={CONNECTING_BORDER_STROKE}
-          opacity={CONNECTING_BORDER_OPACITY}
-          stroke-width={CONNECTING_BORDER_SIZE}
-          stroke-linecap={CONNECTING_BORDER_STYLE}
-        />
-        <line
-          id={`${id}-connecting-border-right`}
-          x1={tR.x + CONNECTING_BORDER_SIZE / 2}
-          x2={bR.x + CONNECTING_BORDER_SIZE / 2}
-          y1={tR.y - CONNECTING_BORDER_SIZE}
-          y2={bR.y + CONNECTING_BORDER_SIZE}
-          stroke={CONNECTING_BORDER_STROKE}
-          opacity={CONNECTING_BORDER_OPACITY}
-          stroke-width={CONNECTING_BORDER_SIZE}
-          stroke-linecap={CONNECTING_BORDER_STYLE}
-        />
-        <line
-          id={`${id}-connecting-border-left`}
-          x1={tL.x - CONNECTING_BORDER_SIZE / 2}
-          x2={bL.x - CONNECTING_BORDER_SIZE / 2}
-          y1={tL.y - CONNECTING_BORDER_SIZE}
-          y2={bL.y + CONNECTING_BORDER_SIZE}
-          stroke={CONNECTING_BORDER_STROKE}
-          opacity={CONNECTING_BORDER_OPACITY}
-          stroke-width={CONNECTING_BORDER_SIZE}
-          stroke-linecap={CONNECTING_BORDER_STYLE}
-        />
-      </>
-    )}
-    {isSelected && (
-      <>
-        <circle
-          id={`${id}-rotate`}
-          r={5}
-          cx={(tL.x + tR.x) / 2}
-          cy={tL.y - 2 * CORNER_OFFSET}
-          style={{ cursor: "grabbing" }}
-          fill={"white"}
-          stroke={"lightblue"}
-          data-testid="rotate"
-        />
-        <rect
-          id={`${id}-resize-top-left`}
-          width={8}
-          height={8}
-          x={tL.x - CORNER_OFFSET}
-          y={tL.y - CORNER_OFFSET}
-          style={{ cursor: "nwse-resize" }}
-          fill={"white"}
-          stroke={"lightblue"}
-        />
-        <rect
-          id={`${id}-resize-top-right`}
-          width={8}
-          height={8}
-          x={tR.x}
-          y={tR.y - CORNER_OFFSET}
-          style={{ cursor: "nesw-resize" }}
-          fill={"white"}
-          stroke={"lightblue"}
-        />
-        <rect
-          id={`${id}-resize-bottom-right`}
-          data-testid={"resize-bottom-right"}
-          width={8}
-          height={8}
-          x={bR.x}
-          y={bR.y}
-          style={{ cursor: "nwse-resize" }}
-          fill={"white"}
-          stroke={"lightblue"}
-        />
-        <rect
-          id={`${id}-resize-bottom-left`}
-          width={8}
-          height={8}
-          x={bL.x - CORNER_OFFSET}
-          y={bL.y}
-          style={{ cursor: "nesw-resize" }}
-          fill={"white"}
-          stroke={"lightblue"}
-        />
-      </>
-    )}
+    {renderElement}
+    {isEditingPolyline && renderConnectingBorder(e)}
+    {isSelected && renderCornerSelectors(e)}
   </g>
 );
 
@@ -288,18 +314,14 @@ const RectRenderer = ({
       />
     </g>
   );
-  const { tL, tR, bR, bL } = getCornerCoords(rect);
   return addDraggableCorners(
     renderElement,
     rect.id,
     x + width / 2,
     y + height / 2,
-    tL,
-    tR,
-    bR,
-    bL,
     rotate,
     isSelected,
+    rect,
     isEditingPolyline
   );
 };
@@ -310,12 +332,14 @@ const EllipseRenderer = ({
   isSelected,
   selectionMode,
   history,
+  isEditingPolyline,
 }: {
   ellipse: Ellipse;
   classes: string;
   isSelected: boolean;
   selectionMode: SelectionMode;
   history: History | null;
+  isEditingPolyline: boolean;
 }) => {
   const [text, setText] = useState(ellipse.text);
 
@@ -366,18 +390,15 @@ const EllipseRenderer = ({
       />
     </g>
   );
-  const { tL, tR, bR, bL } = getCornerCoords(ellipse);
   return addDraggableCorners(
     renderElement,
     ellipse.id,
     cx,
     cy,
-    tL,
-    tR,
-    bR,
-    bL,
     rotate,
-    isSelected
+    isSelected,
+    ellipse,
+    isEditingPolyline
   );
 };
 
@@ -402,7 +423,7 @@ const PolylineRenderer = ({
   );
 
   const processedPoints = points.map((p) => {
-    if (p.connectingElementId) {
+    if (p.connectingElementId && p.connectingElementId in elements) {
       const e = elements[p.connectingElementId];
       switch (e.type) {
         case ElementType.Rect:
@@ -482,12 +503,14 @@ const TextRenderer = ({
   classes,
   textElement,
   history,
+  isEditingPolyline,
 }: {
   isSelected: boolean;
   selectionMode: SelectionMode;
   classes: string;
   textElement: Text;
   history: History | null;
+  isEditingPolyline: boolean;
 }) => {
   const [text, setText] = useState(textElement.text);
 
@@ -537,18 +560,15 @@ const TextRenderer = ({
       />
     </g>
   );
-  const { tL, tR, bR, bL } = getCornerCoords(textElement);
   return addDraggableCorners(
     renderElement,
     textElement.id,
     x + width / 2,
     y + height / 2,
-    tL,
-    tR,
-    bR,
-    bL,
     rotate,
-    isSelected
+    isSelected,
+    textElement,
+    isEditingPolyline
   );
 };
 

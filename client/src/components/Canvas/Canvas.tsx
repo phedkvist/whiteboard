@@ -116,6 +116,7 @@ const Canvas = () => {
           ellipse={e}
           history={history}
           selectionMode={selectionMode}
+          isEditingPolyline={isEditingPolyline}
         />
       );
     } else if (e.type === ElementType.Polyline) {
@@ -137,6 +138,7 @@ const Canvas = () => {
           selectionMode={selectionMode}
           textElement={e}
           history={history}
+          isEditingPolyline={isEditingPolyline}
         />
       );
     }
