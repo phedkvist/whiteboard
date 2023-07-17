@@ -95,7 +95,7 @@ export const getClosestCorner = (
     let inRightPoint = false;
     e.points.forEach((p, i) => {
       let inPoint;
-      if (p.connectingElementId) {
+      if (p.connectingElementId && p.connectingElementId in elements) {
         const connectedElement = elements[p.connectingElementId];
         switch (connectedElement.type) {
           case ElementType.Rect:
