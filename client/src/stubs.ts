@@ -1,5 +1,12 @@
 import { CursorEvent, UserVersion } from "./services/ChangeTypes";
-import { Cursor, ElementState, ElementType, Ellipse } from "./types";
+import {
+  Cursor,
+  ElementState,
+  ElementType,
+  Ellipse,
+  Rect,
+  Text,
+} from "./types";
 
 export const cursorStub: Cursor = {
   id: "unique-id",
@@ -86,8 +93,36 @@ export const ellipseStub: Ellipse = {
   type: ElementType.Ellipse,
   cx: 0,
   cy: 0,
-  rx: 0,
-  ry: 0,
+  rx: 5,
+  ry: 5,
+  id: "",
+  state: ElementState.Visible,
+  rotate: 0,
+  renderingOrder: 0,
+  text: "",
+  userVersion,
+};
+
+export const rectStub: Rect = {
+  type: ElementType.Rect,
+  width: 5,
+  height: 5,
+  x: 0,
+  y: 0,
+  id: "",
+  state: ElementState.Visible,
+  rotate: 0,
+  renderingOrder: 0,
+  text: "",
+  userVersion,
+};
+
+export const textStub: Text = {
+  type: ElementType.Text,
+  width: 5,
+  height: 5,
+  x: 0,
+  y: 0,
   id: "",
   state: ElementState.Visible,
   rotate: 0,
