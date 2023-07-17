@@ -1,5 +1,5 @@
-import { CursorEvent } from "./services/ChangeTypes";
-import { Cursor } from "./types";
+import { CursorEvent, UserVersion } from "./services/ChangeTypes";
+import { Cursor, ElementState, ElementType, Ellipse } from "./types";
 
 export const cursorStub: Cursor = {
   id: "unique-id",
@@ -75,4 +75,23 @@ export const eventStub: MessageEvent = {
   // @ts-ignore
   CAPTURING_PHASE: 0,
   NONE: 0,
+};
+
+const userVersion: UserVersion = {
+  userId: "123",
+  version: 0,
+};
+
+export const ellipseStub: Ellipse = {
+  type: ElementType.Ellipse,
+  cx: 0,
+  cy: 0,
+  rx: 0,
+  ry: 0,
+  id: "",
+  state: ElementState.Visible,
+  rotate: 0,
+  renderingOrder: 0,
+  text: "",
+  userVersion,
 };

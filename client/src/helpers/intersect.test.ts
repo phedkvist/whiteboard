@@ -1,4 +1,10 @@
-import { isRectsIntersecting, isPointInsideRect } from "./intersect";
+import { ellipseStub } from "../stubs";
+import { Ellipse } from "../types";
+import {
+  isRectsIntersecting,
+  isPointInsideRect,
+  isPointInsideEllipse,
+} from "./intersect";
 
 const rectA = {
   left: 10,
@@ -42,5 +48,22 @@ describe("Intersecting rect with a point", () => {
 
   it("A point is not intersecting with a rect", () => {
     expect(isPointInsideRect(0, 0, rectA)).toBeFalsy();
+  });
+});
+
+describe("Intersecting an ellipse with a point", () => {
+  it("A point lies inside", () => {
+    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 5, ry: 4 };
+    expect(isPointInsideEllipse(2, 3, ellipse)).toBeTruthy();
+  });
+
+  it("A point lies outside", () => {
+    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 5, ry: 4 };
+    expect(isPointInsideEllipse(7, 2, ellipse)).toBeFalsy();
+  });
+
+  it("A point lies on the boundary", () => {
+    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 5, ry: 3 };
+    expect(isPointInsideEllipse(5, 0, ellipse)).toBeTruthy();
   });
 });
