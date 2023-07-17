@@ -85,10 +85,10 @@ const Canvas = () => {
     return Number(a.id > b.id);
   });
 
+  // console.log({ selectedElements, keys: Object.keys(appState.elements) });
   const isEditingPolyline = selectedElements.some(
-    (id) => appState.elements[id].type === ElementType.Polyline
+    (id) => appState.elements[id]?.type === ElementType.Polyline
   );
-  console.log({ isEditingPolyline });
 
   const renderElements = sortedElements.map((e) => {
     const isSelected = selectedElements.includes(e.id);
@@ -125,6 +125,7 @@ const Canvas = () => {
           isSelected={isSelected}
           classes={classes}
           polyline={e}
+          elements={elements}
         />
       );
     } else {

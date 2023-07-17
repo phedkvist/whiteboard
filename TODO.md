@@ -6,6 +6,14 @@
 
 Would require the polyline to keep track of whether or not a certain point is connecting to an element, and whereabout on the element?
 Consider how the line would change as the element or the line moves.
+Problem: Line is sometimes underneath elements, making it impossible to change the point.
+Solution: Always display "lines" above elements?
+
+- [ ] Add multi-point lines that have a rounded corner
+
+Use quadratic bezier curve. Any point that is in-between other points, should have a rounded corner.
+When drawing it we should instead of drawing the in-between point, we draw two points instead,
+then we can construct the rounded corner using quadratic func.
 
 - [ ] Resize multiple elements at once.
 
@@ -26,7 +34,6 @@ For group resize the group should be resized but with keeping the width/height r
 - [x] Move several elements at once.
 - [x] View-box should be updated to be of the same width and height of current screen.
 - [x] Add ability to delete elements
-- [ ] Add multi-point lines that have a rounded corner
 - [x] Add support for several rooms
 
 ## Advanced features
@@ -40,6 +47,7 @@ For group resize the group should be resized but with keeping the width/height r
 - [ ] Add undo/redo of operations
 - [x] Collaboration features
 - [ ] Snap lines. When moving an element
+- [ ] Add ability to add generic svg objects (different shapes, lines, graphics, arrows etc.)
 
 ## Super advanced
 

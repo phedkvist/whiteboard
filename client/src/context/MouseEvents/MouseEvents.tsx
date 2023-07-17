@@ -14,6 +14,7 @@ import {
   Rect,
   Text,
   Point,
+  Polyline,
 } from "../../types";
 import {
   resizeRect,
@@ -21,6 +22,7 @@ import {
   getMidPoints,
   MouseButtons,
   copy,
+  findOverlappingElement,
 } from "../../helpers/utility";
 import { useAppState } from "../AppState";
 import { v4 as uuid } from "uuid";
@@ -221,6 +223,7 @@ export const MouseEventsProvider = ({
           setupResizeElement(
             e,
             element,
+            appState.elements,
             viewBox,
             setSelectionCoordinates,
             selectionCoordinates,
@@ -379,6 +382,7 @@ export const MouseEventsProvider = ({
           setupResizeElement(
             e,
             element,
+            appState.elements,
             viewBox,
             setSelectionCoordinates,
             selectionCoordinates,
@@ -483,11 +487,14 @@ export const MouseEventsProvider = ({
             e.preventDefault();
             const diffX = clientX - startX;
             const diffY = clientY - startY;
+            const dx = diffX / viewBox.scale;
+            const dy = diffY / viewBox.scale;
 
+            const element = appState.elements[selectedElement];
             const changeAction = setElementCoords(
-              appState.elements[selectedElement],
-              diffX / viewBox.scale,
-              diffY / viewBox.scale,
+              element,
+              dx,
+              dy,
               originElement,
               history?.currentUserId!
             );
@@ -649,6 +656,38 @@ export const MouseEventsProvider = ({
               const pos = selectedCorner === Corner.TopLeft ? 0 : 1;
               newPoints[pos].x = newX;
               newPoints[pos].y = newY;
+              const overlappingElement = findOverlappingElement(
+                newX,
+                newY,
+                Object.values(appState.elements)
+              );
+              if (overlappingElement) {
+                switch (overlappingElement.type) {
+                  case ElementType.Rect:
+                  case ElementType.Text:
+                    newPoints[pos].connectingElementId = overlappingElement.id;
+                    newPoints[pos].connectingPointX =
+                      overlappingElement.x - newX;
+                    newPoints[pos].connectingPointY =
+                      overlappingElement.y - newY;
+                    break;
+                  case ElementType.Ellipse:
+                    newPoints[pos].connectingElementId = overlappingElement.id;
+                    newPoints[pos].connectingPointX =
+                      overlappingElement.cx - newX;
+                    newPoints[pos].connectingPointY =
+                      overlappingElement.cy - newY;
+                    break;
+                  default:
+                    newPoints[pos].connectingElementId = undefined;
+                    newPoints[pos].connectingPointX = undefined;
+                    newPoints[pos].connectingPointY = undefined;
+                }
+              } else {
+                newPoints[pos].connectingElementId = undefined;
+                newPoints[pos].connectingPointX = undefined;
+                newPoints[pos].connectingPointY = undefined;
+              }
               history?.addLocalChange(
                 updatePolylineAction(
                   {

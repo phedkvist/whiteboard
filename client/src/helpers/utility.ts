@@ -1,5 +1,15 @@
+import { CONNECTING_BORDER_SIZE } from "./../components/Canvas/Elements";
 import { UserVersion } from "../services/ChangeTypes";
-import { Corner, Element, ElementType, Ellipse, Rect, Text } from "../types";
+import {
+  Corner,
+  Element,
+  ElementType,
+  Ellipse,
+  Polyline,
+  Rect,
+  Text,
+} from "../types";
+import { isPointInsideEllipse, isPointInsideRect } from "./intersect";
 
 export enum MouseButtons {
   LEFT = 0,
@@ -72,6 +82,7 @@ const getElementCorners = (
 
 export const getClosestCorner = (
   e: Element | null,
+  elements: { [id: string]: Element },
   xPos: number,
   yPos: number
 ): Corner | null => {
@@ -79,16 +90,58 @@ export const getClosestCorner = (
   if (e.type === ElementType.Polyline) {
     // TODO: Ideally polyline and rect should not share this func
     const matchRadius = 10;
-    const inLeftPoint =
-      Math.abs(e.points[0].x + e.points[0].y - (xPos + yPos)) < matchRadius;
-    const inRightPoint =
-      Math.abs(e.points[1].x + e.points[1].y - (xPos + yPos)) < matchRadius;
+    // TODO: Take into account the polyline connectedElement.
+    let inLeftPoint = false;
+    let inRightPoint = false;
+    e.points.forEach((p, i) => {
+      let inPoint;
+      if (p.connectingElementId) {
+        const connectedElement = elements[p.connectingElementId];
+        switch (connectedElement.type) {
+          case ElementType.Rect:
+          case ElementType.Text:
+            inPoint =
+              Math.abs(
+                connectedElement.x -
+                  p.connectingPointX! +
+                  connectedElement.y -
+                  p.connectingPointY! -
+                  (xPos + yPos)
+              ) < matchRadius;
+            break;
+
+          case ElementType.Ellipse:
+            inPoint =
+              Math.abs(
+                connectedElement.cx -
+                  p.connectingPointX! +
+                  connectedElement.cy -
+                  p.connectingPointY! -
+                  (xPos + yPos)
+              ) < matchRadius;
+            break;
+          default:
+            break;
+        }
+      } else {
+        inPoint = Math.abs(p.x + p.y - (xPos + yPos)) < matchRadius;
+      }
+      if (inPoint) {
+        if (i === 0) {
+          inLeftPoint = true;
+        } else {
+          inRightPoint = true;
+        }
+      }
+    });
+
     if (inLeftPoint) {
       return Corner.TopLeft;
     }
     if (inRightPoint) {
       return Corner.TopRight;
     }
+    console.error("Could not find closest corner, something went wrong.");
     return null;
   }
   const { topLeft, topRight, bottomRight, bottomLeft } =
@@ -395,4 +448,31 @@ export function isNewerVersion(v1: UserVersion, v2: UserVersion) {
     v1.version > v2.version ||
     (v1.version === v2.version && v1.userId.localeCompare(v2.userId) < 0)
   );
+}
+
+// Find first overlapping outside border and return that element
+export function findOverlappingElement(
+  x: number,
+  y: number,
+  elements: Element[]
+) {
+  const element = elements.find((e) => {
+    switch (e.type) {
+      case ElementType.Rect:
+      case ElementType.Text:
+        const targetRect = {
+          top: e.y - CONNECTING_BORDER_SIZE,
+          left: e.x - CONNECTING_BORDER_SIZE,
+          bottom: e.y + e.height + CONNECTING_BORDER_SIZE,
+          right: e.x + e.width + CONNECTING_BORDER_SIZE,
+        };
+        return isPointInsideRect(x, y, targetRect);
+      case ElementType.Ellipse:
+        return isPointInsideEllipse(x, y, e, CONNECTING_BORDER_SIZE);
+      default:
+        return false;
+    }
+  });
+
+  return element;
 }

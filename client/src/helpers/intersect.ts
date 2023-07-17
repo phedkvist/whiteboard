@@ -1,3 +1,4 @@
+import { Ellipse } from "../types";
 import { bresenham } from "./bresenham";
 
 type Rect = { left: number; top: number; right: number; bottom: number };
@@ -32,4 +33,21 @@ export function isLineInsideRect(
 ) {
   const points = bresenham(x1, y1, x2, y2);
   return points.some((p) => isPointInsideRect(p.x, p.y, rect));
+}
+
+export function isPointInsideEllipse(
+  x: number,
+  y: number,
+  ellipse: Ellipse,
+  padding: number = 0
+): boolean {
+  const { cx, cy, rx, ry } = ellipse;
+  const dx = x - cx;
+  const dy = y - cy;
+  const normalizedX = dx / (rx + padding);
+  const normalizedY = dy / (ry + padding);
+  const distanceFromCenter =
+    Math.pow(normalizedX, 2) + Math.pow(normalizedY, 2);
+
+  return distanceFromCenter <= 1;
 }
