@@ -17,7 +17,7 @@ import { updateTextAction } from "../../services/Actions/Text";
 import React from "react";
 
 const CORNER_OFFSET = 8;
-const CONNECTING_BORDER_SIZE = 16;
+export const CONNECTING_BORDER_SIZE = 16;
 const CONNECTING_BORDER_STYLE = "butt";
 const CONNECTING_BORDER_OPACITY = 0.1;
 const CONNECTING_BORDER_STROKE = "gray";
@@ -385,20 +385,38 @@ const PolylineRenderer = ({
   polyline,
   classes,
   isSelected,
+  elements,
 }: {
   classes: string;
   polyline: Polyline;
   isSelected: boolean;
+  elements: { [id: string]: Element };
 }) => {
   const { type, renderingOrder, points, id, userVersion, ...props } = polyline;
   const arrowStyle = { fill: props.style?.stroke || "" };
-  console.log({ points });
   const rotate = angleBetweenPoints(
     points[0].x,
     points[0].y,
     points[1]?.x,
     points[1]?.y
   );
+
+  const processedPoints = points.map((p) => {
+    if (p.connectingElementId) {
+      const e = elements[p.connectingElementId];
+      switch (e.type) {
+        case ElementType.Rect:
+        case ElementType.Text:
+          return [e.x - p.connectingPointX!, e.y - p.connectingPointY!];
+        case ElementType.Ellipse:
+          return [e.cx - p.connectingPointX!, e.cy - p.connectingPointY!];
+        default:
+          throw Error("Could not render polyline");
+      }
+    } else {
+      return [p.x, p.y];
+    }
+  });
   return (
     <g id={`g-${id}`}>
       <defs>
@@ -429,10 +447,7 @@ const PolylineRenderer = ({
         key={id}
         id={id}
         {...props}
-        points={points
-          .map((p) => [p.x.toString(), p.y.toString()])
-          .flat()
-          .join(" ")}
+        points={processedPoints.flat().join(" ")}
         className={classes}
         markerStart="url(#arrow-reverse)"
         markerEnd="url(#arrow)"
@@ -440,15 +455,16 @@ const PolylineRenderer = ({
       ></polyline>
       {isSelected && (
         <>
-          {points.map((p) => (
+          {processedPoints.map(([x, y], i) => (
             <rect
-              id={`${id}-resize-left`}
+              // TODO: Revise the id thing
+              id={`${id}-resize-${i === 0 ? "left" : "right"}`}
               width={8}
               height={8}
-              x={p.x - 4}
-              y={p.y - 4}
+              x={x - 4}
+              y={y - 4}
               style={{ cursor: "nwse-resize" }}
-              transform={`rotate(${rotate} ${p.x} ${p.y})`}
+              transform={`rotate(${rotate} ${x} ${y})`}
               fill={"white"}
               stroke={"lightblue"}
               strokeWidth={1}

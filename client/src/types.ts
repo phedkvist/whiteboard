@@ -98,7 +98,15 @@ export interface Point {
   x: number;
   y: number;
   connectingElementId?: string;
-  connectingPoint?: number; // 0-100
+  // if point is connected to another element, then the connectingPointXY describes where on the element the point
+  // is connected. This will work better in the case of concurrent edits.
+  // this however wouldn't work if the element its connected to gets deleted and the element then remains.
+  // could be some edge case in there? ideally it should also be removed in this case.
+  // could we fall back on the original x,y then? could look into the graveyard to see x,y
+  // this needs to be sorted out though :/
+  // easiest is to stop rendering and element that got messed up, so the user needs to fix it again.
+  connectingPointX?: number;
+  connectingPointY?: number;
 }
 
 export interface Polyline extends ElementBase {

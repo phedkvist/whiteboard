@@ -10,12 +10,16 @@ import {
   SelectionMode,
   Element as IElement,
   ElementType,
+  Rect,
+  Polyline,
 } from "../../types";
 import { copy, getClosestCorner } from "../../helpers/utility";
+import { Change } from "../../services/ChangeTypes";
 
 export const setupResizeElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,
   element: IElement,
+  elements: { [id: string]: IElement },
   viewBox: ViewBox,
   setSelectionCoordinates: (
     value: React.SetStateAction<SelectionCoordinates>
@@ -40,7 +44,12 @@ export const setupResizeElement = (
   const initialX = e.clientX / viewBox.scale + viewBox.x;
   const initialY = e.clientY / viewBox.scale + viewBox.y;
 
-  const selectedCorner = getClosestCorner(element, initialX, initialY);
+  const selectedCorner = getClosestCorner(
+    element,
+    elements,
+    initialX,
+    initialY
+  );
   if (!selectedCorner) return;
   setSelectionCoordinates({
     ...selectionCoordinates,
