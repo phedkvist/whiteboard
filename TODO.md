@@ -8,6 +8,8 @@ Would require the polyline to keep track of whether or not a certain point is co
 Consider how the line would change as the element or the line moves.
 Problem: Line is sometimes underneath elements, making it impossible to change the point.
 Solution: Always display "lines" above elements?
+Problem: What should happen to the point if the element is rotated?
+Solution: add another parameter that tells how much the element was rotated when the point was created.
 
 - [ ] Add multi-point lines that have a rounded corner
 

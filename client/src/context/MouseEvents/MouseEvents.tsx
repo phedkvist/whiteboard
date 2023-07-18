@@ -332,6 +332,7 @@ export const MouseEventsProvider = ({
                   "Expected selected element to be a polyline element"
                 );
               }
+              // TODO: Check if it should be connected to an element.
               history?.addLocalChange(
                 updatePolylineAction(
                   {
@@ -350,6 +351,7 @@ export const MouseEventsProvider = ({
               });
               setSelectedElements([]);
             } else {
+              // TODO: Check if the first point is connected to an element
               history?.addLocalChange(
                 createPolylineAction(
                   initialX,
