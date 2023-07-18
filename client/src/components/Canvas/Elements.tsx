@@ -17,7 +17,7 @@ import { updateTextAction } from "../../services/Actions/Text";
 import React from "react";
 
 const CORNER_OFFSET = 8;
-export const CONNECTING_BORDER_SIZE = 16;
+export const CONNECTING_BORDER_SIZE = 8;
 const CONNECTING_BORDER_STYLE = "butt";
 const CONNECTING_BORDER_OPACITY = 0.1;
 const CONNECTING_BORDER_STROKE = "gray";
@@ -103,8 +103,8 @@ const renderConnectingBorder = (e: Element) => {
     case ElementType.Ellipse:
       return (
         <ellipse
-          rx={e.rx + CONNECTING_BORDER_SIZE}
-          ry={e.ry + CONNECTING_BORDER_SIZE}
+          rx={e.rx + CONNECTING_BORDER_SIZE / 2}
+          ry={e.ry + CONNECTING_BORDER_SIZE / 2}
           cx={e.cx}
           cy={e.cy}
           fill={"none"}
