@@ -14,7 +14,6 @@ import {
   Rect,
   Text,
   Point,
-  Polyline,
 } from "../../types";
 import {
   resizeRect,
