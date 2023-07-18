@@ -1,4 +1,4 @@
-import { ellipseStub } from "../stubs";
+import { ellipseStub, rectStub } from "../stubs";
 import { Ellipse } from "../types";
 import {
   isRectsIntersecting,
@@ -39,15 +39,34 @@ describe("Intersecting rect with another rect", () => {
 
 describe("Intersecting rect with a point", () => {
   it("A point intersects with a rect", () => {
-    expect(isPointInsideRect(20, 20, rectA)).toBeTruthy();
+    const rect = { ...rectStub, x: 10, y: 10, width: 20, height: 20 };
+    expect(isPointInsideRect(20, 20, rect)).toBeTruthy();
   });
 
   it("A point is intersecting rect on the edge", () => {
-    expect(isPointInsideRect(10, 10, rectA)).toBeTruthy();
+    const rect = { ...rectStub, x: 10, y: 10, width: 20, height: 20 };
+
+    expect(isPointInsideRect(10, 10, rect)).toBeTruthy();
   });
 
   it("A point is not intersecting with a rect", () => {
-    expect(isPointInsideRect(0, 0, rectA)).toBeFalsy();
+    const rect = { ...rectStub, x: 10, y: 10, width: 20, height: 20 };
+    expect(isPointInsideRect(0, 0, rect)).toBeFalsy();
+  });
+
+  it("A point is inside the rotated rectangle", () => {
+    const rect = { ...rectStub, x: 0, y: 0, width: 4, height: 4, rotate: 45 };
+    expect(isPointInsideRect(2, 2, rect)).toBeTruthy();
+  });
+
+  it("A point is outside the rotated rectangle", () => {
+    const rect = { ...rectStub, x: 0, y: 0, width: 4, height: 4, rotate: 45 };
+    expect(isPointInsideRect(6, 6, rect)).toBeFalsy();
+  });
+
+  it("A point is on the edge of the rotated rect", () => {
+    const rect = { ...rectStub, x: 0, y: 0, width: 4, height: 4, rotate: 45 };
+    expect(isPointInsideRect(2, 0, rect)).toBeTruthy();
   });
 });
 
