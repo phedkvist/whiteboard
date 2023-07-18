@@ -66,4 +66,19 @@ describe("Intersecting an ellipse with a point", () => {
     const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 5, ry: 3 };
     expect(isPointInsideEllipse(5, 0, ellipse)).toBeTruthy();
   });
+
+  it("A point lies inside the rotated ellipse", () => {
+    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 4, ry: 3, rotate: 45 };
+    expect(isPointInsideEllipse(2, 1, ellipse)).toBeTruthy();
+  });
+
+  it("A point lies outside the rotated ellipse", () => {
+    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 4, ry: 3, rotate: 45 };
+    expect(isPointInsideEllipse(5, 2, ellipse)).toBeFalsy();
+  });
+
+  it("A point lies on the boundary of the rotated ellipse", () => {
+    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 4, ry: 3, rotate: 45 };
+    expect(isPointInsideEllipse(0, 3, ellipse)).toBeTruthy();
+  });
 });
