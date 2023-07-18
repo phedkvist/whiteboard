@@ -460,13 +460,7 @@ export function findOverlappingElement(
     switch (e.type) {
       case ElementType.Rect:
       case ElementType.Text:
-        const targetRect = {
-          top: e.y - CONNECTING_BORDER_SIZE,
-          left: e.x - CONNECTING_BORDER_SIZE,
-          bottom: e.y + e.height + CONNECTING_BORDER_SIZE,
-          right: e.x + e.width + CONNECTING_BORDER_SIZE,
-        };
-        return isPointInsideRect(x, y, targetRect);
+        return isPointInsideRect(x, y, e, CONNECTING_BORDER_SIZE);
       case ElementType.Ellipse:
         return isPointInsideEllipse(x, y, e, CONNECTING_BORDER_SIZE);
       default:
