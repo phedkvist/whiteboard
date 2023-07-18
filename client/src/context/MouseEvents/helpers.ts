@@ -219,3 +219,34 @@ export const setElementCoords = (
 
   return changeAction;
 };
+
+export const getOverlappingPoint = (
+  newX: number,
+  newY: number,
+  overlappingElement: IElement | undefined
+) => {
+  if (overlappingElement) {
+    switch (overlappingElement.type) {
+      case ElementType.Rect:
+      case ElementType.Text:
+        return {
+          connectingElementId: overlappingElement.id,
+          connectingPointX: overlappingElement.x - newX,
+          connectingPointY: overlappingElement.y - newY,
+        };
+      case ElementType.Ellipse:
+        return {
+          connectingElementId: overlappingElement.id,
+          connectingPointX: overlappingElement.cx - newX,
+          connectingPointY: overlappingElement.cy - newY,
+        };
+      default:
+        break;
+    }
+  }
+  return {
+    connectingElementId: undefined,
+    connectingPointX: undefined,
+    connectingPointY: undefined,
+  };
+};

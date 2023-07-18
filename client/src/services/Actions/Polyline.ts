@@ -1,9 +1,8 @@
-import { ElementState, ElementType, Polyline } from "../../types";
+import { ElementState, ElementType, Point, Polyline } from "../../types";
 import { Change, ChangeType } from "../ChangeTypes";
 
 export const createPolylineAction = (
-  initialX: number,
-  initialY: number,
+  point: Point,
   renderingOrder: number,
   id: string,
   userId: string
@@ -12,7 +11,7 @@ export const createPolylineAction = (
     id,
     type: ElementType.Polyline,
     text: "",
-    points: [{ x: initialX, y: initialY }],
+    points: [point],
     rotate: 0,
     stroke: "black",
     state: ElementState.Creation,

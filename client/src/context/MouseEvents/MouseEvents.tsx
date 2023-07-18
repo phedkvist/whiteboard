@@ -45,6 +45,7 @@ import {
 import * as KeyCode from "keycode-js";
 import {
   findSelectedElements,
+  getOverlappingPoint,
   setElementCoords,
   setupMovingElement,
   setupResizeElement,
@@ -352,10 +353,26 @@ export const MouseEventsProvider = ({
               setSelectedElements([]);
             } else {
               // TODO: Check if the first point is connected to an element
+              const x = initialX;
+              const y = initialY;
+              const overlappingElement = findOverlappingElement(
+                x,
+                y,
+                Object.values(appState.elements)
+              );
+              const overlappingPoint = getOverlappingPoint(
+                x,
+                y,
+                overlappingElement
+              );
+              const firstPoint: Point = {
+                x,
+                y,
+                ...overlappingPoint,
+              };
               history?.addLocalChange(
                 createPolylineAction(
-                  initialX,
-                  initialY,
+                  firstPoint,
                   renderingOrder,
                   id,
                   history?.currentUserId
@@ -553,9 +570,23 @@ export const MouseEventsProvider = ({
             )
           );
         } else if (creationElement.type === ElementType.Polyline) {
+          const x = clientX + viewBox.x;
+          const y = clientY + viewBox.y;
+
+          const overlappingElement = findOverlappingElement(
+            x,
+            y,
+            Object.values(appState.elements)
+          );
+          const overlappingPoint = getOverlappingPoint(
+            x,
+            y,
+            overlappingElement
+          );
           const endPoint: Point = {
-            x: clientX + viewBox.x,
-            y: clientY + viewBox.y,
+            x,
+            y,
+            ...overlappingPoint,
           };
           const points = [creationElement.points[0], endPoint];
           history?.addLocalChange(
@@ -663,33 +694,12 @@ export const MouseEventsProvider = ({
                 newY,
                 Object.values(appState.elements)
               );
-              if (overlappingElement) {
-                switch (overlappingElement.type) {
-                  case ElementType.Rect:
-                  case ElementType.Text:
-                    newPoints[pos].connectingElementId = overlappingElement.id;
-                    newPoints[pos].connectingPointX =
-                      overlappingElement.x - newX;
-                    newPoints[pos].connectingPointY =
-                      overlappingElement.y - newY;
-                    break;
-                  case ElementType.Ellipse:
-                    newPoints[pos].connectingElementId = overlappingElement.id;
-                    newPoints[pos].connectingPointX =
-                      overlappingElement.cx - newX;
-                    newPoints[pos].connectingPointY =
-                      overlappingElement.cy - newY;
-                    break;
-                  default:
-                    newPoints[pos].connectingElementId = undefined;
-                    newPoints[pos].connectingPointX = undefined;
-                    newPoints[pos].connectingPointY = undefined;
-                }
-              } else {
-                newPoints[pos].connectingElementId = undefined;
-                newPoints[pos].connectingPointX = undefined;
-                newPoints[pos].connectingPointY = undefined;
-              }
+              const overlappingPoint = getOverlappingPoint(
+                newX,
+                newY,
+                overlappingElement
+              );
+              newPoints[pos] = { ...newPoints[pos], ...overlappingPoint };
               history?.addLocalChange(
                 updatePolylineAction(
                   {
