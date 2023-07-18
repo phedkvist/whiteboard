@@ -91,6 +91,8 @@ const Canvas = () => {
   const isSelectingPolyline = selectedElements.some(
     (id) => appState.elements[id]?.type === ElementType.Polyline
   );
+  // Should this only be displayed whenever one tries to connect to an element,
+  // not just always
   const isEditingPolyline = isSelectingPolyline || isAddingPolyline;
 
   const renderElements = sortedElements.map((e) => {

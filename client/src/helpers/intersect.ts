@@ -12,6 +12,7 @@ export function isRectsIntersecting(r1: Rect, r2: Rect) {
   );
 }
 
+// TODO: Take into account the rotation of the rect here
 export function isPointInsideRect(x: number, y: number, rect: Rect) {
   return isRectsIntersecting(
     {
@@ -41,13 +42,16 @@ export function isPointInsideEllipse(
   ellipse: Ellipse,
   padding: number = 0
 ): boolean {
-  const { cx, cy, rx, ry } = ellipse;
+  const { cx, cy, rx, ry, rotate } = ellipse;
+  const radians = rotate * (Math.PI / 180);
+  const cosAngle = Math.cos(radians);
+  const sinAngle = Math.sin(radians);
+
   const dx = x - cx;
   const dy = y - cy;
-  const normalizedX = dx / (rx + padding);
-  const normalizedY = dy / (ry + padding);
-  const distanceFromCenter =
-    Math.pow(normalizedX, 2) + Math.pow(normalizedY, 2);
+  const rotatedX = (dx * cosAngle - dy * sinAngle) / (rx + padding);
+  const rotatedY = (dx * sinAngle + dy * cosAngle) / (ry + padding);
+  const distanceFromCenter = Math.pow(rotatedX, 2) + Math.pow(rotatedY, 2);
 
   return distanceFromCenter <= 1;
 }
