@@ -10,11 +10,8 @@ import {
   SelectionMode,
   Element as IElement,
   ElementType,
-  Rect,
-  Polyline,
 } from "../../types";
 import { copy, getClosestCorner } from "../../helpers/utility";
-import { Change } from "../../services/ChangeTypes";
 
 export const setupResizeElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,

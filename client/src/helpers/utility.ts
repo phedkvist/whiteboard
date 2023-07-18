@@ -1,14 +1,6 @@
 import { CONNECTING_BORDER_SIZE } from "./../components/Canvas/Elements";
 import { UserVersion } from "../services/ChangeTypes";
-import {
-  Corner,
-  Element,
-  ElementType,
-  Ellipse,
-  Polyline,
-  Rect,
-  Text,
-} from "../types";
+import { Corner, Element, ElementType, Ellipse, Rect, Text } from "../types";
 import { isPointInsideEllipse, isPointInsideRect } from "./intersect";
 
 export enum MouseButtons {
