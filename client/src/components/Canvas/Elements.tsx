@@ -15,12 +15,13 @@ import History from "../../services/History";
 import { updateEllipseAction } from "../../services/Actions/Ellipse";
 import { updateTextAction } from "../../services/Actions/Text";
 import React from "react";
-
-const CORNER_OFFSET = 8;
-export const CONNECTING_BORDER_SIZE = 8;
-const CONNECTING_BORDER_STYLE = "butt";
-const CONNECTING_BORDER_OPACITY = 0.1;
-const CONNECTING_BORDER_STROKE = "gray";
+import {
+  CONNECTING_BORDER_SIZE,
+  CONNECTING_BORDER_STROKE,
+  CONNECTING_BORDER_OPACITY,
+  CONNECTING_BORDER_STYLE,
+  CORNER_OFFSET,
+} from "../../constants";
 
 const getCornerCoords = (e: Element) => {
   if (e.type === ElementType.Rect || e.type === ElementType.Text) {
