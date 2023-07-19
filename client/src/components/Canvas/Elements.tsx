@@ -64,8 +64,8 @@ const renderConnectingBorder = (e: Element) => {
             y2={tR.y - CONNECTING_BORDER_SIZE / 2}
             stroke={CONNECTING_BORDER_STROKE}
             opacity={CONNECTING_BORDER_OPACITY}
-            stroke-width={CONNECTING_BORDER_SIZE}
-            stroke-linecap={CONNECTING_BORDER_STYLE}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
           />
           <line
             id={`${e.id}-connecting-border-bottom`}
@@ -75,8 +75,8 @@ const renderConnectingBorder = (e: Element) => {
             y2={bR.y + CONNECTING_BORDER_SIZE / 2}
             stroke={CONNECTING_BORDER_STROKE}
             opacity={CONNECTING_BORDER_OPACITY}
-            stroke-width={CONNECTING_BORDER_SIZE}
-            stroke-linecap={CONNECTING_BORDER_STYLE}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
           />
           <line
             id={`${e.id}-connecting-border-right`}
@@ -86,8 +86,8 @@ const renderConnectingBorder = (e: Element) => {
             y2={bR.y + CONNECTING_BORDER_SIZE}
             stroke={CONNECTING_BORDER_STROKE}
             opacity={CONNECTING_BORDER_OPACITY}
-            stroke-width={CONNECTING_BORDER_SIZE}
-            stroke-linecap={CONNECTING_BORDER_STYLE}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
           />
           <line
             id={`${e.id}-connecting-border-left`}
@@ -97,8 +97,8 @@ const renderConnectingBorder = (e: Element) => {
             y2={bL.y + CONNECTING_BORDER_SIZE}
             stroke={CONNECTING_BORDER_STROKE}
             opacity={CONNECTING_BORDER_OPACITY}
-            stroke-width={CONNECTING_BORDER_SIZE}
-            stroke-linecap={CONNECTING_BORDER_STYLE}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
           />
         </>
       );
@@ -482,8 +482,7 @@ const PolylineRenderer = ({
         <>
           {processedPoints.map(([x, y], i) => (
             <rect
-              // TODO: Revise the id thing
-              id={`${id}-resize-${i === 0 ? "left" : "right"}`}
+              id={`${id}-resize-polyline-${i}`}
               width={8}
               height={8}
               x={x - 4}

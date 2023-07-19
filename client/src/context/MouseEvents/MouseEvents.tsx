@@ -615,7 +615,7 @@ export const MouseEventsProvider = ({
                 | Rect
                 | Text;
               const [width, height, x, y] = resizeRect(
-                selectedCorner,
+                selectedCorner as Corner,
                 clientX + viewBox.x,
                 clientY + viewBox.y,
                 el
@@ -657,7 +657,7 @@ export const MouseEventsProvider = ({
               const obj = copy(appState.elements[selectedElement]);
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [rx, ry, cx, cy] = resizeEllipse(
-                selectedCorner,
+                selectedCorner as Corner,
                 clientX + viewBox.x,
                 clientY + viewBox.y,
                 obj
@@ -689,7 +689,7 @@ export const MouseEventsProvider = ({
                 return;
               }
               const newPoints = [...el.points];
-              const pos = selectedCorner === Corner.TopLeft ? 0 : 1;
+              const pos = selectedCorner as number;
               newPoints[pos].x = newX;
               newPoints[pos].y = newY;
               const overlappingElement = findOverlappingElement(

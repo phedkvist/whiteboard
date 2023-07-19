@@ -77,15 +77,13 @@ export const getClosestCorner = (
   elements: { [id: string]: Element },
   xPos: number,
   yPos: number
-): Corner | null => {
+): Corner | number | null => {
   if (!e) return null;
   if (e.type === ElementType.Polyline) {
     // TODO: Ideally polyline and rect should not share this func
     const matchRadius = 10;
     // TODO: Take into account the polyline connectedElement.
-    let inLeftPoint = false;
-    let inRightPoint = false;
-    e.points.forEach((p, i) => {
+    const inIndex = e.points.findIndex((p, i) => {
       let inPoint;
       if (p.connectingElementId && p.connectingElementId in elements) {
         const connectedElement = elements[p.connectingElementId];
@@ -118,21 +116,13 @@ export const getClosestCorner = (
       } else {
         inPoint = Math.abs(p.x + p.y - (xPos + yPos)) < matchRadius;
       }
-      if (inPoint) {
-        if (i === 0) {
-          inLeftPoint = true;
-        } else {
-          inRightPoint = true;
-        }
-      }
+      return inPoint;
     });
 
-    if (inLeftPoint) {
-      return Corner.TopLeft;
+    if (inIndex) {
+      return inIndex;
     }
-    if (inRightPoint) {
-      return Corner.TopRight;
-    }
+
     console.error("Could not find closest corner, something went wrong.");
     return null;
   }
