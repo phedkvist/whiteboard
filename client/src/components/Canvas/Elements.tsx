@@ -22,6 +22,7 @@ import {
   CONNECTING_BORDER_STYLE,
   CORNER_OFFSET,
 } from "../../constants";
+import { createRoundedLine } from "./helpers";
 
 const getCornerCoords = (e: Element) => {
   if (e.type === ElementType.Rect || e.type === ElementType.Text) {
@@ -423,7 +424,7 @@ const PolylineRenderer = ({
     points[1]?.y
   );
 
-  const processedPoints = points.map((p) => {
+  const processedPoints: [number, number][] = points.map((p) => {
     if (p.connectingElementId && p.connectingElementId in elements) {
       const e = elements[p.connectingElementId];
       switch (e.type) {
@@ -439,6 +440,7 @@ const PolylineRenderer = ({
       return [p.x, p.y];
     }
   });
+
   return (
     <g id={`g-${id}`}>
       <defs>
@@ -465,16 +467,17 @@ const PolylineRenderer = ({
           <path d="M2,0 V4 L0,2 Z" style={arrowStyle} />
         </marker>
       </defs>
-      <polyline
+      <path
         key={id}
         id={id}
         {...props}
-        points={processedPoints.flat().join(" ")}
+        d={createRoundedLine(processedPoints)}
+        fill={"transparent"}
         className={classes}
         markerStart="url(#arrow-reverse)"
         markerEnd="url(#arrow)"
         data-testid="polyline"
-      ></polyline>
+      ></path>
       {isSelected && (
         <>
           {processedPoints.map(([x, y], i) => (

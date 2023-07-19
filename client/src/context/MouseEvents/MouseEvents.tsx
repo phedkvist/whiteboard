@@ -100,6 +100,7 @@ export const MouseEventsProvider = ({
         startY: null,
         currentX: null,
         currentY: null,
+        currentPointIndex: 0,
       });
       return;
     }
@@ -345,13 +346,11 @@ export const MouseEventsProvider = ({
               );
 
               // Need to handle it being selected but not in selection mode which drags elements around?
-              setSelectionMode({
-                ...selectionMode,
-                type: SelectionModes.None,
+              setSelectionCoordinates({
+                ...selectionCoordinates,
+                currentPointIndex: selectionCoordinates.currentPointIndex + 1,
               });
-              setSelectedElements([]);
             } else {
-              // TODO: Check if the first point is connected to an element
               const x = initialX;
               const y = initialY;
               const overlappingElement = findOverlappingElement(
@@ -377,6 +376,10 @@ export const MouseEventsProvider = ({
                   history?.currentUserId
                 )
               );
+              setSelectionCoordinates({
+                ...selectionCoordinates,
+                currentPointIndex: 1,
+              });
               break;
             }
             break;
@@ -587,7 +590,8 @@ export const MouseEventsProvider = ({
             y,
             ...overlappingPoint,
           };
-          const points = [creationElement.points[0], endPoint];
+          const points = [...creationElement.points];
+          points[selectionCoordinates.currentPointIndex] = endPoint;
           history?.addLocalChange(
             updatePolylineAction(
               { ...creationElement, points, state: ElementState.Creation },
