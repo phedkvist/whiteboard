@@ -14,6 +14,7 @@ export interface SelectionCoordinates {
   xOffset: number;
   yOffset: number;
   selectedCorner: null | Corner;
+  currentPointIndex: number;
 }
 
 export enum Corner {
@@ -209,4 +210,5 @@ export const initialSelectionCoordinates = {
   xOffset: 0,
   yOffset: 0,
   selectedCorner: null,
+  currentPointIndex: 1,
 };
