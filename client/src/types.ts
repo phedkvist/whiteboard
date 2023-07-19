@@ -13,7 +13,7 @@ export interface SelectionCoordinates {
   originElements: Element[];
   xOffset: number;
   yOffset: number;
-  selectedCorner: null | Corner;
+  selectedCorner: null | Corner | number;
   currentPointIndex: number;
 }
 
