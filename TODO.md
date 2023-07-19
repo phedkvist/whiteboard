@@ -1,25 +1,13 @@
 # Todo list
 
-## Current task
+## Current tasks
 
-- [ ] Add ability to draw lines connecting to shapes
-
-Would require the polyline to keep track of whether or not a certain point is connecting to an element, and whereabout on the element?
-Consider how the line would change as the element or the line moves.
-Problem: Line is sometimes underneath elements, making it impossible to change the point.
-Solution: Always display "lines" above elements?
-Problem: What should happen to the point if the element is rotated?
-Solution: add another parameter that tells how much the element was rotated when the point was created.
-
-- [ ] Add multi-point lines that have a rounded corner
-
-Use quadratic bezier curve. Any point that is in-between other points, should have a rounded corner.
-When drawing it we should instead of drawing the in-between point, we draw two points instead,
-then we can construct the rounded corner using quadratic func.
-
-- [ ] Resize multiple elements at once.
-
-For group resize the group should be resized but with keeping the width/height ratio.
+- [ ] (1) Handle zooming in/out
+- [ ] (2) Add ability to add diamond element
+- [ ] (3) Add undo/redo of operations
+- [ ] (4) Add ability to add generic path
+- [ ] (5) Add history logs
+- [ ] (6) Add e2e encryption
 
 # Backlog
 
@@ -37,21 +25,23 @@ For group resize the group should be resized but with keeping the width/height r
 - [x] View-box should be updated to be of the same width and height of current screen.
 - [x] Add ability to delete elements
 - [x] Add support for several rooms
-
-## Advanced features
-
-- [ ] Handle zooming in/out
+- [x] Add multi-point lines that have a rounded corner
+- [x] Add ability to draw lines connecting to shapes
+      Problem: Line is sometimes underneath elements, making it impossible to change the point.
+      Solution: Always display "lines" above elements?
+      Problem: What should happen to the point if the element is rotated?
+      Solution: add another parameter that tells how much the element was rotated when the point was created.
+- [ ] (on hold) Resize multiple elements at once.
+      For group resize the group should be resized but with keeping the width/height ratio.
+- [ ] Add ability to add image
+- [ ] Snap lines. When moving an element
+- [ ] Add ability to add generic svg objects (different shapes, lines, graphics, arrows etc.)
 - [x] Handle panning around the canvas
 - [x] Handle turning an element around
 - [x] Handle resizing an element
-- [ ] Add ability to add image
-- [ ] Add history logs
-- [ ] Add undo/redo of operations
 - [x] Collaboration features
-- [ ] Snap lines. When moving an element
-- [ ] Add ability to add generic svg objects (different shapes, lines, graphics, arrows etc.)
 
-## Super advanced
+## Random ideas
 
 - [ ] Import elements from an image of a real whiteboard
 
@@ -59,4 +49,3 @@ For group resize the group should be resized but with keeping the width/height r
 
 - [x] Place the appState into a context, removes prop drilling.
 - [x] Update the resizing function to take the rotation into account.
-- [ ] Use some kind of reducer pattern to improve how the state changes between updates
