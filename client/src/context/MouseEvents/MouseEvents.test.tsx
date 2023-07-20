@@ -7,7 +7,10 @@ import {
 } from "react-router-dom";
 import App from "../../App";
 import * as KeyCode from "keycode-js";
-import { createRoundedRect } from "../../components/Canvas/shapes";
+import {
+  createRoundedLine,
+  createRoundedRect,
+} from "../../components/Canvas/shapes";
 import { rectStub } from "../../stubs";
 
 const mockGetRoomId = (
@@ -113,7 +116,7 @@ describe("MouseEvents", () => {
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
 
     const rect = screen.getByTestId("rect-svg");
-    mouseDragEvent(rect, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(rect, { x: 100, y: 100 });
 
     const resizeBtn = screen.getByTestId("resize-bottom-right");
     const gElement = resizeBtn.parentElement?.children[0];
@@ -199,8 +202,7 @@ describe("MouseEvents", () => {
 
       const canvas = screen.getByTestId("canvas");
       if (btn === "Line") {
-        clickOnElement(canvas, { x: 100, y: 100 });
-        clickOnElement(canvas, { x: 200, y: 200 });
+        mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
         fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
         clickOnElement(canvas, { x: 150, y: 150 });
       } else if (btn === "Text") {
@@ -275,7 +277,7 @@ describe("MouseEvents", () => {
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
 
     const circle = screen.getByTestId("circle-svg");
-    mouseDragEvent(circle, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(circle, { x: 100, y: 100 });
 
     const resizeBtn = screen.getByTestId("resize-bottom-right");
     const gElement = resizeBtn.parentElement?.children[0];
@@ -318,7 +320,7 @@ describe("MouseEvents", () => {
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
     const circle = screen.getByTestId("circle-svg");
-    mouseDragEvent(circle, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(circle, { x: 100, y: 100 });
 
     const rotation = screen.getByTestId("rotate");
 
@@ -347,36 +349,48 @@ describe("MouseEvents", () => {
     });
   });
 
-  it("Should create a line", () => {
+  it("Should create a line", async () => {
     const screen = renderWrapper();
 
     fireEvent.click(screen.getByText("Line"));
     const canvas = screen.getByTestId("canvas");
 
-    // two separate onclick events pretty much
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
-    mouseDragEvent(canvas, { x: 200, y: 200 }, { x: 200, y: 200 });
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 100 });
+    fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
 
     const line = screen.getByTestId("polyline");
     expect(line).toBeDefined();
+    await waitFor(() => {
+      expect(line.getAttribute("d")).toEqual(
+        createRoundedLine([
+          [100, 100],
+          [200, 100],
+        ])
+      );
+    });
   });
 
-  it("Should move a line", () => {
+  it("Should move a line", async () => {
     const screen = renderWrapper();
 
     fireEvent.click(screen.getByText("Line"));
     const canvas = screen.getByTestId("canvas");
 
     // two separate onclick events pretty much
-    mouseDragEvent(canvas, { x: 100, y: 0 }, { x: 100, y: 0 });
-    mouseDragEvent(canvas, { x: 200, y: 0 }, { x: 200, y: 0 });
+    mouseDragEvent(canvas, { x: 100, y: 0 }, { x: 200, y: 0 });
+    fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
 
     const line = screen.getByTestId("polyline");
     expect(line).toBeDefined();
 
     mouseDragEvent(line, { x: 150, y: 0 }, { x: 150, y: 100 });
-    waitFor(() => {
-      expect(line.getAttribute("points")).toEqual("100,100,200,100");
+    await waitFor(() => {
+      expect(line.getAttribute("d")).toEqual(
+        createRoundedLine([
+          [100, 100],
+          [200, 100],
+        ])
+      );
     });
   });
 
@@ -387,7 +401,7 @@ describe("MouseEvents", () => {
     const canvas = screen.getByTestId("canvas");
 
     // one onclick event
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(canvas, { x: 100, y: 100 });
 
     const text = screen.getByTestId("text");
     expect(text).toBeDefined();
@@ -400,7 +414,7 @@ describe("MouseEvents", () => {
     const canvas = screen.getByTestId("canvas");
 
     // one onclick event
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(canvas, { x: 100, y: 100 });
 
     const text = screen.getByTestId("text");
     expect(text).toBeDefined();
@@ -441,7 +455,7 @@ describe("MouseEvents", () => {
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
 
     const text = screen.getByTestId("text");
-    mouseDragEvent(text, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(text, { x: 100, y: 100 });
 
     const resizeBtn = screen.getByTestId("resize-bottom-right");
     const gElement = resizeBtn.parentElement?.children[0];
@@ -479,7 +493,7 @@ describe("MouseEvents", () => {
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
     const text = screen.getByTestId("text");
-    mouseDragEvent(text, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(text, { x: 100, y: 100 });
 
     const rotation = screen.getByTestId("rotate");
 
@@ -524,14 +538,14 @@ describe("MouseEvents", () => {
 
     // create a text element
     fireEvent.click(screen.getByText("Text"));
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(canvas, { x: 100, y: 100 });
     const text = screen.getByTestId("text");
     expect(text).toBeDefined();
 
     // create a line
     fireEvent.click(screen.getByText("Line"));
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 100 });
-    mouseDragEvent(canvas, { x: 200, y: 200 }, { x: 200, y: 200 });
+    clickOnElement(canvas, { x: 100, y: 100 });
+    clickOnElement(canvas, { x: 200, y: 200 });
     const line = screen.getByTestId("polyline");
     expect(line).toBeDefined();
 

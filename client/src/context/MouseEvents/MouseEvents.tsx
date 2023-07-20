@@ -90,8 +90,7 @@ export const MouseEventsProvider = ({
   const [isSpacePressed, setIsSpacePressed] = useState(false);
 
   const onKeyDown = (e: KeyboardEvent) => {
-    const { key } = e;
-    if (key === KeyCode.CODE_ESCAPE) {
+    if (e.code === KeyCode.CODE_ESCAPE) {
       setSelectionMode({ ...selectionMode, type: SelectionModes.None });
       setSelectedElements([]);
       setSelectionCoordinates({
@@ -513,7 +512,12 @@ export const MouseEventsProvider = ({
           const originElement = originElements.find(
             ({ id }) => id === selectedElement
           );
-          if (selectedElement && startX && startY && originElement) {
+          if (
+            selectedElement &&
+            startX !== null &&
+            startY !== null &&
+            originElement
+          ) {
             e.preventDefault();
             const diffX = clientX - startX;
             const diffY = clientY - startY;
