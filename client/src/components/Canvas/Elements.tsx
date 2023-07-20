@@ -419,12 +419,6 @@ const PolylineRenderer = ({
 }) => {
   const { type, renderingOrder, points, id, userVersion, ...props } = polyline;
   const arrowStyle = { fill: props.style?.stroke || "" };
-  const rotate = angleBetweenPoints(
-    points[0].x,
-    points[0].y,
-    points[1]?.x,
-    points[1]?.y
-  );
 
   const processedPoints: [number, number][] = points.map((p) => {
     if (p.connectingElementId && p.connectingElementId in elements) {
@@ -490,7 +484,6 @@ const PolylineRenderer = ({
             x={x - 4}
             y={y - 4}
             style={{ cursor: "nwse-resize" }}
-            transform={`rotate(${rotate} ${x} ${y})`}
             fill={"white"}
             stroke={"lightblue"}
             strokeWidth={1}
