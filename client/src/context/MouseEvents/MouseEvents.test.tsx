@@ -6,6 +6,9 @@ import {
   SetURLSearchParams,
 } from "react-router-dom";
 import App from "../../App";
+import * as KeyCode from "keycode-js";
+import { createRoundedRect } from "../../components/Canvas/shapes";
+import { rectStub } from "../../stubs";
 
 const mockGetRoomId = (
   _params: URLSearchParams,
@@ -21,17 +24,12 @@ export const renderWrapper = () => {
   );
 };
 
-const mouseDragEvent = (
-  element: HTMLElement,
-  from: {
-    x: number;
-    y: number;
-  },
-  to: {
-    x: number;
-    y: number;
-  }
-) => {
+interface Pos {
+  x: number;
+  y: number;
+}
+
+const mouseDragEvent = (element: HTMLElement, from: Pos, to: Pos) => {
   fireEvent.mouseDown(element, {
     clientX: from.x,
     clientY: from.y,
@@ -46,6 +44,9 @@ const mouseDragEvent = (
   });
 };
 
+const clickOnElement = (element: HTMLElement, pos: Pos) =>
+  mouseDragEvent(element, pos, pos);
+
 describe("MouseEvents", () => {
   it("Should create a rect", () => {
     renderWrapper();
@@ -58,7 +59,7 @@ describe("MouseEvents", () => {
     expect(screen.getByTestId("rect-svg")).toBeDefined();
   });
 
-  it("Should move an existing rect", () => {
+  it("Should move an existing rect", async () => {
     renderWrapper();
 
     fireEvent.click(screen.getByText("Rect"));
@@ -70,8 +71,17 @@ describe("MouseEvents", () => {
 
     mouseDragEvent(rect, { x: 200, y: 200 }, { x: 300, y: 300 });
 
-    expect(Number(rect.getAttribute("x"))).toEqual(200);
-    expect(Number(rect.getAttribute("y"))).toEqual(200);
+    await waitFor(() => {
+      expect(rect.getAttribute("d")).toEqual(
+        createRoundedRect({
+          ...rectStub,
+          x: 200,
+          y: 200,
+          height: 100,
+          width: 100,
+        })
+      );
+    });
   });
 
   it("Should add text to rect", async () => {
@@ -126,10 +136,15 @@ describe("MouseEvents", () => {
     mouseDragEvent(resizeBtn, { x: 205, y: 205 }, { x: 300, y: 300 });
 
     await waitFor(() => {
-      expect(Number(rect.getAttribute("x"))).toEqual(100);
-      expect(Number(rect.getAttribute("y"))).toEqual(100);
-      expect(Number(rect.getAttribute("width"))).toEqual(200);
-      expect(Number(rect.getAttribute("height"))).toEqual(200);
+      expect(rect.getAttribute("d")).toEqual(
+        createRoundedRect({
+          ...rectStub,
+          x: 100,
+          y: 100,
+          height: 200,
+          width: 200,
+        })
+      );
     });
   });
 
@@ -141,7 +156,7 @@ describe("MouseEvents", () => {
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
     const rect = screen.getByTestId("rect-svg");
-    mouseDragEvent(rect, { x: 100, y: 100 }, { x: 100, y: 100 });
+    clickOnElement(canvas, { x: 110, y: 110 });
 
     const rotation = screen.getByTestId("rotate");
 
@@ -178,24 +193,30 @@ describe("MouseEvents", () => {
   ];
   elements.forEach(({ btn, testId }) => {
     it(`Should delete a ${btn}`, async () => {
-      renderWrapper();
+      const screen = renderWrapper();
 
       fireEvent.click(screen.getByText(btn));
 
       const canvas = screen.getByTestId("canvas");
-      mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 100, y: 200 });
       if (btn === "Line") {
-        mouseDragEvent(canvas, { x: 200, y: 200 }, { x: 200, y: 200 });
+        clickOnElement(canvas, { x: 100, y: 100 });
+        clickOnElement(canvas, { x: 200, y: 200 });
+        fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
+        clickOnElement(canvas, { x: 150, y: 150 });
+      } else if (btn === "Text") {
+        clickOnElement(canvas, { x: 100, y: 100 });
+        clickOnElement(canvas, { x: 110, y: 110 });
+      } else {
+        mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+        clickOnElement(canvas, { x: 150, y: 150 });
       }
 
       expect(screen.getByTestId(testId)).toBeDefined();
-      const rect = screen.getByTestId(testId);
-      mouseDragEvent(rect, { x: 100, y: 150 }, { x: 100, y: 150 });
 
-      fireEvent.keyDown(window, { code: "Backspace" });
+      fireEvent.keyDown(window, { code: KeyCode.CODE_BACK_SPACE });
       await waitFor(async () => {
-        const rect = screen.queryByTestId(testId);
-        expect(rect).toBeNull();
+        const deletedElement = screen.queryByTestId(testId);
+        expect(deletedElement).toBeNull();
       });
     });
   });

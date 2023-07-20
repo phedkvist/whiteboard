@@ -8,7 +8,11 @@ import { deleteTextAction } from "./Text";
 export const createDeleteChange = (
   element: Element,
   userId: string
-): Change => {
+): Change | null => {
+  if (!element) {
+    // In the event that a selected element has been deleted already.
+    return null;
+  }
   if (element.type === ElementType.Rect) {
     return deleteRectAction(element, userId);
   } else if (element.type === ElementType.Ellipse) {

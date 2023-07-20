@@ -109,11 +109,13 @@ export const MouseEventsProvider = ({
     }
     if (e.code === KeyCode.CODE_BACK_SPACE) {
       if (selectionMode.type === SelectionModes.TextEditing) return;
-      const changes = selectedElements.map((id) => {
-        const element = appState.elements[id];
-        return createDeleteChange(element, history?.currentUserId!);
-      });
-      changes.forEach((c) => history?.addLocalChange(c));
+      const changes = selectedElements
+        .map((id) => {
+          const element = appState.elements[id];
+          return createDeleteChange(element, history?.currentUserId!);
+        })
+        .filter((c) => c !== null);
+      changes.forEach((c) => history?.addLocalChange(c!));
       setSelectedElements([]);
     }
   };
@@ -280,13 +282,14 @@ export const MouseEventsProvider = ({
           initialX,
           initialY,
         });
-        const id = uuid();
-        setSelectedElements([...selectedElements, id]);
+
         const renderingOrder = Object.keys(appState.elements).length + 1;
 
         switch (selectionMode.elementType) {
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
           case ElementType.Rect: {
+            const id = uuid();
+            setSelectedElements([...selectedElements, id]);
             history?.addLocalChange(
               createRectAction(
                 initialX,
@@ -299,6 +302,8 @@ export const MouseEventsProvider = ({
             break;
           }
           case ElementType.Ellipse: {
+            const id = uuid();
+            setSelectedElements([...selectedElements, id]);
             history?.addLocalChange(
               createEllipseAction(
                 initialX,
@@ -311,6 +316,8 @@ export const MouseEventsProvider = ({
             break;
           }
           case ElementType.Text: {
+            const id = uuid();
+            setSelectedElements([...selectedElements, id]);
             history?.addLocalChange(
               createTextAction(
                 initialX,
@@ -351,6 +358,8 @@ export const MouseEventsProvider = ({
                 currentPointIndex: selectionCoordinates.currentPointIndex + 1,
               });
             } else {
+              const id = uuid();
+              setSelectedElements([...selectedElements, id]);
               const x = initialX;
               const y = initialY;
               const overlappingElement = findOverlappingElement(
