@@ -1,7 +1,7 @@
 import { Rect } from "../../types";
 
 // https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
-const pointCloseToCorner = (
+export const pointCloseToCorner = (
   x0: number,
   y0: number,
   x1: number,
@@ -22,16 +22,13 @@ export function createRoundedLine(
 ): string {
   const pathSegments = [];
 
-  const numCoordinates = coordinates.length;
-  const lastCoordinate = coordinates[numCoordinates - 1];
-
   for (let i = 0; i < coordinates.length; i++) {
     const curPoint = coordinates[i];
 
     if (i === 0) {
       // first point
       pathSegments.push(`M ${curPoint[0]} ${curPoint[1]}`);
-    } else if (i === numCoordinates - 1) {
+    } else if (i === coordinates.length - 1) {
       // last point
       pathSegments.push(`L ${curPoint[0]} ${curPoint[1]}`);
     } else {
@@ -50,25 +47,27 @@ export function createRoundedLine(
 }
 
 export function createRoundedRect(rect: Rect, radius = 10) {
-  // DRAW A PATH THAT HAS THE SAME ROUNDING AS THE POLYGON
   const { x, y, width, height } = rect;
   const pathSegments = [];
   pathSegments.push(`M ${x + radius} ${y} L ${x + width - radius} ${y}`);
-  // TOP RIGHT CORNER
+  // top right corner
   pathSegments.push(`Q ${x + width} ${y}, ${x + width} ${y + radius}`);
 
   pathSegments.push(`L ${x + width} ${y + height - radius}`);
-  // BOTTOM RIGHT CORNER
+
+  // bottom right corner
   pathSegments.push(
     `Q ${x + width} ${y + height}, ${x + width - radius} ${y + height}`
   );
   pathSegments.push(`L ${x + radius} ${y + height}`);
-  // BOTTOM LEFT CORNER
+
+  // bottom left corner
   pathSegments.push(`Q ${x} ${y + height}, ${x} ${y + height - radius}`);
 
   pathSegments.push(`L ${x} ${y + radius}`);
 
-  // TOP LEFT CORNER
+  // top left corner
   pathSegments.push(`Q ${x} ${y}, ${x + radius} ${y}`);
+
   return pathSegments.join(" ");
 }
