@@ -1,3 +1,5 @@
+import { Rect } from "../../types";
+
 // https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
 const pointCloseToCorner = (
   x0: number,
@@ -44,5 +46,29 @@ export function createRoundedLine(
     }
   }
 
+  return pathSegments.join(" ");
+}
+
+export function createRoundedRect(rect: Rect, radius = 10) {
+  // DRAW A PATH THAT HAS THE SAME ROUNDING AS THE POLYGON
+  const { x, y, width, height } = rect;
+  const pathSegments = [];
+  pathSegments.push(`M ${x + radius} ${y} L ${x + width - radius} ${y}`);
+  // TOP RIGHT CORNER
+  pathSegments.push(`Q ${x + width} ${y}, ${x + width} ${y + radius}`);
+
+  pathSegments.push(`L ${x + width} ${y + height - radius}`);
+  // BOTTOM RIGHT CORNER
+  pathSegments.push(
+    `Q ${x + width} ${y + height}, ${x + width - radius} ${y + height}`
+  );
+  pathSegments.push(`L ${x + radius} ${y + height}`);
+  // BOTTOM LEFT CORNER
+  pathSegments.push(`Q ${x} ${y + height}, ${x} ${y + height - radius}`);
+
+  pathSegments.push(`L ${x} ${y + radius}`);
+
+  // TOP LEFT CORNER
+  pathSegments.push(`Q ${x} ${y}, ${x + radius} ${y}`);
   return pathSegments.join(" ");
 }
