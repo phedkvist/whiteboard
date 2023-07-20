@@ -301,6 +301,7 @@ const RectRenderer = ({
       <path
         key={rect.id}
         style={style}
+        id={props.id}
         d={createRoundedRect(rect)}
         className={classes}
         data-testid="rect-svg"
@@ -479,24 +480,22 @@ const PolylineRenderer = ({
         markerEnd="url(#arrow)"
         data-testid="polyline"
       ></path>
-      {isSelected && (
-        <>
-          {processedPoints.map(([x, y], i) => (
-            <rect
-              id={`${id}-resize-polyline-${i}`}
-              width={8}
-              height={8}
-              x={x - 4}
-              y={y - 4}
-              style={{ cursor: "nwse-resize" }}
-              transform={`rotate(${rotate} ${x} ${y})`}
-              fill={"white"}
-              stroke={"lightblue"}
-              strokeWidth={1}
-            />
-          ))}
-        </>
-      )}
+      {isSelected &&
+        processedPoints.map(([x, y], i) => (
+          <rect
+            key={`${id}-resize-polyline-${i}`}
+            id={`${id}-resize-polyline-${i}`}
+            width={8}
+            height={8}
+            x={x - 4}
+            y={y - 4}
+            style={{ cursor: "nwse-resize" }}
+            transform={`rotate(${rotate} ${x} ${y})`}
+            fill={"white"}
+            stroke={"lightblue"}
+            strokeWidth={1}
+          />
+        ))}
     </g>
   );
 };
