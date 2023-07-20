@@ -22,7 +22,7 @@ import {
   CONNECTING_BORDER_STYLE,
   CORNER_OFFSET,
 } from "../../constants";
-import { createRoundedLine } from "./helpers";
+import { createRoundedLine, createRoundedRect } from "./shapes";
 
 const getCornerCoords = (e: Element) => {
   if (e.type === ElementType.Rect || e.type === ElementType.Text) {
@@ -294,13 +294,14 @@ const RectRenderer = ({
 
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
-  const { type, renderingOrder, userVersion, ...props } = rect;
+  const { type, renderingOrder, userVersion, style, ...props } = rect;
   const { x, y, width, height, rotate } = props;
   const renderElement = (
     <g>
-      <rect
+      <path
         key={rect.id}
-        {...props}
+        style={style}
+        d={createRoundedRect(rect)}
         className={classes}
         data-testid="rect-svg"
       />
