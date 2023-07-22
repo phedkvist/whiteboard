@@ -161,6 +161,8 @@ const Canvas = () => {
       onMouseOver={onMouseOver}
       onWheel={onMouseWheel}
       viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+      width={window.innerWidth}
+      height={window.innerHeight}
       data-testid="canvas"
     >
       {showDebugger && <DrawBackgroundLines />}

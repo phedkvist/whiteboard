@@ -187,14 +187,15 @@ export const initialState: AppState = {
   cursors: {},
 };
 
+const SCALE = 0.5;
 export const initialViewBox: ViewBox = {
   x: 0,
   y: 0,
-  w: 2000,
-  h: 1000,
+  w: window.innerWidth * SCALE,
+  h: window.innerHeight * SCALE,
   startPoint: { x: 0, y: 0 },
   endPoint: { x: 0, y: 0 },
-  scale: 1,
+  scale: SCALE,
 };
 
 export const initialSelectionCoordinates = {

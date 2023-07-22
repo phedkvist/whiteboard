@@ -38,8 +38,8 @@ export const setupResizeElement = (
   if (xOffset === null || yOffset === null) return;
   if (width === undefined || height === undefined) return;
 
-  const initialX = e.clientX / viewBox.scale + viewBox.x;
-  const initialY = e.clientY / viewBox.scale + viewBox.y;
+  const initialX = e.clientX * viewBox.scale + viewBox.x;
+  const initialY = e.clientY * viewBox.scale + viewBox.y;
 
   const selectedCorner = getClosestCorner(
     element,
@@ -73,7 +73,8 @@ export const setupRotateElement = (
   ) => void,
   selectionCoordinates: SelectionCoordinates,
   setSelectionMode: (value: React.SetStateAction<SelectionMode>) => void,
-  selectionMode: SelectionMode
+  selectionMode: SelectionMode,
+  scale: number
 ) => {
   if (!(e.target instanceof Element)) return;
   const { width, height } =
@@ -82,8 +83,8 @@ export const setupRotateElement = (
       y: null,
     };
   if (!(width && height)) return;
-  const initialX = e.clientX;
-  const initialY = e.clientY;
+  const initialX = e.clientX * scale;
+  const initialY = e.clientY * scale;
   setSelectionCoordinates({
     ...selectionCoordinates,
     initialX,
@@ -104,19 +105,22 @@ export const setupMovingElement = (
   setSelectionCoordinates: (
     value: React.SetStateAction<SelectionCoordinates>
   ) => void,
-  selectionCoordinates: SelectionCoordinates
+  selectionCoordinates: SelectionCoordinates,
+  scale: number
 ) => {
   if (!(e.target instanceof Element)) return;
 
+  // NOT SURE ABOUT THIS ONE? SHOULD BE SCALED AS WELL I BELIEVE
   const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
-  const initialX = e.clientX - xOffset;
-  const initialY = e.clientY - yOffset;
+  const initialX = e.clientX * scale - xOffset * scale;
+  const initialY = e.clientY * scale - yOffset * scale;
+  console.log({ initialX, initialY });
   setSelectionCoordinates({
     ...selectionCoordinates,
     initialX,
     initialY,
-    startX: e.clientX,
-    startY: e.clientY,
+    startX: e.clientX * scale,
+    startY: e.clientY * scale,
     originElements,
   });
 };
