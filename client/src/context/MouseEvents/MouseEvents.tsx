@@ -65,9 +65,9 @@ interface IMouseEvents {
 
 export const MouseEventsContext = createContext<IMouseEvents | null>(null);
 
-// const width = 2000;
-// const height = 1000;
-// const ZOOM_SENSITIVITY = 0.05;
+const width = 2000;
+const height = 1000;
+const ZOOM_SENSITIVITY = 0.05;
 
 export const MouseEventsProvider = ({
   children,
@@ -136,32 +136,32 @@ export const MouseEventsProvider = ({
 
   const onMouseWheel: WheelEventHandler<SVGSVGElement> = (e) => {
     // https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
-    // if (selectionMode.type !== SelectionModes.None) return;
-    // e.preventDefault();
-    // const w = viewBox.w;
-    // const h = viewBox.h;
-    // const mx = e.pageX; //mouse x
-    // const my = e.pageY;
-    // const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-    // const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-    // const dx = (dw * mx) / width;
-    // const dy = (dh * my) / height;
-    // const newViewBox = {
-    //   x: viewBox.x + dx,
-    //   y: viewBox.y + dy,
-    //   w: viewBox.w - dw,
-    //   h: viewBox.h - dh,
-    // };
-    // const scale = width / viewBox.w;
+    if (selectionMode.type !== SelectionModes.None) return;
+    e.preventDefault();
+    const w = viewBox.w;
+    const h = viewBox.h;
+    const mx = e.nativeEvent.offsetX; //mouse x
+    const my = e.nativeEvent.offsetY;
+    const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
+    const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
+    const dx = (dw * mx) / width;
+    const dy = (dh * my) / height;
+    const newViewBox = {
+      x: viewBox.x + dx,
+      y: viewBox.y + dy,
+      w: viewBox.w - dw,
+      h: viewBox.h - dh,
+    };
+    const scale = width / viewBox.w;
     // zoomValue.innerText = `${Math.round(scale * 100) / 100}`;
     // svgImage.setAttribute(
     //   "viewBox",
     //   `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`
     // );
-    // console.log("SCALE: ", scale);
-    // console.log("VIEWBOX: ", viewBox);
+    console.log("SCALE: ", scale);
+    console.log("VIEWBOX: ", viewBox);
     // setViewBox({ ...viewBox, ...newViewBox, scale });
-    // e.stopPropagation();
+    e.stopPropagation();
   };
 
   const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {
@@ -244,7 +244,8 @@ export const MouseEventsProvider = ({
             setSelectionCoordinates,
             selectionCoordinates,
             setSelectionMode,
-            selectionMode
+            selectionMode,
+            viewBox.scale
           );
           break;
         }
@@ -269,13 +270,14 @@ export const MouseEventsProvider = ({
           e,
           elements,
           setSelectionCoordinates,
-          selectionCoordinates
+          selectionCoordinates,
+          viewBox.scale
         );
         break;
       }
       case SelectionModes.Add: {
-        const initialX = e.clientX + viewBox.x;
-        const initialY = e.clientY + viewBox.y;
+        const initialX = e.clientX * viewBox.scale + viewBox.x;
+        const initialY = e.clientY * viewBox.scale + viewBox.y;
         setSelectionCoordinates({
           ...selectionCoordinates,
           initialX,
@@ -430,7 +432,8 @@ export const MouseEventsProvider = ({
             setSelectionCoordinates,
             selectionCoordinates,
             setSelectionMode,
-            selectionMode
+            selectionMode,
+            viewBox.scale
           );
           break;
         }
@@ -456,7 +459,8 @@ export const MouseEventsProvider = ({
           e,
           elements,
           setSelectionCoordinates,
-          selectionCoordinates
+          selectionCoordinates,
+          viewBox.scale
         );
         break;
       }
@@ -465,6 +469,7 @@ export const MouseEventsProvider = ({
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
     const { clientX, clientY, movementX, movementY } = e;
+    // send cursor needs to take scaling into account
     history?.sendCursor(clientX + viewBox.x, clientY + viewBox.y);
     const isEphemeral = true;
 
@@ -486,8 +491,8 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.MultiSelecting: {
-        const currentX = e.clientX / viewBox.scale + viewBox.x;
-        const currentY = e.clientY / viewBox.scale + viewBox.y;
+        const currentX = e.clientX * viewBox.scale + viewBox.x;
+        const currentY = e.clientY * viewBox.scale + viewBox.y;
         const { startX, startY } = selectionCoordinates;
         if (!startX || !startY) return;
         setSelectedElements(
@@ -519,10 +524,10 @@ export const MouseEventsProvider = ({
             originElement
           ) {
             e.preventDefault();
-            const diffX = clientX - startX;
-            const diffY = clientY - startY;
-            const dx = diffX / viewBox.scale;
-            const dy = diffY / viewBox.scale;
+            const diffX = clientX * viewBox.scale - startX;
+            const diffY = clientY * viewBox.scale - startY;
+            const dx = diffX;
+            const dy = diffY;
 
             const element = appState.elements[selectedElement];
             const changeAction = setElementCoords(
@@ -547,8 +552,9 @@ export const MouseEventsProvider = ({
           newAppState.elements[selectedElement]
         );
         if (creationElement.type === ElementType.Rect) {
-          const width = clientX + viewBox.x - creationElement.x;
-          const height = clientY + viewBox.y - creationElement.y;
+          const width = clientX * viewBox.scale + viewBox.x - creationElement.x;
+          const height =
+            clientY * viewBox.scale + viewBox.y - creationElement.y;
           history?.addLocalChange(
             updateRectAction(
               {
@@ -566,8 +572,8 @@ export const MouseEventsProvider = ({
           if (!(initialX && initialY)) return;
           const [rx, ry, cx, cy] = resizeEllipse(
             Corner.BottomRight,
-            clientX + viewBox.x,
-            clientY + viewBox.y,
+            clientX * viewBox.scale + viewBox.x,
+            clientY * viewBox.scale + viewBox.y,
             creationElement
           );
           history?.addLocalChange(
@@ -585,8 +591,8 @@ export const MouseEventsProvider = ({
             )
           );
         } else if (creationElement.type === ElementType.Polyline) {
-          const x = clientX + viewBox.x;
-          const y = clientY + viewBox.y;
+          const x = clientX * viewBox.scale + viewBox.x;
+          const y = clientY * viewBox.scale + viewBox.y;
 
           const overlappingElement = findOverlappingElement(
             x,
@@ -629,8 +635,8 @@ export const MouseEventsProvider = ({
                 | Text;
               const [width, height, x, y] = resizeRect(
                 selectedCorner as Corner,
-                clientX + viewBox.x,
-                clientY + viewBox.y,
+                clientX * viewBox.scale + viewBox.x,
+                clientY * viewBox.scale + viewBox.y,
                 el
               );
               if (el.type === ElementType.Rect) {
@@ -671,8 +677,8 @@ export const MouseEventsProvider = ({
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [rx, ry, cx, cy] = resizeEllipse(
                 selectedCorner as Corner,
-                clientX + viewBox.x,
-                clientY + viewBox.y,
+                clientX * viewBox.scale + viewBox.x,
+                clientY * viewBox.scale + viewBox.y,
                 obj
               );
               history?.addLocalChange(
@@ -693,8 +699,8 @@ export const MouseEventsProvider = ({
             case ElementType.Polyline: {
               // TODO: Need to know which points are being dragged.
               // selected corner, set this to some kind of index?
-              const newX = clientX + viewBox.x;
-              const newY = clientY + viewBox.y;
+              const newX = clientX * viewBox.scale + viewBox.x;
+              const newY = clientY * viewBox.scale + viewBox.y;
               const selectedElement = selectedElements[0];
               if (!selectedElement) return;
               const el = appState.elements[selectedElement];
@@ -741,8 +747,8 @@ export const MouseEventsProvider = ({
         if (!selectedElement) return;
         let element = copy(appState.elements[selectedElement]);
         const [midX, midY] = getMidPoints(element);
-        const deltaX = clientX + viewBox.x - midX;
-        const deltaY = clientY + viewBox.y - midY;
+        const deltaX = clientX * viewBox.scale + viewBox.x - midX;
+        const deltaY = clientY * viewBox.scale + viewBox.y - midY;
         const rotate = Math.round(
           (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90
         );

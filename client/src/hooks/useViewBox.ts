@@ -8,7 +8,9 @@ export const useViewBox = (): [
 ] => {
   const [viewBox, setViewBox] = useState<ViewBox>(initialViewBox);
 
-  const { height: h, width: w } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
+  const h = viewBox.scale * height;
+  const w = viewBox.scale * width;
   useEffect(() => {
     if (viewBox.h !== h || viewBox.w !== w) {
       setViewBox({ ...viewBox, h, w });
