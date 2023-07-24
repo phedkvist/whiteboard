@@ -6,7 +6,9 @@ const isExcludedFromContextMenu = (e: MouseEvent) => {
   if (!e.target) return;
   if (!("id" in e.target)) return;
   const { id = "" } = e.target;
-  return NON_CONTEXT_MENU_DIVS.some((excludedId) => id.includes(excludedId));
+  return NON_CONTEXT_MENU_DIVS.some((excludedId) =>
+    (id as string).includes(excludedId)
+  );
 };
 
 const useContextMenu = () => {
