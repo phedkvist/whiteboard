@@ -204,8 +204,8 @@ export const MouseEventsProvider = ({
             ...selectionMode,
             type: SelectionModes.MultiSelecting,
           });
-          const initialX = e.clientX / viewBox.scale + viewBox.x;
-          const initialY = e.clientY / viewBox.scale + viewBox.y;
+          const initialX = e.clientX * viewBox.scale + viewBox.x;
+          const initialY = e.clientY * viewBox.scale + viewBox.y;
           setSelectionCoordinates({
             ...selectionCoordinates,
             initialX,
@@ -470,7 +470,10 @@ export const MouseEventsProvider = ({
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
     const { clientX, clientY, movementX, movementY } = e;
     // send cursor needs to take scaling into account
-    history?.sendCursor(clientX + viewBox.x, clientY + viewBox.y);
+    history?.sendCursor(
+      clientX * viewBox.scale + viewBox.x,
+      clientY * viewBox.scale + viewBox.y
+    );
     const isEphemeral = true;
 
     if (e.button !== MouseButtons.LEFT) return;
@@ -479,8 +482,8 @@ export const MouseEventsProvider = ({
       case SelectionModes.Panning: {
         const { startPoint, scale } = viewBox;
         const endPoint = { x: movementX, y: movementY };
-        const dx = (startPoint.x - endPoint.x) / scale;
-        const dy = (startPoint.y - endPoint.y) / scale;
+        const dx = (startPoint.x - endPoint.x) * scale;
+        const dy = (startPoint.y - endPoint.y) * scale;
         const movedViewBox = {
           x: viewBox.x + dx,
           y: viewBox.y + dy,
