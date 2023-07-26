@@ -228,11 +228,11 @@ export const MouseEventsProvider = ({
             e,
             element,
             appState.elements,
-            viewBox,
             setSelectionCoordinates,
             selectionCoordinates,
             setSelectionMode,
-            selectionMode
+            selectionMode,
+            clientCoordinates
           );
           break;
         } else if (id.includes("rotate")) {
@@ -416,11 +416,11 @@ export const MouseEventsProvider = ({
             e,
             element,
             appState.elements,
-            viewBox,
             setSelectionCoordinates,
             selectionCoordinates,
             setSelectionMode,
-            selectionMode
+            selectionMode,
+            clientCoordinates
           );
           break;
         } else if (e.target.id.includes("rotate")) {

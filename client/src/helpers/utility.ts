@@ -1,6 +1,14 @@
 import { CONNECTING_BORDER_SIZE } from "../constants";
 import { UserVersion } from "../services/ChangeTypes";
-import { Corner, Element, ElementType, Ellipse, Rect, Text } from "../types";
+import {
+  ClientCoordinates,
+  Corner,
+  Element,
+  ElementType,
+  Ellipse,
+  Rect,
+  Text,
+} from "../types";
 import { isPointInsideEllipse, isPointInsideRect } from "./intersect";
 
 export enum MouseButtons {
@@ -75,8 +83,7 @@ const getElementCorners = (
 export const getClosestCorner = (
   e: Element | null,
   elements: { [id: string]: Element },
-  xPos: number,
-  yPos: number
+  clientCoordinates: ClientCoordinates
 ): Corner | number | null => {
   if (!e) return null;
   if (e.type === ElementType.Polyline) {
@@ -96,7 +103,7 @@ export const getClosestCorner = (
                   p.connectingPointX! +
                   connectedElement.y -
                   p.connectingPointY! -
-                  (xPos + yPos)
+                  (clientCoordinates.x + clientCoordinates.y)
               ) < matchRadius;
             break;
 
@@ -107,14 +114,16 @@ export const getClosestCorner = (
                   p.connectingPointX! +
                   connectedElement.cy -
                   p.connectingPointY! -
-                  (xPos + yPos)
+                  (clientCoordinates.x + clientCoordinates.y)
               ) < matchRadius;
             break;
           default:
             break;
         }
       } else {
-        inPoint = Math.abs(p.x + p.y - (xPos + yPos)) < matchRadius;
+        inPoint =
+          Math.abs(p.x + p.y - (clientCoordinates.x + clientCoordinates.y)) <
+          matchRadius;
       }
       return inPoint;
     });
@@ -141,7 +150,10 @@ export const getClosestCorner = (
   let dist = Infinity;
   // TODO: Replace with reduce to get a functional pattern instead
   [topLeft, topRight, bottomLeft, bottomRight].forEach(({ x, y, corner }) => {
-    const d = Math.sqrt(Math.pow(x - xPos, 2) + Math.pow(y - yPos, 2));
+    const d = Math.sqrt(
+      Math.pow(x - clientCoordinates.x, 2) +
+        Math.pow(y - clientCoordinates.y, 2)
+    );
     if (d < dist) {
       dist = d;
       closestCorner = corner;

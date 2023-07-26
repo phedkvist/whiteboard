@@ -213,3 +213,8 @@ export const initialSelectionCoordinates = {
   selectedCorner: null,
   currentPointIndex: 1,
 };
+
+export interface ClientCoordinates {
+  x: number;
+  y: number;
+}
