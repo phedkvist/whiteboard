@@ -251,3 +251,14 @@ export const getOverlappingPoint = (
     connectingPointY: undefined,
   };
 };
+
+export const getClientCoordinates = (
+  e: React.MouseEvent<SVGSVGElement, MouseEvent>,
+  viewBox: ViewBox
+) => {
+  const { clientX, clientY } = e;
+  return {
+    x: clientX * viewBox.scale + viewBox.x,
+    y: clientY * viewBox.scale + viewBox.y,
+  };
+};
