@@ -10,6 +10,7 @@ import {
   SelectionMode,
   Element as IElement,
   ElementType,
+  ClientCoordinates,
 } from "../../types";
 import { copy, getClosestCorner } from "../../helpers/utility";
 
@@ -17,13 +18,13 @@ export const setupResizeElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,
   element: IElement,
   elements: { [id: string]: IElement },
-  viewBox: ViewBox,
   setSelectionCoordinates: (
     value: React.SetStateAction<SelectionCoordinates>
   ) => void,
   selectionCoordinates: SelectionCoordinates,
   setSelectionMode: (value: React.SetStateAction<SelectionMode>) => void,
-  selectionMode: SelectionMode
+  selectionMode: SelectionMode,
+  clientCoordinates: ClientCoordinates
 ) => {
   if (!(e.target instanceof Element)) return;
   const {
@@ -38,22 +39,14 @@ export const setupResizeElement = (
   if (xOffset === null || yOffset === null) return;
   if (width === undefined || height === undefined) return;
 
-  const initialX = e.clientX * viewBox.scale + viewBox.x;
-  const initialY = e.clientY * viewBox.scale + viewBox.y;
-
-  const selectedCorner = getClosestCorner(
-    element,
-    elements,
-    initialX,
-    initialY
-  );
+  const selectedCorner = getClosestCorner(element, elements, clientCoordinates);
   if (!selectedCorner) return;
   setSelectionCoordinates({
     ...selectionCoordinates,
     xOffset,
     yOffset,
-    initialX,
-    initialY,
+    initialX: clientCoordinates.x,
+    initialY: clientCoordinates.y,
     initialWidth: width,
     initialHeight: height,
     selectedCorner,
@@ -83,9 +76,10 @@ export const setupRotateElement = (
       y: null,
     };
   if (!(width && height)) return;
-  const initialX = e.clientX * scale;
+  const initialX = e.clientX * scale; // TODO: Strange that we don't just use the client coordinates here?
   const initialY = e.clientY * scale;
   setSelectionCoordinates({
+    // TODO: Remove this setSelectionCoordinates from here, this should happen in mouseEvents already.
     ...selectionCoordinates,
     initialX,
     initialY,
@@ -255,7 +249,7 @@ export const getOverlappingPoint = (
 export const getClientCoordinates = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,
   viewBox: ViewBox
-) => {
+): ClientCoordinates => {
   const { clientX, clientY } = e;
   return {
     x: clientX * viewBox.scale + viewBox.x,
