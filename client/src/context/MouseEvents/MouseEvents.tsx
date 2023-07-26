@@ -66,10 +66,6 @@ interface IMouseEvents {
 
 export const MouseEventsContext = createContext<IMouseEvents | null>(null);
 
-const width = 2000;
-const height = 1000;
-const ZOOM_SENSITIVITY = 0.05;
-
 export const MouseEventsProvider = ({
   children,
 }: {
@@ -139,30 +135,30 @@ export const MouseEventsProvider = ({
     // https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
     if (selectionMode.type !== SelectionModes.None) return;
     e.preventDefault();
-    const w = viewBox.w;
-    const h = viewBox.h;
-    const mx = e.nativeEvent.offsetX; //mouse x
-    const my = e.nativeEvent.offsetY;
-    const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-    const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-    const dx = (dw * mx) / width;
-    const dy = (dh * my) / height;
-    const newViewBox = {
-      x: viewBox.x + dx,
-      y: viewBox.y + dy,
-      w: viewBox.w - dw,
-      h: viewBox.h - dh,
-    };
-    const scale = width / viewBox.w;
+    // const w = viewBox.w;
+    // const h = viewBox.h;
+    // const mx = e.nativeEvent.offsetX; //mouse x
+    // const my = e.nativeEvent.offsetY;
+    // const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
+    // const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
+    // const dx = (dw * mx) / width;
+    // const dy = (dh * my) / height;
+    // const newViewBox = {
+    //   x: viewBox.x + dx,
+    //   y: viewBox.y + dy,
+    //   w: viewBox.w - dw,
+    //   h: viewBox.h - dh,
+    // };
+    // const scale = width / viewBox.w;
     // zoomValue.innerText = `${Math.round(scale * 100) / 100}`;
     // svgImage.setAttribute(
     //   "viewBox",
     //   `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`
     // );
-    console.log("SCALE: ", scale);
-    console.log("VIEWBOX: ", viewBox);
+    // console.log("SCALE: ", scale);
+    // console.log("VIEWBOX: ", viewBox);
     // setViewBox({ ...viewBox, ...newViewBox, scale });
-    e.stopPropagation();
+    // e.stopPropagation();
   };
 
   const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {

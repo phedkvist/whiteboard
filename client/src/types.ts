@@ -187,7 +187,7 @@ export const initialState: AppState = {
   cursors: {},
 };
 
-const SCALE = 0.5;
+const SCALE = 1;
 export const initialViewBox: ViewBox = {
   x: 0,
   y: 0,
