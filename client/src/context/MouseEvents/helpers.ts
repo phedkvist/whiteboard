@@ -108,7 +108,6 @@ export const setupMovingElement = (
   const { x: xOffset, y: yOffset } = e.target.getBoundingClientRect();
   const initialX = e.clientX * scale - xOffset * scale;
   const initialY = e.clientY * scale - yOffset * scale;
-  console.log({ initialX, initialY });
   setSelectionCoordinates({
     ...selectionCoordinates,
     initialX,
