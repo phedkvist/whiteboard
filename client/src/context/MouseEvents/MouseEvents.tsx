@@ -44,6 +44,7 @@ import {
 import * as KeyCode from "keycode-js";
 import {
   findSelectedElements,
+  getClientCoordinates,
   getOverlappingPoint,
   setElementCoords,
   setupMovingElement,
@@ -176,6 +177,7 @@ export const MouseEventsProvider = ({
   // Extract all the "logic" into separate functions that can be easily tested.
   // Should return new viewbox, selectionMode,
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
+    const clientCoordinates = getClientCoordinates(e, viewBox);
     if (e.button !== MouseButtons.LEFT) return;
 
     const isDoubleClick = e.detail === 2;
@@ -204,8 +206,8 @@ export const MouseEventsProvider = ({
             ...selectionMode,
             type: SelectionModes.MultiSelecting,
           });
-          const initialX = e.clientX * viewBox.scale + viewBox.x;
-          const initialY = e.clientY * viewBox.scale + viewBox.y;
+          const initialX = clientCoordinates.x;
+          const initialY = clientCoordinates.y;
           setSelectionCoordinates({
             ...selectionCoordinates,
             initialX,
@@ -276,8 +278,8 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Add: {
-        const initialX = e.clientX * viewBox.scale + viewBox.x;
-        const initialY = e.clientY * viewBox.scale + viewBox.y;
+        const initialX = clientCoordinates.x;
+        const initialY = clientCoordinates.y;
         setSelectionCoordinates({
           ...selectionCoordinates,
           initialX,
@@ -468,12 +470,11 @@ export const MouseEventsProvider = ({
   };
 
   const onMouseMove: MouseEventHandler<SVGSVGElement> = (e) => {
-    const { clientX, clientY, movementX, movementY } = e;
+    const clientCoordinates = getClientCoordinates(e, viewBox);
+    const { movementX, movementY } = e;
+
     // send cursor needs to take scaling into account
-    history?.sendCursor(
-      clientX * viewBox.scale + viewBox.x,
-      clientY * viewBox.scale + viewBox.y
-    );
+    history?.sendCursor(clientCoordinates.x, clientCoordinates.y);
     const isEphemeral = true;
 
     if (e.button !== MouseButtons.LEFT) return;
@@ -494,8 +495,8 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.MultiSelecting: {
-        const currentX = e.clientX * viewBox.scale + viewBox.x;
-        const currentY = e.clientY * viewBox.scale + viewBox.y;
+        const currentX = clientCoordinates.x;
+        const currentY = clientCoordinates.y;
         const { startX, startY } = selectionCoordinates;
         if (!startX || !startY) return;
         setSelectedElements(
@@ -527,8 +528,8 @@ export const MouseEventsProvider = ({
             originElement
           ) {
             e.preventDefault();
-            const diffX = clientX * viewBox.scale - startX;
-            const diffY = clientY * viewBox.scale - startY;
+            const diffX = e.clientX * viewBox.scale - startX;
+            const diffY = e.clientY * viewBox.scale - startY;
             const dx = diffX;
             const dy = diffY;
 
@@ -555,9 +556,8 @@ export const MouseEventsProvider = ({
           newAppState.elements[selectedElement]
         );
         if (creationElement.type === ElementType.Rect) {
-          const width = clientX * viewBox.scale + viewBox.x - creationElement.x;
-          const height =
-            clientY * viewBox.scale + viewBox.y - creationElement.y;
+          const width = clientCoordinates.x - creationElement.x;
+          const height = clientCoordinates.y - creationElement.y;
           history?.addLocalChange(
             updateRectAction(
               {
@@ -575,8 +575,8 @@ export const MouseEventsProvider = ({
           if (!(initialX && initialY)) return;
           const [rx, ry, cx, cy] = resizeEllipse(
             Corner.BottomRight,
-            clientX * viewBox.scale + viewBox.x,
-            clientY * viewBox.scale + viewBox.y,
+            clientCoordinates.x,
+            clientCoordinates.y,
             creationElement
           );
           history?.addLocalChange(
@@ -594,8 +594,7 @@ export const MouseEventsProvider = ({
             )
           );
         } else if (creationElement.type === ElementType.Polyline) {
-          const x = clientX * viewBox.scale + viewBox.x;
-          const y = clientY * viewBox.scale + viewBox.y;
+          const { x, y } = clientCoordinates;
 
           const overlappingElement = findOverlappingElement(
             x,
@@ -638,8 +637,8 @@ export const MouseEventsProvider = ({
                 | Text;
               const [width, height, x, y] = resizeRect(
                 selectedCorner as Corner,
-                clientX * viewBox.scale + viewBox.x,
-                clientY * viewBox.scale + viewBox.y,
+                clientCoordinates.x,
+                clientCoordinates.y,
                 el
               );
               if (el.type === ElementType.Rect) {
@@ -680,8 +679,8 @@ export const MouseEventsProvider = ({
               if (!obj || obj.type !== ElementType.Ellipse) return;
               const [rx, ry, cx, cy] = resizeEllipse(
                 selectedCorner as Corner,
-                clientX * viewBox.scale + viewBox.x,
-                clientY * viewBox.scale + viewBox.y,
+                clientCoordinates.x,
+                clientCoordinates.y,
                 obj
               );
               history?.addLocalChange(
@@ -702,8 +701,8 @@ export const MouseEventsProvider = ({
             case ElementType.Polyline: {
               // TODO: Need to know which points are being dragged.
               // selected corner, set this to some kind of index?
-              const newX = clientX * viewBox.scale + viewBox.x;
-              const newY = clientY * viewBox.scale + viewBox.y;
+              const newX = clientCoordinates.x;
+              const newY = clientCoordinates.y;
               const selectedElement = selectedElements[0];
               if (!selectedElement) return;
               const el = appState.elements[selectedElement];
@@ -750,8 +749,8 @@ export const MouseEventsProvider = ({
         if (!selectedElement) return;
         let element = copy(appState.elements[selectedElement]);
         const [midX, midY] = getMidPoints(element);
-        const deltaX = clientX * viewBox.scale + viewBox.x - midX;
-        const deltaY = clientY * viewBox.scale + viewBox.y - midY;
+        const deltaX = clientCoordinates.x - midX;
+        const deltaY = clientCoordinates.y - midY;
         const rotate = Math.round(
           (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90
         );
