@@ -188,7 +188,7 @@ export const initialState: AppState = {
 };
 
 const SCALE = 1;
-export const initialViewBox: ViewBox = {
+export const initialViewBox = (window: Window): ViewBox => ({
   x: 0,
   y: 0,
   w: window.innerWidth * SCALE,
@@ -196,7 +196,7 @@ export const initialViewBox: ViewBox = {
   startPoint: { x: 0, y: 0 },
   endPoint: { x: 0, y: 0 },
   scale: SCALE,
-};
+});
 
 export const initialSelectionCoordinates = {
   currentX: null,
