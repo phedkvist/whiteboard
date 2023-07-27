@@ -6,7 +6,7 @@ export const useViewBox = (): [
   ViewBox,
   React.Dispatch<React.SetStateAction<ViewBox>>
 ] => {
-  const [viewBox, setViewBox] = useState<ViewBox>(initialViewBox);
+  const [viewBox, setViewBox] = useState<ViewBox>(initialViewBox(window));
 
   const { height, width } = useWindowDimensions();
   const h = viewBox.scale * height;

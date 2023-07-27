@@ -46,7 +46,7 @@ export const AppStateContext = createContext<IAppStateContext>({
   },
   setSelectionMode: () => {},
   showDebugger: false,
-  viewBox: initialViewBox,
+  viewBox: initialViewBox(window),
   setViewBox: () => {},
 });
 
