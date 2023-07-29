@@ -61,8 +61,9 @@ interface IMouseEvents {
   onMouseDown: MouseEventHandler<SVGSVGElement>;
   onMouseUp: MouseEventHandler<SVGSVGElement>;
   onMouseMove: MouseEventHandler<SVGSVGElement>;
-  onMouseWheel: WheelEventHandler<SVGSVGElement>;
 }
+
+const ZOOM_SENSITIVITY = 0.05;
 
 export const MouseEventsContext = createContext<IMouseEvents | null>(null);
 
@@ -85,6 +86,7 @@ export const MouseEventsProvider = ({
     setViewBox,
   } = useAppState();
   const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const [isMetaPressed, setIsMetaPressed] = useState(false);
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.code === KeyCode.CODE_ESCAPE) {
@@ -114,52 +116,68 @@ export const MouseEventsProvider = ({
       changes.forEach((c) => history?.addLocalChange(c!));
       setSelectedElements([]);
     }
+
+    if (e.code === KeyCode.CODE_META_LEFT) {
+      setIsMetaPressed(true);
+    }
   };
 
   const onKeyUp = (e: KeyboardEvent) => {
     if (e.code === KeyCode.CODE_SPACE) {
       setIsSpacePressed(false);
     }
+    if (e.code === KeyCode.CODE_META_LEFT) {
+      setIsMetaPressed(false);
+    }
+  };
+
+  const onScroll = (e: WheelEvent) => {
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
+    if (isMetaPressed) {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const mx = e.offsetX; //mouse x
+      const my = e.offsetY;
+      const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
+      const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
+      console.log({ dw, dh });
+      const dx = (dw * mx) / window.innerWidth;
+      const dy = (dh * my) / window.innerHeight;
+      const newViewBox = {
+        x: viewBox.x + dx,
+        y: viewBox.y + dy,
+        w: viewBox.w - dw,
+        h: viewBox.h - dh,
+      };
+      const scale = viewBox.w / window.innerWidth;
+      if (newViewBox.w < 100 || newViewBox.h < 100) {
+        return;
+      } else if (newViewBox.w > 5000 || newViewBox.h > 5000) {
+        return;
+      }
+      setViewBox({ ...viewBox, ...newViewBox, scale });
+    } else {
+      setViewBox({
+        ...viewBox,
+        x: viewBox.x + e.deltaX,
+        y: viewBox.y + e.deltaY,
+      });
+    }
   };
 
   useEffect(() => {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("wheel", onScroll, { passive: false });
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("wheel", onScroll);
     };
   });
-
-  const onMouseWheel: WheelEventHandler<SVGSVGElement> = (e) => {
-    // https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
-    if (selectionMode.type !== SelectionModes.None) return;
-    e.preventDefault();
-    // const w = viewBox.w;
-    // const h = viewBox.h;
-    // const mx = e.nativeEvent.offsetX; //mouse x
-    // const my = e.nativeEvent.offsetY;
-    // const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-    // const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-    // const dx = (dw * mx) / width;
-    // const dy = (dh * my) / height;
-    // const newViewBox = {
-    //   x: viewBox.x + dx,
-    //   y: viewBox.y + dy,
-    //   w: viewBox.w - dw,
-    //   h: viewBox.h - dh,
-    // };
-    // const scale = width / viewBox.w;
-    // zoomValue.innerText = `${Math.round(scale * 100) / 100}`;
-    // svgImage.setAttribute(
-    //   "viewBox",
-    //   `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`
-    // );
-    // console.log("SCALE: ", scale);
-    // console.log("VIEWBOX: ", viewBox);
-    // setViewBox({ ...viewBox, ...newViewBox, scale });
-    // e.stopPropagation();
-  };
 
   const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element) || e.target.id === "container") {
@@ -942,7 +960,6 @@ export const MouseEventsProvider = ({
         onMouseDown,
         onMouseMove,
         onMouseUp,
-        onMouseWheel,
       }}
     >
       {children}

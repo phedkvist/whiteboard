@@ -74,8 +74,7 @@ const Canvas = () => {
     history,
     selectionCoordinates,
   } = useAppState();
-  const { onMouseOver, onMouseDown, onMouseMove, onMouseUp, onMouseWheel } =
-    useMouseEvents();
+  const { onMouseOver, onMouseDown, onMouseMove, onMouseUp } = useMouseEvents();
 
   const { elements } = appState;
   const sortedElements = Object.values(elements).sort((a, b) => {
@@ -159,7 +158,6 @@ const Canvas = () => {
       onMouseUp={onMouseUp}
       onMouseMove={onMouseMove}
       onMouseOver={onMouseOver}
-      onWheel={onMouseWheel}
       viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
       width={window.innerWidth}
       height={window.innerHeight}

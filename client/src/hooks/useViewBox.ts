@@ -8,14 +8,15 @@ export const useViewBox = (): [
 ] => {
   const [viewBox, setViewBox] = useState<ViewBox>(initialViewBox(window));
 
-  const { height, width } = useWindowDimensions();
-  const h = viewBox.scale * height;
-  const w = viewBox.scale * width;
-  useEffect(() => {
-    if (viewBox.h !== h || viewBox.w !== w) {
-      setViewBox({ ...viewBox, h, w });
-    }
-  }, [h, w, viewBox, setViewBox]);
+  // TODO: Make sure this is not interering with zooming in/out
+  // const { height, width } = useWindowDimensions();
+  // const h = viewBox.scale * height;
+  // const w = viewBox.scale * width;
+  // useEffect(() => {
+  //   if (viewBox.h !== h || viewBox.w !== w) {
+  //     setViewBox({ ...viewBox, h, w });
+  //   }
+  // }, [h, w, viewBox, setViewBox]);
 
   return [viewBox, setViewBox];
 };
