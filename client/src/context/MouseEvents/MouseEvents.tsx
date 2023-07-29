@@ -4,7 +4,6 @@ import {
   useContext,
   useEffect,
   useState,
-  WheelEventHandler,
 } from "react";
 import {
   SelectionModes,
