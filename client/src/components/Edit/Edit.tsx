@@ -29,11 +29,12 @@ const Edit = () => {
   const zoomValue = Math.round(100 + (1 - scale) * 100);
 
   const updateViewBox = (newScale: number) => {
+    const roundedScale = Number(newScale.toFixed(1));
     setViewBox({
       ...viewBox,
-      scale: newScale,
-      w: window.innerWidth * newScale,
-      h: window.innerHeight * newScale,
+      scale: roundedScale,
+      w: window.innerWidth * roundedScale,
+      h: window.innerHeight * roundedScale,
     });
   };
 
