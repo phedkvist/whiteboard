@@ -1,14 +1,6 @@
 import { CONNECTING_BORDER_SIZE } from "../constants";
 import { UserVersion } from "../services/ChangeTypes";
-import {
-  ClientCoordinates,
-  Corner,
-  Element,
-  ElementType,
-  Ellipse,
-  Rect,
-  Text,
-} from "../types";
+import { Corner, Element, ElementType, Ellipse, Rect, Text } from "../types";
 import { isPointInsideEllipse, isPointInsideRect } from "./intersect";
 
 export enum MouseButtons {
@@ -16,69 +8,6 @@ export enum MouseButtons {
   MIDDLE = 1,
   RIGHT = 2,
 }
-
-const rotateVector = (xy: [number, number], theta: number) => {
-  const [x, y] = xy;
-  return [
-    Math.cos((theta * Math.PI) / 180) * x -
-      Math.sin((theta * Math.PI) / 180) * y,
-    Math.sin((theta * Math.PI) / 180) * x +
-      Math.cos((theta * Math.PI) / 180) * y,
-  ];
-};
-
-const getElementCorners = (
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  rotate: number
-) => {
-  // Let mid point be the center
-  // Rotate each corner and treat as a vector.
-  // Get the rotated vector into the current coordinate system
-  // Should be able to get coordinates by adding the mid points to the rotated vector.
-  const [cx, cy] = [x + w / 2, y + h / 2];
-
-  const topLeftVector: [number, number] = [-w / 2, -h / 2];
-  const rotatedTl = rotateVector(topLeftVector, rotate);
-
-  const topRightVector: [number, number] = [w / 2, -h / 2];
-  const rotatedTr = rotateVector(topRightVector, rotate);
-
-  const bottomRightVector: [number, number] = [w / 2, h / 2];
-  const rotatedBr = rotateVector(bottomRightVector, rotate);
-
-  const bottomLeftVector: [number, number] = [-w / 2, h / 2];
-  const rotatedBl = rotateVector(bottomLeftVector, rotate);
-
-  const topLeft = {
-    corner: Corner.TopLeft,
-    x: rotatedTl[0] + cx,
-    y: rotatedTl[1] + cy,
-  };
-  const topRight = {
-    corner: Corner.TopRight,
-    x: rotatedTr[0] + cx,
-    y: rotatedTr[1] + cy,
-  };
-  const bottomRight = {
-    corner: Corner.BottomRight,
-    x: rotatedBr[0] + cx,
-    y: rotatedBr[1] + cy,
-  };
-  const bottomLeft = {
-    corner: Corner.BottomLeft,
-    x: rotatedBl[0] + cx,
-    y: rotatedBl[1] + cy,
-  };
-  return {
-    topLeft,
-    topRight,
-    bottomRight,
-    bottomLeft,
-  };
-};
 
 export const getClosestCornerById = (
   element: Element,
