@@ -139,20 +139,19 @@ export const MouseEventsProvider = ({
     if (isMetaPressed) {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const mx = e.offsetX; //mouse x
+      const mx = e.offsetX;
       const my = e.offsetY;
       const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
       const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-      console.log({ dw, dh });
-      const dx = (dw * mx) / window.innerWidth;
-      const dy = (dh * my) / window.innerHeight;
+      const dx = (dw * mx) / w;
+      const dy = (dh * my) / h;
       const newViewBox = {
         x: viewBox.x + dx,
         y: viewBox.y + dy,
         w: viewBox.w - dw,
         h: viewBox.h - dh,
       };
-      const scale = viewBox.w / window.innerWidth;
+      const scale = viewBox.w / w;
       if (newViewBox.w < 100 || newViewBox.h < 100) {
         return;
       } else if (newViewBox.w > 5000 || newViewBox.h > 5000) {
