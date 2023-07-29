@@ -80,86 +80,32 @@ const getElementCorners = (
   };
 };
 
-export const getClosestCorner = (
-  e: Element | null,
-  elements: { [id: string]: Element },
-  clientCoordinates: ClientCoordinates
+export const getClosestCornerById = (
+  element: Element,
+  id: string
 ): Corner | number | null => {
-  if (!e) return null;
-  if (e.type === ElementType.Polyline) {
-    // TODO: Ideally polyline and rect should not share this func
-    const matchRadius = 10;
-    // TODO: Take into account the polyline connectedElement.
-    const inIndex = e.points.findIndex((p, i) => {
-      let inPoint;
-      if (p.connectingElementId && p.connectingElementId in elements) {
-        const connectedElement = elements[p.connectingElementId];
-        switch (connectedElement.type) {
-          case ElementType.Rect:
-          case ElementType.Text:
-            inPoint =
-              Math.abs(
-                connectedElement.x -
-                  p.connectingPointX! +
-                  connectedElement.y -
-                  p.connectingPointY! -
-                  (clientCoordinates.x + clientCoordinates.y)
-              ) < matchRadius;
-            break;
-
-          case ElementType.Ellipse:
-            inPoint =
-              Math.abs(
-                connectedElement.cx -
-                  p.connectingPointX! +
-                  connectedElement.cy -
-                  p.connectingPointY! -
-                  (clientCoordinates.x + clientCoordinates.y)
-              ) < matchRadius;
-            break;
-          default:
-            break;
-        }
-      } else {
-        inPoint =
-          Math.abs(p.x + p.y - (clientCoordinates.x + clientCoordinates.y)) <
-          matchRadius;
-      }
-      return inPoint;
-    });
-
-    if (inIndex) {
-      return inIndex;
+  switch (element.type) {
+    case ElementType.Polyline: {
+      const parts = id.split("-");
+      const pointIndex = parts[parts.length - 1];
+      return Number(pointIndex);
     }
-
-    console.error("Could not find closest corner, something went wrong.");
-    return null;
+    case ElementType.Text:
+    case ElementType.Ellipse:
+    case ElementType.Rect: {
+      const parts = id.split("-");
+      const horizontal = parts[parts.length - 2];
+      const vertical = parts[parts.length - 1];
+      return (horizontal[0].toUpperCase() +
+        horizontal.slice(1) +
+        vertical[0].toUpperCase() +
+        vertical.slice(1)) as Corner;
+    }
+    default: {
+      console.error("Could not find corner");
+      return null;
+    }
   }
-  const { topLeft, topRight, bottomRight, bottomLeft } =
-    e.type === ElementType.Rect || e.type === ElementType.Text
-      ? getElementCorners(e.x, e.y, e.width, e.height, e.rotate)
-      : getElementCorners(
-          e.cx - e.rx,
-          e.cy - e.ry,
-          2 * e.rx,
-          2 * e.ry,
-          e.rotate
-        );
-
-  let closestCorner = Corner.TopLeft;
-  let dist = Infinity;
-  // TODO: Replace with reduce to get a functional pattern instead
-  [topLeft, topRight, bottomLeft, bottomRight].forEach(({ x, y, corner }) => {
-    const d = Math.sqrt(
-      Math.pow(x - clientCoordinates.x, 2) +
-        Math.pow(y - clientCoordinates.y, 2)
-    );
-    if (d < dist) {
-      dist = d;
-      closestCorner = corner;
-    }
-  });
-  return closestCorner;
 };
 
 export function rotateCenter(
