@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ViewBox, initialViewBox } from "../types";
-import useWindowDimensions from "./useWindowDimensions";
 
 export const useViewBox = (): [
   ViewBox,
