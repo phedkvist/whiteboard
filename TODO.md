@@ -3,7 +3,9 @@
 ## Current tasks
 
 - [ ] (1) Handle zooming in/out
+      Working, but still a bit buggy in some cases. After having zoomed in the resizing of elements gets messed up, the scale seems to be off a bit.
 - [ ] (2) Add ability to add diamond element
+- [ ] (3) Improve the polyline so it doesn't include the last point, it should be removed. And allow for a straight line element, and a polyline one.
 - [ ] (3) Add undo/redo of operations
 - [ ] (4) Add ability to add generic path
 - [ ] (5) Add history logs

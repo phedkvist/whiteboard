@@ -13,6 +13,7 @@ import {
   Rect,
   Text,
   Point,
+  Diamond,
 } from "../../types";
 import {
   resizeRect,
@@ -51,6 +52,10 @@ import {
   setupRotateElement,
 } from "./helpers";
 import { createDeleteChange } from "../../services/Actions";
+import {
+  createDiamondAction,
+  updateDiamondAction,
+} from "../../services/Actions/Diamond";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -306,6 +311,20 @@ export const MouseEventsProvider = ({
             setSelectedElements([...selectedElements, id]);
             history?.addLocalChange(
               createRectAction(
+                initialX,
+                initialY,
+                renderingOrder,
+                id,
+                history?.currentUserId
+              )
+            );
+            break;
+          }
+          case ElementType.Diamond: {
+            const id = uuid();
+            setSelectedElements([...selectedElements, id]);
+            history?.addLocalChange(
+              createDiamondAction(
                 initialX,
                 initialY,
                 renderingOrder,
@@ -640,11 +659,13 @@ export const MouseEventsProvider = ({
         const { selectedCorner } = selectionCoordinates;
         if (selectedElement && selectedCorner !== null) {
           switch (selectionMode.elementType) {
+            case ElementType.Diamond:
             case ElementType.Text:
             case ElementType.Rect: {
               const el = copy(appState.elements[selectedElement]) as
                 | Rect
-                | Text;
+                | Text
+                | Diamond;
               const [width, height, x, y] = resizeRect(
                 selectedCorner as Corner,
                 clientCoordinates.x,
@@ -654,6 +675,20 @@ export const MouseEventsProvider = ({
               if (el.type === ElementType.Rect) {
                 history?.addLocalChange(
                   updateRectAction(
+                    {
+                      ...el,
+                      width,
+                      height,
+                      x,
+                      y,
+                    },
+                    isEphemeral,
+                    history?.currentUserId
+                  )
+                );
+              } else if (el.type === ElementType.Diamond) {
+                history?.addLocalChange(
+                  updateDiamondAction(
                     {
                       ...el,
                       width,
@@ -773,6 +808,12 @@ export const MouseEventsProvider = ({
             isEphemeral,
             history?.currentUserId
           );
+        } else if (element.type === ElementType.Diamond) {
+          changeAction = updateDiamondAction(
+            element,
+            isEphemeral,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Text) {
           changeAction = updateTextAction(
             element,
@@ -806,6 +847,12 @@ export const MouseEventsProvider = ({
         let changeAction;
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(
+            element,
+            isEphemeral,
+            history?.currentUserId
+          );
+        } else if (element.type === ElementType.Diamond) {
+          changeAction = updateDiamondAction(
             element,
             isEphemeral,
             history?.currentUserId
@@ -849,6 +896,12 @@ export const MouseEventsProvider = ({
             isEphemeral,
             history?.currentUserId
           );
+        } else if (element.type === ElementType.Diamond) {
+          changeAction = updateDiamondAction(
+            element,
+            isEphemeral,
+            history?.currentUserId
+          );
         } else if (element.type === ElementType.Ellipse) {
           changeAction = updateEllipseAction(
             element,
@@ -884,6 +937,12 @@ export const MouseEventsProvider = ({
         let changeAction;
         if (element.type === ElementType.Rect) {
           changeAction = updateRectAction(
+            element,
+            isEphemeral,
+            history?.currentUserId
+          );
+        } else if (element.type === ElementType.Diamond) {
+          changeAction = updateDiamondAction(
             element,
             isEphemeral,
             history?.currentUserId

@@ -98,6 +98,19 @@ const ToolbarComponent = () => {
           });
         }}
       >
+        Diamond
+      </Button>
+      <Button
+        id="toolbar_ellipse"
+        isActive={SelectionModeHelper.isAddingEllipse(selectionMode)}
+        onClick={() => {
+          setSelectedElements([]);
+          setSelectionMode({
+            type: SelectionModes.Add,
+            elementType: ElementType.Diamond,
+          });
+        }}
+      >
         Circle
       </Button>
       <Button

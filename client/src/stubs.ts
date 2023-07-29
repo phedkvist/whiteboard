@@ -112,6 +112,7 @@ export const rectStub: Rect = {
   id: "",
   state: ElementState.Visible,
   rotate: 0,
+  textRotation: 0,
   renderingOrder: 0,
   text: "",
   userVersion,

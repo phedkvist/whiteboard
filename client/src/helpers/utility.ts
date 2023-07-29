@@ -1,6 +1,14 @@
 import { CONNECTING_BORDER_SIZE } from "../constants";
 import { UserVersion } from "../services/ChangeTypes";
-import { Corner, Element, ElementType, Ellipse, Rect, Text } from "../types";
+import {
+  Corner,
+  Diamond,
+  Element,
+  ElementType,
+  Ellipse,
+  Rect,
+  Text,
+} from "../types";
 import { isPointInsideEllipse, isPointInsideRect } from "./intersect";
 
 export enum MouseButtons {
@@ -58,7 +66,7 @@ export const resizeRect = (
   selectedCorner: Corner,
   clientX: number,
   clientY: number,
-  rect: Rect | Text
+  rect: Rect | Text | Diamond
 ) => {
   const { x, y, width: w, height: h, rotate } = rect;
 

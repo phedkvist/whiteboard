@@ -72,6 +72,11 @@ export interface Rect extends ElementBase {
   height: number;
   x: number;
   y: number;
+  textRotation: number;
+}
+
+export interface Diamond extends Omit<Rect, "type"> {
+  type: ElementType.Diamond;
 }
 
 export interface Text extends ElementBase {
@@ -123,9 +128,10 @@ export enum ElementType {
   Ellipse = "ellipse",
   Text = "text",
   Polyline = "polyline",
+  Diamond = "diamond",
 }
 
-export type Element = Ellipse | Rect | Text | Polyline;
+export type Element = Ellipse | Rect | Text | Polyline | Diamond;
 
 // https://en.wikipedia.org/wiki/Natural_Color_System
 export enum COLORS {
