@@ -12,12 +12,11 @@ import {
   ElementType,
   ClientCoordinates,
 } from "../../types";
-import { copy, getClosestCorner } from "../../helpers/utility";
+import { copy, getClosestCornerById } from "../../helpers/utility";
 
 export const setupResizeElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,
   element: IElement,
-  elements: { [id: string]: IElement },
   setSelectionCoordinates: (
     value: React.SetStateAction<SelectionCoordinates>
   ) => void,
@@ -39,8 +38,8 @@ export const setupResizeElement = (
   if (xOffset === null || yOffset === null) return;
   if (width === undefined || height === undefined) return;
 
-  const selectedCorner = getClosestCorner(element, elements, clientCoordinates);
-  if (!selectedCorner) return;
+  const selectedCorner = getClosestCornerById(element, e.target.id);
+  if (selectedCorner === null) return;
   setSelectionCoordinates({
     ...selectionCoordinates,
     xOffset,

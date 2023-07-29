@@ -241,7 +241,6 @@ export const MouseEventsProvider = ({
           setupResizeElement(
             e,
             element,
-            appState.elements,
             setSelectionCoordinates,
             selectionCoordinates,
             setSelectionMode,
@@ -429,7 +428,6 @@ export const MouseEventsProvider = ({
           setupResizeElement(
             e,
             element,
-            appState.elements,
             setSelectionCoordinates,
             selectionCoordinates,
             setSelectionMode,
@@ -642,7 +640,7 @@ export const MouseEventsProvider = ({
 
         const selectedElement = selectedElements[0];
         const { selectedCorner } = selectionCoordinates;
-        if (selectedElement && selectedCorner) {
+        if (selectedElement && selectedCorner !== null) {
           switch (selectionMode.elementType) {
             case ElementType.Text:
             case ElementType.Rect: {
