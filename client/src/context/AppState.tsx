@@ -79,7 +79,7 @@ export const AppStateProvider = ({
   const [selectionMode, setSelectionMode] = useState<SelectionMode>({
     type: SelectionModes.None,
   });
-  const [showDebugger] = useState(true);
+  const [showDebugger] = useState(false);
   const [viewBox, setViewBox] = useViewBox();
   return (
     <AppStateContext.Provider
