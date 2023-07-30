@@ -8,6 +8,7 @@ import {
   Ellipse,
   Polyline,
   Text,
+  Diamond,
 } from "../../types";
 import { copy } from "../../helpers/utility";
 import { updateRectAction } from "../../services/Actions/Rect";
@@ -22,10 +23,19 @@ import {
   CONNECTING_BORDER_STYLE,
   CORNER_OFFSET,
 } from "../../constants";
-import { createRoundedLine, createRoundedRect } from "./shapes";
+import {
+  createRoundedDiamond,
+  createRoundedLine,
+  createRoundedRect,
+} from "./shapes";
+import { updateDiamondAction } from "../../services/Actions/Diamond";
 
 const getCornerCoords = (e: Element) => {
-  if (e.type === ElementType.Rect || e.type === ElementType.Text) {
+  if (
+    e.type === ElementType.Rect ||
+    e.type === ElementType.Text ||
+    e.type === ElementType.Diamond
+  ) {
     return {
       tL: { x: e.x, y: e.y },
       tR: { x: e.x + e.width, y: e.y },
@@ -102,6 +112,69 @@ const renderConnectingBorder = (e: Element) => {
           />
         </>
       );
+    case ElementType.Diamond: {
+      const { x, y, width: w, height: h } = e;
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      const a = [cx, cy - h / 2];
+      const b = [cx + w / 2, cy];
+      const c = [cx, cy + h / 2];
+      const d = [cx - w / 2, cy];
+
+      const tL = { x: a[0], y: a[1] };
+      const tR = { x: b[0], y: b[1] };
+      const bR = { x: c[0], y: c[1] };
+      const bL = { x: d[0], y: d[1] };
+
+      return (
+        <>
+          <line
+            id={`${e.id}-connecting-border-top`}
+            x1={tL.x}
+            y1={tL.y}
+            x2={tR.x}
+            y2={tR.y}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
+          />
+          <line
+            id={`${e.id}-connecting-border-right`}
+            x1={tR.x}
+            y1={tR.y}
+            x2={bR.x}
+            y2={bR.y}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
+          />
+          <line
+            id={`${e.id}-connecting-border-bottom`}
+            x1={bL.x}
+            y1={bL.y}
+            x2={bR.x}
+            y2={bR.y}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
+          />
+          <line
+            id={`${e.id}-connecting-border-left`}
+            x1={tL.x}
+            y1={tL.y}
+            x2={bL.x}
+            y2={bL.y}
+            stroke={CONNECTING_BORDER_STROKE}
+            opacity={CONNECTING_BORDER_OPACITY}
+            strokeWidth={CONNECTING_BORDER_SIZE}
+            strokeLinecap={CONNECTING_BORDER_STYLE}
+          />
+        </>
+      );
+    }
     case ElementType.Ellipse:
       return (
         <ellipse
@@ -326,6 +399,86 @@ const RectRenderer = ({
     rotate,
     isSelected,
     rect,
+    isEditingPolyline
+  );
+};
+
+const DiamondRenderer = ({
+  isSelected,
+  selectionMode,
+  classes,
+  diamond,
+  history,
+  isEditingPolyline,
+}: {
+  isSelected: boolean;
+  selectionMode: SelectionMode;
+  classes: string;
+  diamond: Diamond;
+  history: History | null;
+  isEditingPolyline: boolean;
+}) => {
+  const [text, setText] = useState(diamond.text);
+
+  useEffect(() => {
+    // Only update the state if its changed by another user.
+    // Since the uncontrolled state will get messed up if the user changes alters the local state
+    if (diamond.text !== text && !isSelected) {
+      setText(diamond.text);
+    }
+  }, [diamond, text, isSelected]);
+
+  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
+    // setText(e.currentTarget.textContent || "");
+
+    const element = copy(diamond);
+    if (element && history) {
+      const changeAction = updateDiamondAction(
+        { ...element, text: e.currentTarget.innerHTML || "" },
+        false,
+        history?.currentUserId
+      );
+      // TODO: Consider using debounce here.
+      history.addLocalChange(changeAction);
+    }
+  };
+
+  console.log({ isSelected });
+
+  const isEditable =
+    isSelected && selectionMode.type === SelectionModes.TextEditing;
+  const { type, renderingOrder, userVersion, style, ...props } = diamond;
+  const { x, y, width, height, rotate } = props;
+  const renderElement = (
+    <g>
+      <path
+        key={diamond.id}
+        style={style}
+        id={props.id}
+        d={createRoundedDiamond(diamond)}
+        className={classes}
+        data-testid="rect-svg"
+      />
+      <EditableInput
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        id={diamond.id}
+        isEditable={isEditable}
+        text={text}
+        onChange={onChangeInput}
+      />
+    </g>
+  );
+  return addDraggableCorners(
+    renderElement,
+    diamond.id,
+    x + width / 2,
+    y + height / 2,
+    rotate,
+    isSelected,
+    diamond,
     isEditingPolyline
   );
 };
@@ -573,6 +726,7 @@ const defaultExports = {
   Ellipse: EllipseRenderer,
   Polyline: PolylineRenderer,
   Text: TextRenderer,
+  Diamond: DiamondRenderer,
 };
 
 export default defaultExports;

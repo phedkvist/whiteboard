@@ -13,6 +13,7 @@ import {
   ClientCoordinates,
 } from "../../types";
 import { copy, getClosestCornerById } from "../../helpers/utility";
+import { updateDiamondAction } from "../../services/Actions/Diamond";
 
 export const setupResizeElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,
@@ -188,6 +189,13 @@ export const setElementCoords = (
     obj.x = originElement.x + diffX;
     obj.y = originElement.y + diffY;
     changeAction = updateRectAction(obj, true, currentUserId);
+  } else if (
+    obj.type === ElementType.Diamond &&
+    originElement.type === ElementType.Diamond
+  ) {
+    obj.x = originElement.x + diffX;
+    obj.y = originElement.y + diffY;
+    changeAction = updateDiamondAction(obj, true, currentUserId);
   } else if (
     obj.type === ElementType.Text &&
     originElement.type === ElementType.Text

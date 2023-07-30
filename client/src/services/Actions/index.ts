@@ -1,5 +1,6 @@
 import { Element, ElementType } from "../../types";
 import { Change } from "../ChangeTypes";
+import { deleteDiamondAction } from "./Diamond";
 import { deleteEllipseAction } from "./Ellipse";
 import { deletePolylineAction } from "./Polyline";
 import { deleteRectAction } from "./Rect";
@@ -19,6 +20,8 @@ export const createDeleteChange = (
     return deleteEllipseAction(element, userId);
   } else if (element.type === ElementType.Polyline) {
     return deletePolylineAction(element, userId);
+  } else if (element.type === ElementType.Diamond) {
+    return deleteDiamondAction(element, userId);
   } else {
     return deleteTextAction(element, userId);
   }

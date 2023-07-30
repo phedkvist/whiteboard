@@ -1,6 +1,11 @@
 import "./Canvas.css";
 import React from "react";
-import { SelectionModes, ElementType, SelectionCoordinates } from "../../types";
+import {
+  SelectionModes,
+  ElementType,
+  SelectionCoordinates,
+  Rect,
+} from "../../types";
 import { useAppState } from "../../context/AppState";
 import { useMouseEvents } from "../../context/MouseEvents/MouseEvents";
 import Elements from "./Elements";
@@ -107,6 +112,18 @@ const Canvas = () => {
           classes={classes}
           selectionMode={selectionMode}
           rect={e}
+          history={history}
+          isEditingPolyline={isEditingPolyline}
+        />
+      );
+    } else if (e.type === ElementType.Diamond) {
+      return (
+        <Elements.Diamond
+          key={e.id}
+          isSelected={isSelected}
+          classes={classes}
+          selectionMode={selectionMode}
+          diamond={e}
           history={history}
           isEditingPolyline={isEditingPolyline}
         />

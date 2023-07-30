@@ -33,6 +33,13 @@ class SelectionModeHelper {
     );
   }
 
+  static isAddingDiamond(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Diamond &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
   static isAddingEllipse(selectionMode: SelectionMode) {
     return Boolean(
       selectionMode.elementType === ElementType.Ellipse &&
@@ -89,12 +96,12 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_ellipse"
-        isActive={SelectionModeHelper.isAddingEllipse(selectionMode)}
+        isActive={SelectionModeHelper.isAddingDiamond(selectionMode)}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
             type: SelectionModes.Add,
-            elementType: ElementType.Ellipse,
+            elementType: ElementType.Diamond,
           });
         }}
       >
@@ -107,7 +114,7 @@ const ToolbarComponent = () => {
           setSelectedElements([]);
           setSelectionMode({
             type: SelectionModes.Add,
-            elementType: ElementType.Diamond,
+            elementType: ElementType.Ellipse,
           });
         }}
       >

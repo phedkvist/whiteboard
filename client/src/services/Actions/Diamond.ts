@@ -18,8 +18,8 @@ export const createDiamondAction = (
     x: initialX,
     y: initialY,
     state: ElementState.Creation,
-    rotate: 90,
-    textRotation: 270,
+    rotate: 0,
+    textRotation: 0,
     renderingOrder,
     style: {
       fill: "#FDFD96",
@@ -59,7 +59,10 @@ export const updateDiamondAction = (
   };
 };
 
-export const deleteRectAction = (object: Diamond, userId: string): Change => {
+export const deleteDiamondAction = (
+  object: Diamond,
+  userId: string
+): Change => {
   return {
     createdAt: new Date().toISOString(),
     elementType: ElementType.Diamond,

@@ -29,6 +29,7 @@ export const getClosestCornerById = (
     }
     case ElementType.Text:
     case ElementType.Ellipse:
+    case ElementType.Diamond:
     case ElementType.Rect: {
       const parts = id.split("-");
       const horizontal = parts[parts.length - 2];
