@@ -282,6 +282,7 @@ export const MouseEventsProvider = ({
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
         // This path is only for single select
+        console.log(id);
         setSelectedElements([id]);
         const elements = [appState.elements[id]];
         setupMovingElement(
@@ -589,6 +590,21 @@ export const MouseEventsProvider = ({
           const height = clientCoordinates.y - creationElement.y;
           history?.addLocalChange(
             updateRectAction(
+              {
+                ...creationElement,
+                width,
+                height,
+                state: ElementState.Creation,
+              },
+              isEphemeral,
+              history?.currentUserId
+            )
+          );
+        } else if (creationElement.type === ElementType.Diamond) {
+          const width = clientCoordinates.x - creationElement.x;
+          const height = clientCoordinates.y - creationElement.y;
+          history?.addLocalChange(
+            updateDiamondAction(
               {
                 ...creationElement,
                 width,

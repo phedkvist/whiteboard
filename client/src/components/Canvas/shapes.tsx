@@ -1,4 +1,5 @@
-import { Rect } from "../../types";
+import { rotateCenter } from "../../helpers/utility";
+import { Diamond, Rect } from "../../types";
 
 // https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
 export const pointCloseToCorner = (
@@ -49,6 +50,10 @@ export function createRoundedLine(
 export function createRoundedRect(rect: Rect, radius = 10) {
   const { x, y, width, height } = rect;
   const pathSegments = [];
+  const a = [x, y];
+  const b = [x + width, y];
+  const c = [x + width, y + height];
+  const d = [x, y + height];
   pathSegments.push(`M ${x + radius} ${y} L ${x + width - radius} ${y}`);
   // top right corner
   pathSegments.push(`Q ${x + width} ${y}, ${x + width} ${y + radius}`);
@@ -68,6 +73,39 @@ export function createRoundedRect(rect: Rect, radius = 10) {
 
   // top left corner
   pathSegments.push(`Q ${x} ${y}, ${x + radius} ${y}`);
+
+  return pathSegments.join(" ");
+}
+
+export function createRoundedDiamond(diamond: Diamond, radius = 10) {
+  const { x, y, width: w, height: h } = diamond;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const a = [cx, cy - h / 2];
+  const b = [cx + w / 2, cy];
+  const c = [cx, cy + h / 2];
+  const d = [cx - w / 2, cy];
+
+  const pathSegments = [];
+  pathSegments.push(
+    `M ${a[0] + radius} ${a[1] + radius} L ${b[0] - radius} ${b[1] - radius}`
+  );
+  pathSegments.push(`Q ${b[0]} ${b[1]}, ${b[0] - radius} ${b[1] + radius}`);
+
+  pathSegments.push(`L ${c[0] + radius} ${c[1] - radius}`);
+
+  // bottom right corner
+  pathSegments.push(`Q ${c[0]} ${c[1]}, ${c[0] - radius} ${c[1] - radius}`);
+
+  pathSegments.push(`L ${d[0] + radius} ${d[1] + radius}`);
+
+  // bottom left corner
+  pathSegments.push(`Q ${d[0]} ${d[1]}, ${d[0] + radius} ${d[1] - radius}`);
+
+  pathSegments.push(`L ${a[0] - radius} ${a[1] + radius}`);
+
+  // top left corner
+  pathSegments.push(`Q ${a[0]} ${a[1]}, ${a[0] + radius} ${a[1] + radius}`);
 
   return pathSegments.join(" ");
 }
