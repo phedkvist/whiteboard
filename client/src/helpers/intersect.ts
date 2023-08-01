@@ -1,4 +1,4 @@
-import { Ellipse, Rect as IRect, Text } from "../types";
+import { Diamond, Ellipse, Rect as IRect, Text } from "../types";
 import { bresenham } from "./bresenham";
 
 type Rect = { left: number; top: number; right: number; bottom: number };
@@ -57,7 +57,7 @@ export function isPointInsideEllipse(
 export function isPointInsideRect(
   pointX: number,
   pointY: number,
-  element: IRect | Text,
+  element: IRect | Text | Diamond,
   padding = 0
 ) {
   const {

@@ -116,10 +116,10 @@ const renderConnectingBorder = (e: Element) => {
       const { x, y, width: w, height: h } = e;
       const cx = x + w / 2;
       const cy = y + h / 2;
-      const a = [cx, cy - h / 2];
-      const b = [cx + w / 2, cy];
-      const c = [cx, cy + h / 2];
-      const d = [cx - w / 2, cy];
+      const a = [cx, cy - h / 2 - CONNECTING_BORDER_SIZE / 2];
+      const b = [cx + w / 2 + CONNECTING_BORDER_SIZE / 2, cy];
+      const c = [cx, cy + h / 2 + CONNECTING_BORDER_SIZE / 2];
+      const d = [cx - w / 2 - CONNECTING_BORDER_SIZE / 2, cy];
 
       const tL = { x: a[0], y: a[1] };
       const tR = { x: b[0], y: b[1] };
@@ -443,8 +443,6 @@ const DiamondRenderer = ({
     }
   };
 
-  console.log({ isSelected });
-
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
   const { type, renderingOrder, userVersion, style, ...props } = diamond;
@@ -579,6 +577,7 @@ const PolylineRenderer = ({
       switch (e.type) {
         case ElementType.Rect:
         case ElementType.Text:
+        case ElementType.Diamond:
           return [e.x - p.connectingPointX!, e.y - p.connectingPointY!];
         case ElementType.Ellipse:
           return [e.cx - p.connectingPointX!, e.cy - p.connectingPointY!];

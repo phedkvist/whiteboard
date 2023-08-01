@@ -1,4 +1,3 @@
-import { rotateCenter } from "../../helpers/utility";
 import { Diamond, Rect } from "../../types";
 
 // https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
@@ -50,10 +49,6 @@ export function createRoundedLine(
 export function createRoundedRect(rect: Rect, radius = 10) {
   const { x, y, width, height } = rect;
   const pathSegments = [];
-  const a = [x, y];
-  const b = [x + width, y];
-  const c = [x + width, y + height];
-  const d = [x, y + height];
   pathSegments.push(`M ${x + radius} ${y} L ${x + width - radius} ${y}`);
   // top right corner
   pathSegments.push(`Q ${x + width} ${y}, ${x + width} ${y + radius}`);

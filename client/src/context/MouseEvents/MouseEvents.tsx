@@ -45,6 +45,7 @@ import * as KeyCode from "keycode-js";
 import {
   findSelectedElements,
   getClientCoordinates,
+  getClosestElementId,
   getOverlappingPoint,
   setElementCoords,
   setupMovingElement,
@@ -234,7 +235,11 @@ export const MouseEventsProvider = ({
           });
           return;
         }
-        const id = e.target.id;
+        const id = getClosestElementId(e);
+
+        if (!id) {
+          return;
+        }
 
         if (id.includes("resize")) {
           const elementId = id.split("-resize-")[0];
@@ -470,6 +475,7 @@ export const MouseEventsProvider = ({
           break;
         }
 
+        console.log("ID: ", e.target.id);
         if (!selectedElements.includes(e.target.id)) {
           setSelectionMode({
             ...selectionMode,
