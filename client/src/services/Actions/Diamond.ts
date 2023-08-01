@@ -1,4 +1,4 @@
-import { Diamond, ElementState, ElementType, Rect } from "../../types";
+import { Diamond, ElementState, ElementType } from "../../types";
 import { Change, ChangeType } from "../ChangeTypes";
 
 // A diamond element is the same as a rect, except for having the element and text rotated

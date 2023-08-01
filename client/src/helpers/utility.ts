@@ -274,7 +274,11 @@ const resizeRotatedRectangle = ({
 };
 
 export const getMidPoints = (element: Element): [number, number] => {
-  if (element.type === ElementType.Rect || element.type === ElementType.Text) {
+  if (
+    element.type === ElementType.Rect ||
+    element.type === ElementType.Text ||
+    element.type === ElementType.Diamond
+  ) {
     return [element.x + element.width / 2, element.y + element.height / 2];
   } else if (element.type === "ellipse") {
     return [element.cx, element.cy];
@@ -338,6 +342,7 @@ export function findOverlappingElement(
     switch (e.type) {
       case ElementType.Rect:
       case ElementType.Text:
+      case ElementType.Diamond:
         return isPointInsideRect(x, y, e, CONNECTING_BORDER_SIZE);
       case ElementType.Ellipse:
         return isPointInsideEllipse(x, y, e, CONNECTING_BORDER_SIZE);

@@ -230,6 +230,7 @@ export const getOverlappingPoint = (
     switch (overlappingElement.type) {
       case ElementType.Rect:
       case ElementType.Text:
+      case ElementType.Diamond:
         return {
           connectingElementId: overlappingElement.id,
           connectingPointX: overlappingElement.x - newX,
@@ -261,4 +262,20 @@ export const getClientCoordinates = (
     x: clientX * viewBox.scale + viewBox.x,
     y: clientY * viewBox.scale + viewBox.y,
   };
+};
+
+export const getClosestElementId = (
+  e: React.MouseEvent<SVGSVGElement, MouseEvent>
+) => {
+  if (!(e.target instanceof Element)) return;
+
+  let id = e.target.id;
+  const parentElementId = e.target.parentElement?.id;
+  if (!id && parentElementId) {
+    id = parentElementId;
+  }
+  if (!id) {
+    console.error("Could not find element id");
+  }
+  return id;
 };
