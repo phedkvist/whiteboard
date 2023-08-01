@@ -35,20 +35,18 @@ const RenderCursor = ({
   username: string;
 }) => {
   return (
-    <svg>
-      <g
-        data-testid={id}
-        style={{
-          transform: `translate(${position.x}px, ${position.y}px)`,
-          transition: "transform 120ms linear",
-        }}
-      >
-        <CursorSvg color={color} />
-        <text fill={color} style={{ fontSize: 14 }} x={10} y={30}>
-          {username}
-        </text>
-      </g>
-    </svg>
+    <g
+      data-testid={id}
+      style={{
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        transition: "transform 120ms linear",
+      }}
+    >
+      <CursorSvg color={color} />
+      <text fill={color} style={{ fontSize: 14 }} x={10} y={30}>
+        {username}
+      </text>
+    </g>
   );
 };
 
