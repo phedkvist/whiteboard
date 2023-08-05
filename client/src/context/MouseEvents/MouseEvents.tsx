@@ -156,7 +156,7 @@ export const MouseEventsProvider = ({
         w: viewBox.w - dw,
         h: viewBox.h - dh,
       };
-      const scale = viewBox.w / w;
+      const scale = newViewBox.w / w;
       if (newViewBox.w < 100 || newViewBox.h < 100) {
         return;
       } else if (newViewBox.w > 5000 || newViewBox.h > 5000) {
