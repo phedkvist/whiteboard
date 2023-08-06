@@ -33,7 +33,7 @@ export const useViewBox = (): [
       });
       setWindowDimensions(currentWindowDimension);
     }
-  }, [viewBox, setViewBox, currentWindowDimension]);
+  }, [viewBox, setViewBox, currentWindowDimension, windowDimension]);
 
   return [viewBox, setViewBox];
 };
