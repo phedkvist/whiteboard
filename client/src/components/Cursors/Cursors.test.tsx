@@ -18,7 +18,11 @@ describe("Cursors", () => {
         },
       },
     ];
-    const screen = render(<Cursors cursors={cursors} />);
+    const screen = render(
+      <svg>
+        <Cursors cursors={cursors} />
+      </svg>
+    );
     expect(screen.getByTestId("blue-cursor")).toBeInTheDocument();
   });
 
@@ -35,7 +39,11 @@ describe("Cursors", () => {
         },
       },
     ];
-    const screen = render(<Cursors cursors={cursors} />);
+    const screen = render(
+      <svg>
+        <Cursors cursors={cursors} />
+      </svg>
+    );
     expect(screen.queryByTestId("blue-cursor")).not.toBeInTheDocument();
   });
 });

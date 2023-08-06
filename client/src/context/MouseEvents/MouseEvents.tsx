@@ -287,7 +287,6 @@ export const MouseEventsProvider = ({
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
         // This path is only for single select
-        console.log(id);
         setSelectedElements([id]);
         const elements = [appState.elements[id]];
         setupMovingElement(
