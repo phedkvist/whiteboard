@@ -72,7 +72,6 @@ export interface Rect extends ElementBase {
   height: number;
   x: number;
   y: number;
-  textRotation: number;
 }
 
 export interface Diamond extends Omit<Rect, "type"> {

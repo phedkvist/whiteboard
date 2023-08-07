@@ -19,7 +19,6 @@ export const createDiamondAction = (
     y: initialY,
     state: ElementState.Creation,
     rotate: 0,
-    textRotation: 0,
     renderingOrder,
     style: {
       fill: "#FDFD96",
