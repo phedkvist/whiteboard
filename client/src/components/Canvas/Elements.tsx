@@ -455,7 +455,7 @@ const DiamondRenderer = ({
         id={props.id}
         d={createRoundedDiamond(diamond)}
         className={classes}
-        data-testid="rect-svg"
+        data-testid="diamond"
       />
       <EditableInput
         x={x}
