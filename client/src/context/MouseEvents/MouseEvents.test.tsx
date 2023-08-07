@@ -8,10 +8,11 @@ import {
 import App from "../../App";
 import * as KeyCode from "keycode-js";
 import {
+  createRoundedDiamond,
   createRoundedLine,
   createRoundedRect,
 } from "../../components/Canvas/shapes";
-import { rectStub } from "../../stubs";
+import { diamondStub, rectStub } from "../../stubs";
 
 const mockGetRoomId = (
   _params: URLSearchParams,
@@ -193,6 +194,7 @@ describe("MouseEvents", () => {
     { btn: "Circle", testId: "circle-svg" },
     { btn: "Text", testId: "text" },
     { btn: "Line", testId: "polyline" },
+    { btn: "Diamond", testId: "diamond" },
   ];
   elements.forEach(({ btn, testId }) => {
     it(`Should delete a ${btn}`, async () => {
@@ -220,6 +222,143 @@ describe("MouseEvents", () => {
         const deletedElement = screen.queryByTestId(testId);
         expect(deletedElement).toBeNull();
       });
+    });
+  });
+
+  it("Should create a diamond element", () => {
+    const screen = renderWrapper();
+
+    fireEvent.click(screen.getByText("Diamond"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    expect(screen.getByTestId("diamond")).toBeDefined();
+  });
+
+  it("Should move a diamond element", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Diamond"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    const diamond = screen.getByTestId("diamond");
+
+    mouseDragEvent(diamond, { x: 200, y: 200 }, { x: 300, y: 300 });
+
+    await waitFor(() => {
+      expect(diamond.getAttribute("d")).toEqual(
+        createRoundedDiamond({
+          ...diamondStub,
+          x: 200,
+          y: 200,
+          height: 100,
+          width: 100,
+        })
+      );
+    });
+  });
+
+  it("Should resize a diamond element", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Diamond"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    const rect = screen.getByTestId("diamond");
+    clickOnElement(rect, { x: 100, y: 100 });
+
+    const resizeBtn = screen.getByTestId("resize-bottom-right");
+    const gElement = resizeBtn.parentElement?.children[0];
+
+    if (gElement) {
+      // getBoundingClientRect is not part of jsdom and needs to be mocked
+      gElement.getBoundingClientRect = jest.fn(() => ({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+        top: 100,
+        bottom: 200,
+        right: 200,
+        left: 100,
+        toJSON: () => {},
+      }));
+    }
+
+    mouseDragEvent(resizeBtn, { x: 205, y: 205 }, { x: 300, y: 300 });
+
+    await waitFor(() => {
+      expect(rect.getAttribute("d")).toEqual(
+        createRoundedDiamond({
+          ...diamondStub,
+          x: 100,
+          y: 100,
+          height: 200,
+          width: 200,
+        })
+      );
+    });
+  });
+
+  it("Should add text to diamond", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Diamond"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+    const rect = screen.getByTestId("editableInput");
+
+    fireEvent.doubleClick(rect);
+    fireEvent.change(rect, {
+      target: { innerHTML: "abc" },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("abc"));
+    });
+  });
+
+  it("Should rotate a diamond", async () => {
+    renderWrapper();
+
+    fireEvent.click(screen.getByText("Diamond"));
+
+    const canvas = screen.getByTestId("canvas");
+    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+    const rect = screen.getByTestId("diamond");
+    clickOnElement(canvas, { x: 110, y: 110 });
+
+    const rotation = screen.getByTestId("rotate");
+
+    const gElement = rotation.parentElement?.children[0];
+
+    if (gElement) {
+      // getBoundingClientRect is not part of jsdom and needs to be mocked
+      gElement.getBoundingClientRect = jest.fn(() => ({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+        top: 100,
+        bottom: 200,
+        right: 200,
+        left: 100,
+        toJSON: () => {},
+      }));
+    }
+    mouseDragEvent(rotation, { x: 150, y: 84 }, { x: 84, y: 150 });
+
+    await waitFor(() => {
+      expect(
+        rect.parentElement?.parentElement?.getAttribute("transform")
+      ).toEqual("rotate(270, 150, 150)");
     });
   });
 

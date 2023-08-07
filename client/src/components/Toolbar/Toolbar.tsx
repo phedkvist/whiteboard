@@ -95,7 +95,7 @@ const ToolbarComponent = () => {
         Rect
       </Button>
       <Button
-        id="toolbar_ellipse"
+        id="toolbar_diamond"
         isActive={SelectionModeHelper.isAddingDiamond(selectionMode)}
         onClick={() => {
           setSelectedElements([]);

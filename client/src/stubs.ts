@@ -1,6 +1,7 @@
 import { CursorEvent, UserVersion } from "./services/ChangeTypes";
 import {
   Cursor,
+  Diamond,
   ElementState,
   ElementType,
   Ellipse,
@@ -127,6 +128,21 @@ export const textStub: Text = {
   id: "",
   state: ElementState.Visible,
   rotate: 0,
+  renderingOrder: 0,
+  text: "",
+  userVersion,
+};
+
+export const diamondStub: Diamond = {
+  type: ElementType.Diamond,
+  width: 5,
+  height: 5,
+  x: 0,
+  y: 0,
+  id: "",
+  state: ElementState.Visible,
+  rotate: 0,
+  textRotation: 0,
   renderingOrder: 0,
   text: "",
   userVersion,

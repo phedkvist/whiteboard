@@ -144,6 +144,7 @@ export const findSelectedElements = (
           element.points[1].y,
           selectRect
         );
+      case ElementType.Diamond:
       case ElementType.Rect:
       case ElementType.Text:
         return isRectsIntersecting(selectRect, {

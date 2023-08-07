@@ -2,7 +2,7 @@ import {
   createContext,
   MouseEventHandler,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
 import {
@@ -172,7 +172,7 @@ export const MouseEventsProvider = ({
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("wheel", onScroll, { passive: false });
@@ -199,6 +199,8 @@ export const MouseEventsProvider = ({
     if (e.button !== MouseButtons.LEFT) return;
 
     const isDoubleClick = e.detail === 2;
+
+    // console.log("onMouseDown: ", e.target.id);
 
     switch (selectionMode.type) {
       case SelectionModes.None: {
