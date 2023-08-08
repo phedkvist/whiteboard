@@ -52,46 +52,80 @@ const clickOnElement = (element: HTMLElement, pos: Pos) =>
   mouseDragEvent(element, pos, pos);
 
 describe("MouseEvents", () => {
-  it("Should create a rect", () => {
+  const createElements = [
+    ["Rect", "rect-svg"],
+    ["Diamond", "diamond"],
+    ["Circle", "circle-svg"],
+    ["Text", "text"],
+  ];
+  it.each(createElements)("Should create a %s", (buttonText, elementTestId) => {
     renderWrapper();
 
-    fireEvent.click(screen.getByText("Rect"));
+    fireEvent.click(screen.getByText(buttonText));
 
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
 
-    expect(screen.getByTestId("rect-svg")).toBeDefined();
+    expect(screen.getByTestId(elementTestId)).toBeDefined();
   });
 
-  it("Should move an existing rect", async () => {
+  const moveElements = [
+    [
+      "Rect",
+      "rect-svg",
+      createRoundedRect({
+        ...rectStub,
+        x: 200,
+        y: 200,
+        height: 100,
+        width: 100,
+      }),
+    ],
+    [
+      "Diamond",
+      "diamond",
+      createRoundedDiamond({
+        ...diamondStub,
+        x: 200,
+        y: 200,
+        height: 100,
+        width: 100,
+      }),
+    ],
+    ["Circle", "circle-svg", "-"],
+  ];
+
+  it.each(moveElements)(
+    "Should move an existing %s",
+    async (buttonText, elementTestId, d) => {
+      renderWrapper();
+
+      fireEvent.click(screen.getByText(buttonText));
+
+      const canvas = screen.getByTestId("canvas");
+      mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+      const element = screen.getByTestId(elementTestId);
+
+      mouseDragEvent(element, { x: 200, y: 200 }, { x: 300, y: 300 });
+
+      await waitFor(() => {
+        if (buttonText === "Circle") {
+          expect(Number(element.getAttribute("cx"))).toEqual(250);
+          expect(Number(element.getAttribute("cy"))).toEqual(250);
+        } else {
+          expect(element.getAttribute("d")).toEqual(d);
+        }
+      });
+    }
+  );
+
+  const addTextToElements = ["Rect", "Diamond", "Text", "Circle"];
+
+  it.each(addTextToElements)("Should add text to %s", async (buttonText) => {
     renderWrapper();
 
-    fireEvent.click(screen.getByText("Rect"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
-    const rect = screen.getByTestId("rect-svg");
-
-    mouseDragEvent(rect, { x: 200, y: 200 }, { x: 300, y: 300 });
-
-    await waitFor(() => {
-      expect(rect.getAttribute("d")).toEqual(
-        createRoundedRect({
-          ...rectStub,
-          x: 200,
-          y: 200,
-          height: 100,
-          width: 100,
-        })
-      );
-    });
-  });
-
-  it("Should add text to rect", async () => {
-    renderWrapper();
-
-    fireEvent.click(screen.getByText("Rect"));
+    fireEvent.click(screen.getByText(buttonText));
 
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -225,42 +259,6 @@ describe("MouseEvents", () => {
     });
   });
 
-  it("Should create a diamond element", () => {
-    const screen = renderWrapper();
-
-    fireEvent.click(screen.getByText("Diamond"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
-    expect(screen.getByTestId("diamond")).toBeDefined();
-  });
-
-  it("Should move a diamond element", async () => {
-    renderWrapper();
-
-    fireEvent.click(screen.getByText("Diamond"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
-    const diamond = screen.getByTestId("diamond");
-
-    mouseDragEvent(diamond, { x: 200, y: 200 }, { x: 300, y: 300 });
-
-    await waitFor(() => {
-      expect(diamond.getAttribute("d")).toEqual(
-        createRoundedDiamond({
-          ...diamondStub,
-          x: 200,
-          y: 200,
-          height: 100,
-          width: 100,
-        })
-      );
-    });
-  });
-
   it("Should resize a diamond element", async () => {
     renderWrapper();
 
@@ -305,26 +303,6 @@ describe("MouseEvents", () => {
     });
   });
 
-  it("Should add text to diamond", async () => {
-    renderWrapper();
-
-    fireEvent.click(screen.getByText("Diamond"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
-    const rect = screen.getByTestId("editableInput");
-
-    fireEvent.doubleClick(rect);
-    fireEvent.change(rect, {
-      target: { innerHTML: "abc" },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText("abc"));
-    });
-  });
-
   it("Should rotate a diamond", async () => {
     renderWrapper();
 
@@ -359,51 +337,6 @@ describe("MouseEvents", () => {
       expect(
         rect.parentElement?.parentElement?.getAttribute("transform")
       ).toEqual("rotate(270, 150, 150)");
-    });
-  });
-
-  it("Should create a circle", () => {
-    const screen = renderWrapper();
-
-    fireEvent.click(screen.getByText("Circle"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
-    expect(screen.getByTestId("circle-svg")).toBeDefined();
-  });
-
-  it("Should move a circle", () => {
-    const screen = renderWrapper();
-
-    fireEvent.click(screen.getByText("Circle"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-    const circle = screen.getByTestId("circle-svg");
-    mouseDragEvent(circle, { x: 200, y: 200 }, { x: 300, y: 300 });
-
-    expect(Number(circle.getAttribute("cx"))).toEqual(250);
-    expect(Number(circle.getAttribute("cy"))).toEqual(250);
-  });
-
-  it("Should add text to circle", async () => {
-    renderWrapper();
-
-    fireEvent.click(screen.getByText("Circle"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
-    const circle = screen.getByTestId("circle-svg");
-
-    fireEvent.doubleClick(circle);
-    fireEvent.change(circle, {
-      target: { innerHTML: "abc" },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText("abc"));
     });
   });
 
@@ -533,19 +466,6 @@ describe("MouseEvents", () => {
     });
   });
 
-  it("Should create a text element", () => {
-    const screen = renderWrapper();
-
-    fireEvent.click(screen.getByText("Text"));
-    const canvas = screen.getByTestId("canvas");
-
-    // one onclick event
-    clickOnElement(canvas, { x: 100, y: 100 });
-
-    const text = screen.getByTestId("text");
-    expect(text).toBeDefined();
-  });
-
   it("Should move a text element", async () => {
     const screen = renderWrapper();
 
@@ -562,26 +482,6 @@ describe("MouseEvents", () => {
     await waitFor(() => {
       expect(Number(text.getAttribute("x"))).toEqual(200);
       expect(Number(text.getAttribute("y"))).toEqual(200);
-    });
-  });
-
-  it("Should add text to text element", async () => {
-    renderWrapper();
-
-    fireEvent.click(screen.getByText("Text"));
-
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
-
-    const text = screen.getByTestId("text");
-
-    fireEvent.doubleClick(text);
-    fireEvent.change(text, {
-      target: { innerHTML: "abc" },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText("abc"));
     });
   });
 
