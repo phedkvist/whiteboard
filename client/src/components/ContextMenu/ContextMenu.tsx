@@ -17,10 +17,6 @@ const ContextMenu = () => {
 
   const changeRenderingOrder = (change: number) => {
     selectedElements.forEach((selectedElement) => {
-      if (!selectedElement) {
-        console.warn("No selected element on bring up callback");
-        return;
-      }
       const element = copy(appState.elements[selectedElement]);
       if (!element) {
         throw new Error(
@@ -32,8 +28,55 @@ const ContextMenu = () => {
     });
   };
 
+  const getToTop = () => {
+    const maxValue = Object.values(appState.elements).reduce(
+      (current, element) => {
+        if (element.renderingOrder > current) {
+          return element.renderingOrder;
+        } else {
+          return current;
+        }
+      },
+      0
+    );
+    const currentValue = appState.elements[selectedElements[0]];
+    const diff = maxValue - currentValue.renderingOrder;
+    console.log({ maxValue, current: currentValue.renderingOrder });
+
+    if (diff === 0) {
+      // The element is already at the top
+      return 0;
+    }
+    return diff + 1;
+  };
+
+  const getToBottom = () => {
+    const minValue = Object.values(appState.elements).reduce(
+      (current, element) => {
+        if (element.renderingOrder < current) {
+          return element.renderingOrder;
+        } else {
+          return current;
+        }
+      },
+      0
+    );
+    const currentValue = appState.elements[selectedElements[0]];
+    const diff = currentValue.renderingOrder - minValue;
+    console.log({ minValue, current: currentValue.renderingOrder, diff });
+    if (diff === 0) {
+      // already at the bottom
+      return 0;
+    }
+    return diff + 1;
+  };
+
+  // TODO: If something is either at the top or bottom. Keep them at the same position.
   const onBringUp = () => changeRenderingOrder(+1);
   const onBringDown = () => changeRenderingOrder(-1);
+
+  const onBringToTop = () => changeRenderingOrder(getToTop());
+  const onBringToBottom = () => changeRenderingOrder(-getToBottom());
 
   const style = selectedElements.length > 0 ? "menu_item" : "menu_item shade";
 
@@ -44,8 +87,14 @@ const ContextMenu = () => {
         <li className={style} onClick={onBringUp}>
           Bring up
         </li>
+        <li className={style} onClick={onBringToTop}>
+          Bring to top
+        </li>
         <li className={style} onClick={onBringDown}>
           Bring down
+        </li>
+        <li className={style} onClick={onBringToBottom}>
+          Bring to bottom
         </li>
         <hr />
         <li className={style}>Delete</li>
