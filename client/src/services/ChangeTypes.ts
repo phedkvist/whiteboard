@@ -1,7 +1,9 @@
 import { Cursor, Element, ElementType } from "../types";
+import { updateDiamondAction } from "./Actions/Diamond";
 import { updateEllipseAction } from "./Actions/Ellipse";
 import { updatePolylineAction } from "./Actions/Polyline";
 import { updateRectAction } from "./Actions/Rect";
+import { updateTextAction } from "./Actions/Text";
 import History from "./History";
 
 export enum ChangeType {
@@ -47,6 +49,14 @@ export const createUpdateChangeAction = (
   } else if (type === ElementType.Rect) {
     return history?.addLocalChange(
       updateRectAction(element, ephemeral, history?.currentUserId)
+    );
+  } else if (type === ElementType.Diamond) {
+    return history?.addLocalChange(
+      updateDiamondAction(element, ephemeral, history?.currentUserId)
+    );
+  } else if (type === ElementType.Text) {
+    return history?.addLocalChange(
+      updateTextAction(element, ephemeral, history?.currentUserId)
     );
   }
 };
