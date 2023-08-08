@@ -11,10 +11,8 @@ import {
   Diamond,
 } from "../../types";
 import { copy } from "../../helpers/utility";
-import { updateRectAction } from "../../services/Actions/Rect";
 import History from "../../services/History";
 import { updateEllipseAction } from "../../services/Actions/Ellipse";
-import { updateTextAction } from "../../services/Actions/Text";
 import React from "react";
 import {
   CONNECTING_BORDER_SIZE,
@@ -28,7 +26,7 @@ import {
   createRoundedLine,
   createRoundedRect,
 } from "./shapes";
-import { updateDiamondAction } from "../../services/Actions/Diamond";
+import { createUpdateChange } from "../../services/Actions";
 
 const getCornerCoords = (e: Element) => {
   if (
@@ -325,66 +323,93 @@ const EditableInput = ({
   );
 };
 
+const renderSvgElement = (element: Rect | Text | Diamond, classes: string) => {
+  const { type, id, style } = element;
+  if (type === ElementType.Rect) {
+    return (
+      <path
+        key={id}
+        style={style}
+        id={id}
+        d={createRoundedRect(element)}
+        className={classes}
+        data-testid="rect-svg"
+      />
+    );
+  } else if (type === ElementType.Diamond) {
+    return (
+      <path
+        key={id}
+        style={style}
+        id={id}
+        d={createRoundedDiamond(element)}
+        className={classes}
+        data-testid="diamond"
+      />
+    );
+  } else {
+    const { type, renderingOrder, userVersion, ...props } = element;
+    return (
+      <rect
+        key={element.id}
+        {...props}
+        className={classes}
+        data-testid="text"
+      />
+    );
+  }
+};
+
 const RectRenderer = ({
   isSelected,
   selectionMode,
   classes,
-  rect,
+  element,
   history,
   isEditingPolyline,
 }: {
   isSelected: boolean;
   selectionMode: SelectionMode;
   classes: string;
-  rect: Rect;
+  element: Rect | Text | Diamond;
   history: History | null;
   isEditingPolyline: boolean;
 }) => {
-  const [text, setText] = useState(rect.text);
+  const [text, setText] = useState(element.text);
 
   useEffect(() => {
     // Only update the state if its changed by another user.
     // Since the uncontrolled state will get messed up if the user changes alters the local state
-    if (rect.text !== text && !isSelected) {
-      setText(rect.text);
+    if (element.text !== text && !isSelected) {
+      setText(element.text);
     }
-  }, [rect, text, isSelected]);
+  }, [element, text, isSelected]);
 
   const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
-    // setText(e.currentTarget.textContent || "");
-
-    const element = copy(rect);
-    if (element && history) {
-      const changeAction = updateRectAction(
-        { ...element, text: e.currentTarget.innerHTML || "" },
+    const elementCopy = copy(element);
+    if (elementCopy && history) {
+      const changeAction = createUpdateChange(
+        { ...elementCopy, text: e.currentTarget.innerHTML || "" },
         false,
         history?.currentUserId
       );
-      // TODO: Consider using debounce here.
-      history.addLocalChange(changeAction);
+      changeAction && history.addLocalChange(changeAction);
     }
   };
 
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
-  const { type, renderingOrder, userVersion, style, ...props } = rect;
+  const { type, renderingOrder, userVersion, style, ...props } = element;
   const { x, y, width, height, rotate } = props;
   const renderElement = (
     <g>
-      <path
-        key={rect.id}
-        style={style}
-        id={props.id}
-        d={createRoundedRect(rect)}
-        className={classes}
-        data-testid="rect-svg"
-      />
+      {renderSvgElement(element, classes)}
       <EditableInput
         x={x}
         y={y}
         width={width}
         height={height}
-        id={rect.id}
+        id={element.id}
         isEditable={isEditable}
         text={text}
         onChange={onChangeInput}
@@ -393,90 +418,12 @@ const RectRenderer = ({
   );
   return addDraggableCorners(
     renderElement,
-    rect.id,
+    element.id,
     x + width / 2,
     y + height / 2,
     rotate,
     isSelected,
-    rect,
-    isEditingPolyline
-  );
-};
-
-const DiamondRenderer = ({
-  isSelected,
-  selectionMode,
-  classes,
-  diamond,
-  history,
-  isEditingPolyline,
-}: {
-  isSelected: boolean;
-  selectionMode: SelectionMode;
-  classes: string;
-  diamond: Diamond;
-  history: History | null;
-  isEditingPolyline: boolean;
-}) => {
-  const [text, setText] = useState(diamond.text);
-
-  useEffect(() => {
-    // Only update the state if its changed by another user.
-    // Since the uncontrolled state will get messed up if the user changes alters the local state
-    if (diamond.text !== text && !isSelected) {
-      setText(diamond.text);
-    }
-  }, [diamond, text, isSelected]);
-
-  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
-    // setText(e.currentTarget.textContent || "");
-
-    const element = copy(diamond);
-    if (element && history) {
-      const changeAction = updateDiamondAction(
-        { ...element, text: e.currentTarget.innerHTML || "" },
-        false,
-        history?.currentUserId
-      );
-      // TODO: Consider using debounce here.
-      history.addLocalChange(changeAction);
-    }
-  };
-
-  const isEditable =
-    isSelected && selectionMode.type === SelectionModes.TextEditing;
-  const { type, renderingOrder, userVersion, style, ...props } = diamond;
-  const { x, y, width, height, rotate } = props;
-  const renderElement = (
-    <g>
-      <path
-        key={diamond.id}
-        style={style}
-        id={props.id}
-        d={createRoundedDiamond(diamond)}
-        className={classes}
-        data-testid="diamond"
-      />
-      <EditableInput
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        id={diamond.id}
-        isEditable={isEditable}
-        text={text}
-        onChange={onChangeInput}
-      />
-    </g>
-  );
-  return addDraggableCorners(
-    renderElement,
-    diamond.id,
-    x + width / 2,
-    y + height / 2,
-    rotate,
-    isSelected,
-    diamond,
+    element,
     isEditingPolyline
   );
 };
@@ -645,87 +592,10 @@ const PolylineRenderer = ({
   );
 };
 
-const TextRenderer = ({
-  isSelected,
-  selectionMode,
-  classes,
-  textElement,
-  history,
-  isEditingPolyline,
-}: {
-  isSelected: boolean;
-  selectionMode: SelectionMode;
-  classes: string;
-  textElement: Text;
-  history: History | null;
-  isEditingPolyline: boolean;
-}) => {
-  const [text, setText] = useState(textElement.text);
-
-  useEffect(() => {
-    // Only update the state if its changed by another user.
-    // Since the uncontrolled state will get messed up if the user changes alters the local state
-    if (textElement.text !== text && !isSelected) {
-      setText(textElement.text);
-    }
-  }, [textElement, text, isSelected]);
-
-  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
-    // setText(e.currentTarget.textContent || "");
-    const element = copy(textElement);
-    if (element && history) {
-      const changeAction = updateTextAction(
-        { ...element, text: e.currentTarget.innerHTML || "" },
-        false,
-        history?.currentUserId
-      );
-      // TODO: Consider using debounce here.
-      history.addLocalChange(changeAction);
-    }
-  };
-
-  const isEditable =
-    isSelected && selectionMode.type === SelectionModes.TextEditing;
-  const { type, renderingOrder, userVersion, ...props } = textElement;
-  const { x, y, width, height, rotate } = props;
-  const renderElement = (
-    <g>
-      <rect
-        key={textElement.id}
-        {...props}
-        className={classes}
-        data-testid="text"
-      />
-      <EditableInput
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        id={textElement.id}
-        isEditable={isEditable}
-        text={text}
-        onChange={onChangeInput}
-      />
-    </g>
-  );
-  return addDraggableCorners(
-    renderElement,
-    textElement.id,
-    x + width / 2,
-    y + height / 2,
-    rotate,
-    isSelected,
-    textElement,
-    isEditingPolyline
-  );
-};
-
 const defaultExports = {
   Rect: RectRenderer,
   Ellipse: EllipseRenderer,
   Polyline: PolylineRenderer,
-  Text: TextRenderer,
-  Diamond: DiamondRenderer,
 };
 
 export default defaultExports;

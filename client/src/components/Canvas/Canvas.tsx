@@ -99,26 +99,18 @@ const Canvas = () => {
     const isSelectedCss = isSelected ? "isSelected" : "";
     const isHovering = !isSelected && e.id === hoverElement ? "isHovering" : "";
     const classes = `${e.state} ${isSelectedCss} ${isHovering}`;
-    if (e.type === ElementType.Rect) {
+    if (
+      e.type === ElementType.Rect ||
+      e.type === ElementType.Text ||
+      e.type === ElementType.Diamond
+    ) {
       return (
         <Elements.Rect
           key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}
-          rect={e}
-          history={history}
-          isEditingPolyline={isEditingPolyline}
-        />
-      );
-    } else if (e.type === ElementType.Diamond) {
-      return (
-        <Elements.Diamond
-          key={e.id}
-          isSelected={isSelected}
-          classes={classes}
-          selectionMode={selectionMode}
-          diamond={e}
+          element={e}
           history={history}
           isEditingPolyline={isEditingPolyline}
         />
@@ -135,7 +127,7 @@ const Canvas = () => {
           isEditingPolyline={isEditingPolyline}
         />
       );
-    } else if (e.type === ElementType.Polyline) {
+    } else {
       return (
         <Elements.Polyline
           key={e.id}
@@ -143,18 +135,6 @@ const Canvas = () => {
           classes={classes}
           polyline={e}
           elements={elements}
-        />
-      );
-    } else {
-      return (
-        <Elements.Text
-          key={e.id}
-          isSelected={isSelected}
-          classes={classes}
-          selectionMode={selectionMode}
-          textElement={e}
-          history={history}
-          isEditingPolyline={isEditingPolyline}
         />
       );
     }

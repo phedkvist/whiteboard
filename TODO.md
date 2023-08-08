@@ -8,7 +8,7 @@
 - [ ] Update the UI so it looks nicer.
 - [ ] Add undo/redo of operations
 - [ ] Refactor the Canvas/Elements ase there is too much code duplication.
-- [ ] Refactor the MouseEvents.tests.tsx ase there is too much code duplication.
+- [x] Refactor the MouseEvents.tests.tsx ase there is too much code duplication.
 - [ ] Add ability to add generic path
 - [ ] Add history logs
 - [ ] Add e2e encryption
