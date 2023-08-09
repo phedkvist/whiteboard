@@ -25,18 +25,8 @@ import {
 } from "../../helpers/utility";
 import { useAppState } from "../AppState";
 import { v4 as uuid } from "uuid";
-import {
-  createRectAction,
-  updateRectAction,
-} from "../../services/Actions/Rect";
-import {
-  createEllipseAction,
-  updateEllipseAction,
-} from "../../services/Actions/Ellipse";
-import {
-  createTextAction,
-  updateTextAction,
-} from "../../services/Actions/Text";
+import { updateEllipseAction } from "../../services/Actions/Ellipse";
+
 import {
   createPolylineAction,
   updatePolylineAction,
@@ -52,11 +42,11 @@ import {
   setupResizeElement,
   setupRotateElement,
 } from "./helpers";
-import { createDeleteChange } from "../../services/Actions";
 import {
-  createDiamondAction,
-  updateDiamondAction,
-} from "../../services/Actions/Diamond";
+  createDeleteChange,
+  createNewChange,
+  createUpdateChange,
+} from "../../services/Actions";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -313,60 +303,21 @@ export const MouseEventsProvider = ({
 
         switch (selectionMode.elementType) {
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
-          case ElementType.Rect: {
-            const id = uuid();
-            setSelectedElements([...selectedElements, id]);
-            history?.addLocalChange(
-              createRectAction(
-                initialX,
-                initialY,
-                renderingOrder,
-                id,
-                history?.currentUserId
-              )
-            );
-            break;
-          }
+          case ElementType.Rect:
+          case ElementType.Ellipse:
+          case ElementType.Text:
           case ElementType.Diamond: {
             const id = uuid();
             setSelectedElements([...selectedElements, id]);
-            history?.addLocalChange(
-              createDiamondAction(
-                initialX,
-                initialY,
-                renderingOrder,
-                id,
-                history?.currentUserId
-              )
+            const change = createNewChange(
+              selectionMode.elementType,
+              initialX,
+              initialY,
+              renderingOrder,
+              id,
+              history?.currentUserId!!
             );
-            break;
-          }
-          case ElementType.Ellipse: {
-            const id = uuid();
-            setSelectedElements([...selectedElements, id]);
-            history?.addLocalChange(
-              createEllipseAction(
-                initialX,
-                initialY,
-                renderingOrder,
-                id,
-                history?.currentUserId
-              )
-            );
-            break;
-          }
-          case ElementType.Text: {
-            const id = uuid();
-            setSelectedElements([...selectedElements, id]);
-            history?.addLocalChange(
-              createTextAction(
-                initialX,
-                initialY,
-                renderingOrder,
-                id,
-                history?.currentUserId
-              )
-            );
+            change && history?.addLocalChange(change);
             break;
           }
           case ElementType.Polyline: {
@@ -588,15 +539,13 @@ export const MouseEventsProvider = ({
         if (!selectedElement) return;
         const newAppState = Object.assign({}, appState);
         // Update actions with ephemeral set to true.
-        const creationElement = Object.assign(
-          {},
-          newAppState.elements[selectedElement]
-        );
-        if (creationElement.type === ElementType.Rect) {
-          const width = clientCoordinates.x - creationElement.x;
-          const height = clientCoordinates.y - creationElement.y;
-          history?.addLocalChange(
-            updateRectAction(
+        const creationElement = copy(newAppState.elements[selectedElement]);
+        switch (creationElement.type) {
+          case ElementType.Rect:
+          case ElementType.Diamond: {
+            const width = clientCoordinates.x - creationElement.x;
+            const height = clientCoordinates.y - creationElement.y;
+            const change = createUpdateChange(
               {
                 ...creationElement,
                 width,
@@ -604,74 +553,65 @@ export const MouseEventsProvider = ({
                 state: ElementState.Creation,
               },
               isEphemeral,
-              history?.currentUserId
-            )
-          );
-        } else if (creationElement.type === ElementType.Diamond) {
-          const width = clientCoordinates.x - creationElement.x;
-          const height = clientCoordinates.y - creationElement.y;
-          history?.addLocalChange(
-            updateDiamondAction(
-              {
-                ...creationElement,
-                width,
-                height,
-                state: ElementState.Creation,
-              },
-              isEphemeral,
-              history?.currentUserId
-            )
-          );
-        } else if (creationElement.type === ElementType.Ellipse) {
-          const { initialX, initialY } = selectionCoordinates;
-          if (!(initialX && initialY)) return;
-          const [rx, ry, cx, cy] = resizeEllipse(
-            Corner.BottomRight,
-            clientCoordinates.x,
-            clientCoordinates.y,
-            creationElement
-          );
-          history?.addLocalChange(
-            updateEllipseAction(
-              {
-                ...creationElement,
-                rx,
-                ry,
-                cx,
-                cy,
-                state: ElementState.Creation,
-              },
-              isEphemeral,
-              history?.currentUserId
-            )
-          );
-        } else if (creationElement.type === ElementType.Polyline) {
-          const { x, y } = clientCoordinates;
+              history?.currentUserId!!
+            );
+            change && history?.addLocalChange(change);
+            break;
+          }
+          case ElementType.Ellipse: {
+            const { initialX, initialY } = selectionCoordinates;
+            if (!(initialX && initialY)) return;
+            const [rx, ry, cx, cy] = resizeEllipse(
+              Corner.BottomRight,
+              clientCoordinates.x,
+              clientCoordinates.y,
+              creationElement
+            );
+            history?.addLocalChange(
+              updateEllipseAction(
+                {
+                  ...creationElement,
+                  rx,
+                  ry,
+                  cx,
+                  cy,
+                  state: ElementState.Creation,
+                },
+                isEphemeral,
+                history?.currentUserId
+              )
+            );
+            break;
+          }
+          case ElementType.Polyline: {
+            const { x, y } = clientCoordinates;
 
-          const overlappingElement = findOverlappingElement(
-            x,
-            y,
-            Object.values(appState.elements)
-          );
-          const overlappingPoint = getOverlappingPoint(
-            x,
-            y,
-            overlappingElement
-          );
-          const endPoint: Point = {
-            x,
-            y,
-            ...overlappingPoint,
-          };
-          const points = [...creationElement.points];
-          points[selectionCoordinates.currentPointIndex] = endPoint;
-          history?.addLocalChange(
-            updatePolylineAction(
-              { ...creationElement, points, state: ElementState.Creation },
-              isEphemeral,
-              history?.currentUserId
-            )
-          );
+            const overlappingElement = findOverlappingElement(
+              x,
+              y,
+              Object.values(appState.elements)
+            );
+            const overlappingPoint = getOverlappingPoint(
+              x,
+              y,
+              overlappingElement
+            );
+            const endPoint: Point = {
+              x,
+              y,
+              ...overlappingPoint,
+            };
+            const points = [...creationElement.points];
+            points[selectionCoordinates.currentPointIndex] = endPoint;
+            history?.addLocalChange(
+              updatePolylineAction(
+                { ...creationElement, points, state: ElementState.Creation },
+                isEphemeral,
+                history?.currentUserId
+              )
+            );
+            break;
+          }
         }
         break;
       }
@@ -695,49 +635,19 @@ export const MouseEventsProvider = ({
                 clientCoordinates.y,
                 el
               );
-              if (el.type === ElementType.Rect) {
-                history?.addLocalChange(
-                  updateRectAction(
-                    {
-                      ...el,
-                      width,
-                      height,
-                      x,
-                      y,
-                    },
-                    isEphemeral,
-                    history?.currentUserId
-                  )
-                );
-              } else if (el.type === ElementType.Diamond) {
-                history?.addLocalChange(
-                  updateDiamondAction(
-                    {
-                      ...el,
-                      width,
-                      height,
-                      x,
-                      y,
-                    },
-                    isEphemeral,
-                    history?.currentUserId
-                  )
-                );
-              } else if (el.type === ElementType.Text) {
-                history?.addLocalChange(
-                  updateTextAction(
-                    {
-                      ...el,
-                      width,
-                      height,
-                      x,
-                      y,
-                    },
-                    isEphemeral,
-                    history?.currentUserId
-                  )
-                );
-              }
+              const changeUpdate = createUpdateChange(
+                {
+                  ...el,
+                  width,
+                  height,
+                  x,
+                  y,
+                },
+                isEphemeral,
+                history?.currentUserId!!
+              );
+              changeUpdate && history?.addLocalChange(changeUpdate);
+
               break;
             }
             case ElementType.Ellipse: {
@@ -824,32 +734,11 @@ export const MouseEventsProvider = ({
         );
         element.rotate = rotate;
         if (!history) return;
-        let changeAction;
-        if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Diamond) {
-          changeAction = updateDiamondAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        }
+        const changeAction = createUpdateChange(
+          element,
+          isEphemeral,
+          history?.currentUserId
+        );
         changeAction && history?.addLocalChange(changeAction);
       }
     }
@@ -867,38 +756,11 @@ export const MouseEventsProvider = ({
 
         if (!selectedElement || !history) return;
         const element = copy(appState.elements[selectedElement]);
-        let changeAction;
-        if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Diamond) {
-          changeAction = updateDiamondAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Polyline) {
-          changeAction = updatePolylineAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        }
+        const changeAction = createUpdateChange(
+          element,
+          isEphemeral,
+          history?.currentUserId
+        );
         changeAction && history?.addLocalChange(changeAction);
 
         setSelectionMode({ ...selectionMode, type: SelectionModes.None });
@@ -912,32 +774,11 @@ export const MouseEventsProvider = ({
           break;
         }
         element.state = ElementState.Visible;
-        let changeAction;
-        if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Diamond) {
-          changeAction = updateDiamondAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        }
+        const changeAction = createUpdateChange(
+          element,
+          isEphemeral,
+          history?.currentUserId
+        );
         changeAction && history?.addLocalChange(changeAction);
 
         setSelectionMode({
@@ -957,39 +798,11 @@ export const MouseEventsProvider = ({
 
         const element = copy(appState.elements[selectedElement]);
         element.state = ElementState.Visible;
-        let changeAction;
-        if (element.type === ElementType.Rect) {
-          changeAction = updateRectAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Diamond) {
-          changeAction = updateDiamondAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Ellipse) {
-          changeAction = updateEllipseAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Text) {
-          changeAction = updateTextAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        } else if (element.type === ElementType.Polyline) {
-          // todo last update (non ephemeral):
-          changeAction = updatePolylineAction(
-            element,
-            isEphemeral,
-            history?.currentUserId
-          );
-        }
+        const changeAction = createUpdateChange(
+          element,
+          isEphemeral,
+          history?.currentUserId
+        );
         changeAction && history?.addLocalChange(changeAction);
 
         setSelectionMode({
