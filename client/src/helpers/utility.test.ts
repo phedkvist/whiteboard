@@ -1,6 +1,5 @@
 import { UserVersion } from "../services/ChangeTypes";
 import { ellipseStub, rectStub, textStub } from "../stubs";
-import { Element } from "../types";
 import {
   angleBetweenPoints,
   findOverlappingElement,

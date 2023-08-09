@@ -72,32 +72,26 @@ describe("Intersecting rect with a point", () => {
 
 describe("Intersecting an ellipse with a point", () => {
   it("A point lies inside", () => {
-    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 5, ry: 4 };
-    expect(isPointInsideEllipse(2, 3, ellipse)).toBeTruthy();
+    expect(isPointInsideEllipse(2, 3, 0, 0, 5, 4, 0)).toBeTruthy();
   });
 
   it("A point lies outside", () => {
-    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 5, ry: 4 };
-    expect(isPointInsideEllipse(7, 2, ellipse)).toBeFalsy();
+    expect(isPointInsideEllipse(7, 2, 0, 0, 5, 4, 0)).toBeFalsy();
   });
 
   it("A point lies on the boundary", () => {
-    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 5, ry: 3 };
-    expect(isPointInsideEllipse(5, 0, ellipse)).toBeTruthy();
+    expect(isPointInsideEllipse(5, 0, 0, 0, 5, 3, 0)).toBeTruthy();
   });
 
   it("A point lies inside the rotated ellipse", () => {
-    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 4, ry: 3, rotate: 45 };
-    expect(isPointInsideEllipse(2, 1, ellipse)).toBeTruthy();
+    expect(isPointInsideEllipse(2, 1, 0, 0, 4, 3, 45)).toBeTruthy();
   });
 
   it("A point lies outside the rotated ellipse", () => {
-    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 4, ry: 3, rotate: 45 };
-    expect(isPointInsideEllipse(5, 2, ellipse)).toBeFalsy();
+    expect(isPointInsideEllipse(5, 2, 0, 0, 4, 3, 45)).toBeFalsy();
   });
 
   it("A point lies on the boundary of the rotated ellipse", () => {
-    const ellipse = { ...ellipseStub, cx: 0, cy: 0, rx: 4, ry: 3, rotate: 45 };
-    expect(isPointInsideEllipse(0, 3, ellipse)).toBeTruthy();
+    expect(isPointInsideEllipse(0, 3, 0, 0, 4, 3, 45)).toBeTruthy();
   });
 });

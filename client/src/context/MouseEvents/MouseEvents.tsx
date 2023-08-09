@@ -14,10 +14,10 @@ import {
   Text,
   Point,
   Diamond,
+  Ellipse,
 } from "../../types";
 import {
   resizeRect,
-  resizeEllipse,
   getMidPoints,
   MouseButtons,
   copy,
@@ -25,7 +25,6 @@ import {
 } from "../../helpers/utility";
 import { useAppState } from "../AppState";
 import { v4 as uuid } from "uuid";
-import { updateEllipseAction } from "../../services/Actions/Ellipse";
 
 import {
   createPolylineAction,
@@ -542,7 +541,8 @@ export const MouseEventsProvider = ({
         const creationElement = copy(newAppState.elements[selectedElement]);
         switch (creationElement.type) {
           case ElementType.Rect:
-          case ElementType.Diamond: {
+          case ElementType.Diamond:
+          case ElementType.Ellipse: {
             const width = clientCoordinates.x - creationElement.x;
             const height = clientCoordinates.y - creationElement.y;
             const change = createUpdateChange(
@@ -556,31 +556,6 @@ export const MouseEventsProvider = ({
               history?.currentUserId!!
             );
             change && history?.addLocalChange(change);
-            break;
-          }
-          case ElementType.Ellipse: {
-            const { initialX, initialY } = selectionCoordinates;
-            if (!(initialX && initialY)) return;
-            const [rx, ry, cx, cy] = resizeEllipse(
-              Corner.BottomRight,
-              clientCoordinates.x,
-              clientCoordinates.y,
-              creationElement
-            );
-            history?.addLocalChange(
-              updateEllipseAction(
-                {
-                  ...creationElement,
-                  rx,
-                  ry,
-                  cx,
-                  cy,
-                  state: ElementState.Creation,
-                },
-                isEphemeral,
-                history?.currentUserId
-              )
-            );
             break;
           }
           case ElementType.Polyline: {
@@ -624,11 +599,13 @@ export const MouseEventsProvider = ({
           switch (selectionMode.elementType) {
             case ElementType.Diamond:
             case ElementType.Text:
-            case ElementType.Rect: {
+            case ElementType.Rect:
+            case ElementType.Ellipse: {
               const el = copy(appState.elements[selectedElement]) as
                 | Rect
                 | Text
-                | Diamond;
+                | Diamond
+                | Ellipse;
               const [width, height, x, y] = resizeRect(
                 selectedCorner as Corner,
                 clientCoordinates.x,
@@ -648,32 +625,6 @@ export const MouseEventsProvider = ({
               );
               changeUpdate && history?.addLocalChange(changeUpdate);
 
-              break;
-            }
-            case ElementType.Ellipse: {
-              const selectedElement = selectedElements[0];
-              if (!selectedElement) return;
-              const obj = copy(appState.elements[selectedElement]);
-              if (!obj || obj.type !== ElementType.Ellipse) return;
-              const [rx, ry, cx, cy] = resizeEllipse(
-                selectedCorner as Corner,
-                clientCoordinates.x,
-                clientCoordinates.y,
-                obj
-              );
-              history?.addLocalChange(
-                updateEllipseAction(
-                  {
-                    ...obj,
-                    rx,
-                    ry,
-                    cx,
-                    cy,
-                  },
-                  isEphemeral,
-                  history?.currentUserId
-                )
-              );
               break;
             }
             case ElementType.Polyline: {

@@ -147,18 +147,12 @@ export const findSelectedElements = (
       case ElementType.Diamond:
       case ElementType.Rect:
       case ElementType.Text:
+      case ElementType.Ellipse:
         return isRectsIntersecting(selectRect, {
           left: element.x,
           top: element.y,
           right: element.x + element.width,
           bottom: element.y + element.height,
-        });
-      case ElementType.Ellipse:
-        return isRectsIntersecting(selectRect, {
-          left: element.cx - element.rx,
-          top: element.cy - element.ry,
-          right: element.cx + element.rx,
-          bottom: element.cy + element.ry,
         });
       default:
         return false;
@@ -180,8 +174,8 @@ export const setElementCoords = (
     obj.type === ElementType.Ellipse &&
     originElement.type === ElementType.Ellipse
   ) {
-    obj.cx = diffX + originElement.cx;
-    obj.cy = diffY + originElement.cy;
+    obj.x = originElement.x + diffX;
+    obj.y = originElement.y + diffY;
     changeAction = updateEllipseAction(obj, true, currentUserId);
   } else if (
     obj.type === ElementType.Rect &&
@@ -232,16 +226,11 @@ export const getOverlappingPoint = (
       case ElementType.Rect:
       case ElementType.Text:
       case ElementType.Diamond:
+      case ElementType.Ellipse:
         return {
           connectingElementId: overlappingElement.id,
           connectingPointX: overlappingElement.x - newX,
           connectingPointY: overlappingElement.y - newY,
-        };
-      case ElementType.Ellipse:
-        return {
-          connectingElementId: overlappingElement.id,
-          connectingPointX: overlappingElement.cx - newX,
-          connectingPointY: overlappingElement.cy - newY,
         };
       default:
         break;
