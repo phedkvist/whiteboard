@@ -67,7 +67,7 @@ export const resizeRect = (
   selectedCorner: Corner,
   clientX: number,
   clientY: number,
-  rect: Rect | Text | Diamond
+  rect: Rect | Text | Diamond | Ellipse
 ) => {
   const { x, y, width: w, height: h, rotate } = rect;
 
@@ -88,37 +88,6 @@ export const resizeRect = (
       clientY,
     });
   return [newWidth, newHeight, newX, newY];
-};
-
-export const resizeEllipse = (
-  selectedCorner: Corner,
-  clientX: number,
-  clientY: number,
-  ellipse: Ellipse
-) => {
-  const { cx, cy, rx, ry, rotate } = ellipse;
-
-  const x = cx - rx;
-  const y = cy - ry;
-  const w = 2 * rx;
-  const h = 2 * ry;
-  // eslint-disable-next-line
-  const [newWidth, newHeight, _newX, _newY, newCX, newCY] =
-    resizeRotatedRectangle({
-      x,
-      y,
-      cx,
-      cy,
-      w,
-      h,
-      rotate,
-      selectedCorner,
-      clientX,
-      clientY,
-    });
-  const newRx = newWidth / 2;
-  const newRy = newHeight / 2;
-  return [newRx, newRy, newCX, newCY];
 };
 
 const resizeRotatedRectangle = ({
@@ -277,11 +246,10 @@ export const getMidPoints = (element: Element): [number, number] => {
   if (
     element.type === ElementType.Rect ||
     element.type === ElementType.Text ||
-    element.type === ElementType.Diamond
+    element.type === ElementType.Diamond ||
+    element.type === ElementType.Ellipse
   ) {
     return [element.x + element.width / 2, element.y + element.height / 2];
-  } else if (element.type === "ellipse") {
-    return [element.cx, element.cy];
   } else {
     // TODO: Implement this
     return [0, 0];
@@ -345,7 +313,21 @@ export function findOverlappingElement(
       case ElementType.Diamond:
         return isPointInsideRect(x, y, e, CONNECTING_BORDER_SIZE);
       case ElementType.Ellipse:
-        return isPointInsideEllipse(x, y, e, CONNECTING_BORDER_SIZE);
+        const rx = e.width / 2;
+        const ry = e.height / 2;
+        const cx = e.x + rx;
+        const cy = e.y + ry;
+        const rotation = e.rotate;
+        return isPointInsideEllipse(
+          x,
+          y,
+          cx,
+          cy,
+          rx,
+          ry,
+          rotation,
+          CONNECTING_BORDER_SIZE
+        );
       default:
         return false;
     }

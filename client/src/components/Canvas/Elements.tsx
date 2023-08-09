@@ -32,20 +32,14 @@ const getCornerCoords = (e: Element) => {
   if (
     e.type === ElementType.Rect ||
     e.type === ElementType.Text ||
-    e.type === ElementType.Diamond
+    e.type === ElementType.Diamond ||
+    e.type === ElementType.Ellipse
   ) {
     return {
       tL: { x: e.x, y: e.y },
       tR: { x: e.x + e.width, y: e.y },
       bR: { x: e.x + e.width, y: e.y + e.height },
       bL: { x: e.x, y: e.y + e.height },
-    };
-  } else if (e.type === ElementType.Ellipse) {
-    return {
-      tL: { x: e.cx - e.rx, y: e.cy - e.ry },
-      tR: { x: e.cx + e.rx, y: e.cy - e.ry },
-      bR: { x: e.cx + e.rx, y: e.cy + e.ry },
-      bL: { x: e.cx - e.rx, y: e.cy + e.ry },
     };
   } else {
     return {
@@ -174,12 +168,16 @@ const renderConnectingBorder = (e: Element) => {
       );
     }
     case ElementType.Ellipse:
+      const rx = e.width / 2;
+      const ry = e.height / 2;
+      const cx = e.x + rx;
+      const cy = e.y + ry;
       return (
         <ellipse
-          rx={e.rx + CONNECTING_BORDER_SIZE / 2}
-          ry={e.ry + CONNECTING_BORDER_SIZE / 2}
-          cx={e.cx}
-          cy={e.cy}
+          rx={rx + CONNECTING_BORDER_SIZE / 2}
+          ry={ry + CONNECTING_BORDER_SIZE / 2}
+          cx={cx}
+          cy={cy}
           fill={"none"}
           stroke={CONNECTING_BORDER_STROKE}
           opacity={CONNECTING_BORDER_OPACITY}
@@ -466,16 +464,33 @@ const EllipseRenderer = ({
       history.addLocalChange(changeAction);
     }
   };
-  const { type, renderingOrder, userVersion, ...props } = ellipse;
-  const { cx, cy, rx, ry, rotate } = props;
+  const {
+    type,
+    renderingOrder,
+    userVersion,
+    x,
+    y,
+    width,
+    height,
+    rotate,
+    ...props
+  } = ellipse;
+
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
-  const width = rx * Math.sqrt(2);
-  const height = ry * Math.sqrt(2);
+
+  const rx = width / 2;
+  const ry = height / 2;
+  const cx = x + rx;
+  const cy = y + ry;
   const renderElement = (
     <g>
       <ellipse
         key={ellipse.id}
+        rx={rx}
+        ry={ry}
+        cx={cx}
+        cy={cy}
         {...props}
         className={classes}
         data-testid="circle-svg"
@@ -525,9 +540,8 @@ const PolylineRenderer = ({
         case ElementType.Rect:
         case ElementType.Text:
         case ElementType.Diamond:
-          return [e.x - p.connectingPointX!, e.y - p.connectingPointY!];
         case ElementType.Ellipse:
-          return [e.cx - p.connectingPointX!, e.cy - p.connectingPointY!];
+          return [e.x - p.connectingPointX!, e.y - p.connectingPointY!];
         default:
           throw Error("Could not render polyline");
       }

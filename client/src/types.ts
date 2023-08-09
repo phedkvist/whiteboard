@@ -57,15 +57,7 @@ interface ElementBase {
   userVersion: UserVersion;
 }
 
-// TODO: Turn these into classes that can also contain rendering functions.
-export interface Ellipse extends ElementBase {
-  type: ElementType.Ellipse;
-  cx: number;
-  cy: number;
-  rx: number;
-  ry: number;
-}
-
+// TODO: Add some other type that unifies all of these shapes, some thing like "renderType: Square"
 export interface Rect extends ElementBase {
   type: ElementType.Rect;
   width: number;
@@ -74,16 +66,16 @@ export interface Rect extends ElementBase {
   y: number;
 }
 
+export interface Ellipse extends Omit<Rect, "type"> {
+  type: ElementType.Ellipse;
+}
+
 export interface Diamond extends Omit<Rect, "type"> {
   type: ElementType.Diamond;
 }
 
-export interface Text extends ElementBase {
+export interface Text extends Omit<Rect, "type"> {
   type: ElementType.Text;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
 }
 
 /*

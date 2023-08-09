@@ -92,10 +92,10 @@ const userVersion: UserVersion = {
 
 export const ellipseStub: Ellipse = {
   type: ElementType.Ellipse,
-  cx: 0,
-  cy: 0,
-  rx: 5,
-  ry: 5,
+  width: 5,
+  height: 5,
+  x: 0,
+  y: 0,
   id: "",
   state: ElementState.Visible,
   rotate: 0,

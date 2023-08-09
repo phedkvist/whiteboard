@@ -37,10 +37,13 @@ export function isLineInsideRect(
 export function isPointInsideEllipse(
   x: number,
   y: number,
-  ellipse: Ellipse,
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  rotate: number,
   padding: number = 0
 ): boolean {
-  const { cx, cy, rx, ry, rotate } = ellipse;
   const radians = rotate * (Math.PI / 180);
   const cosAngle = Math.cos(radians);
   const sinAngle = Math.sin(radians);
@@ -57,7 +60,7 @@ export function isPointInsideEllipse(
 export function isPointInsideRect(
   pointX: number,
   pointY: number,
-  element: IRect | Text | Diamond,
+  element: IRect | Text | Diamond | Ellipse,
   padding = 0
 ) {
   const {
