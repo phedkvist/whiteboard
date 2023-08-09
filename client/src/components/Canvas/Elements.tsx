@@ -12,7 +12,6 @@ import {
 } from "../../types";
 import { copy } from "../../helpers/utility";
 import History from "../../services/History";
-import { updateEllipseAction } from "../../services/Actions/Ellipse";
 import React from "react";
 import {
   CONNECTING_BORDER_SIZE,
@@ -321,7 +320,10 @@ const EditableInput = ({
   );
 };
 
-const renderSvgElement = (element: Rect | Text | Diamond, classes: string) => {
+const renderSvgElement = (
+  element: Rect | Text | Diamond | Ellipse,
+  classes: string
+) => {
   const { type, id, style } = element;
   if (type === ElementType.Rect) {
     return (
@@ -345,7 +347,7 @@ const renderSvgElement = (element: Rect | Text | Diamond, classes: string) => {
         data-testid="diamond"
       />
     );
-  } else {
+  } else if (type === ElementType.Text) {
     const { type, renderingOrder, userVersion, ...props } = element;
     return (
       <rect
@@ -355,10 +357,39 @@ const renderSvgElement = (element: Rect | Text | Diamond, classes: string) => {
         data-testid="text"
       />
     );
+  } else {
+    const {
+      type,
+      renderingOrder,
+      userVersion,
+      x,
+      y,
+      width,
+      height,
+      rotate,
+      ...props
+    } = element;
+
+    const rx = width / 2;
+    const ry = height / 2;
+    const cx = x + rx;
+    const cy = y + ry;
+    return (
+      <ellipse
+        key={id}
+        rx={rx}
+        ry={ry}
+        cx={cx}
+        cy={cy}
+        {...props}
+        className={classes}
+        data-testid="circle-svg"
+      />
+    );
   }
 };
 
-const RectRenderer = ({
+const SquareRenderer = ({
   isSelected,
   selectionMode,
   classes,
@@ -369,7 +400,7 @@ const RectRenderer = ({
   isSelected: boolean;
   selectionMode: SelectionMode;
   classes: string;
-  element: Rect | Text | Diamond;
+  element: Rect | Text | Diamond | Ellipse;
   history: History | null;
   isEditingPolyline: boolean;
 }) => {
@@ -422,99 +453,6 @@ const RectRenderer = ({
     rotate,
     isSelected,
     element,
-    isEditingPolyline
-  );
-};
-
-const EllipseRenderer = ({
-  ellipse,
-  classes,
-  isSelected,
-  selectionMode,
-  history,
-  isEditingPolyline,
-}: {
-  ellipse: Ellipse;
-  classes: string;
-  isSelected: boolean;
-  selectionMode: SelectionMode;
-  history: History | null;
-  isEditingPolyline: boolean;
-}) => {
-  const [text, setText] = useState(ellipse.text);
-
-  useEffect(() => {
-    // Only update the state if its changed by another user.
-    // Since the uncontrolled state will get messed up if the user changes alters the local state
-    if (ellipse.text !== text && !isSelected) {
-      setText(ellipse.text);
-    }
-  }, [text, ellipse, isSelected]);
-
-  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
-    // setText(e.currentTarget.textContent || "");
-    const element = copy(ellipse);
-    if (element && history) {
-      const changeAction = updateEllipseAction(
-        { ...element, text: e.currentTarget.innerHTML || "" },
-        false,
-        history?.currentUserId
-      );
-      // TODO: Consider using debounce here.
-      history.addLocalChange(changeAction);
-    }
-  };
-  const {
-    type,
-    renderingOrder,
-    userVersion,
-    x,
-    y,
-    width,
-    height,
-    rotate,
-    ...props
-  } = ellipse;
-
-  const isEditable =
-    isSelected && selectionMode.type === SelectionModes.TextEditing;
-
-  const rx = width / 2;
-  const ry = height / 2;
-  const cx = x + rx;
-  const cy = y + ry;
-  const renderElement = (
-    <g>
-      <ellipse
-        key={ellipse.id}
-        rx={rx}
-        ry={ry}
-        cx={cx}
-        cy={cy}
-        {...props}
-        className={classes}
-        data-testid="circle-svg"
-      />
-      <EditableInput
-        x={cx - width / 2}
-        y={cy - height / 2}
-        width={width}
-        height={height}
-        id={ellipse.id}
-        isEditable={isEditable}
-        text={text}
-        onChange={onChangeInput}
-      />
-    </g>
-  );
-  return addDraggableCorners(
-    renderElement,
-    ellipse.id,
-    cx,
-    cy,
-    rotate,
-    isSelected,
-    ellipse,
     isEditingPolyline
   );
 };
@@ -607,8 +545,7 @@ const PolylineRenderer = ({
 };
 
 const defaultExports = {
-  Rect: RectRenderer,
-  Ellipse: EllipseRenderer,
+  Square: SquareRenderer,
   Polyline: PolylineRenderer,
 };
 

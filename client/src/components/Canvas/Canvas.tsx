@@ -102,28 +102,17 @@ const Canvas = () => {
     if (
       e.type === ElementType.Rect ||
       e.type === ElementType.Text ||
-      e.type === ElementType.Diamond
+      e.type === ElementType.Diamond ||
+      e.type === ElementType.Ellipse
     ) {
       return (
-        <Elements.Rect
+        <Elements.Square
           key={e.id}
           isSelected={isSelected}
           classes={classes}
           selectionMode={selectionMode}
           element={e}
           history={history}
-          isEditingPolyline={isEditingPolyline}
-        />
-      );
-    } else if (e.type === ElementType.Ellipse) {
-      return (
-        <Elements.Ellipse
-          key={e.id}
-          isSelected={isSelected}
-          classes={classes}
-          ellipse={e}
-          history={history}
-          selectionMode={selectionMode}
           isEditingPolyline={isEditingPolyline}
         />
       );

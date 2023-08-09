@@ -7,7 +7,7 @@
 - [ ] Improve the polyline so it doesn't include the last point, it should be removed. And allow for a straight line element, and a polyline one.
 - [ ] Update the UI so it looks nicer.
 - [ ] Add undo/redo of operations
-- [ ] Refactor the Canvas/Elements ase there is too much code duplication.
+- [x] Refactor the Canvas/Elements ase there is too much code duplication.
 - [x] Refactor the MouseEvents.tests.tsx ase there is too much code duplication.
 - [ ] Add ability to add generic path
 - [ ] Add history logs
