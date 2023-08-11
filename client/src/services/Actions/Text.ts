@@ -15,7 +15,7 @@ export const createTextAction = (
     y: initialY,
     width: 100,
     height: 20,
-    text: "Text",
+    text: "",
     state: ElementState.Creation,
     rotate: 0,
     renderingOrder,

@@ -1,4 +1,4 @@
-import { Diamond, Rect } from "../../types";
+import { Diamond, ElementType, Ellipse, Rect, Text } from "../../types";
 
 // https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
 export const pointCloseToCorner = (
@@ -104,3 +104,72 @@ export function createRoundedDiamond(diamond: Diamond, radius = 10) {
 
   return pathSegments.join(" ");
 }
+
+export const renderSvgElement = (
+  element: Rect | Text | Diamond | Ellipse,
+  classes: string
+) => {
+  const { type, id, style } = element;
+  if (type === ElementType.Rect) {
+    return (
+      <path
+        key={id}
+        style={style}
+        id={id}
+        d={createRoundedRect(element)}
+        className={classes}
+        data-testid="rect-svg"
+      />
+    );
+  } else if (type === ElementType.Diamond) {
+    return (
+      <path
+        key={id}
+        style={style}
+        id={id}
+        d={createRoundedDiamond(element)}
+        className={classes}
+        data-testid="diamond"
+      />
+    );
+  } else if (type === ElementType.Text) {
+    const { type, renderingOrder, userVersion, ...props } = element;
+    return (
+      <rect
+        key={element.id}
+        {...props}
+        className={classes}
+        data-testid="text"
+      />
+    );
+  } else {
+    const {
+      type,
+      renderingOrder,
+      userVersion,
+      x,
+      y,
+      width,
+      height,
+      rotate,
+      ...props
+    } = element;
+
+    const rx = width / 2;
+    const ry = height / 2;
+    const cx = x + rx;
+    const cy = y + ry;
+    return (
+      <ellipse
+        key={id}
+        rx={rx}
+        ry={ry}
+        cx={cx}
+        cy={cy}
+        {...props}
+        className={classes}
+        data-testid="circle-svg"
+      />
+    );
+  }
+};
