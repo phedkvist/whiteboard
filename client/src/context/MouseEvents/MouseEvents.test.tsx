@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import {
   MemoryRouter,
   Route,
@@ -131,10 +137,8 @@ describe("MouseEvents", () => {
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
 
     const rect = screen.getByTestId("editableInput");
-
-    fireEvent.doubleClick(rect);
-    fireEvent.change(rect, {
-      target: { innerHTML: "abc" },
+    fireEvent.input(rect, {
+      target: { value: "abc" },
     });
 
     await waitFor(() => {
@@ -235,6 +239,7 @@ describe("MouseEvents", () => {
 
       const canvas = screen.getByTestId("canvas");
       mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+      fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
       const rect = screen.getByTestId(elementTestId);
       clickOnElement(canvas, { x: 110, y: 110 });
 
@@ -286,9 +291,11 @@ describe("MouseEvents", () => {
         clickOnElement(canvas, { x: 150, y: 150 });
       } else if (btn === "Text") {
         clickOnElement(canvas, { x: 100, y: 100 });
+        fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
         clickOnElement(canvas, { x: 110, y: 110 });
       } else {
         mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+        fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
         clickOnElement(canvas, { x: 150, y: 150 });
       }
 

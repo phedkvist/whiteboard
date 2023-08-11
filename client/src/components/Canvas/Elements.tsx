@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { LegacyRef, useEffect, useState } from "react";
 import {
   SelectionModes,
   SelectionMode,
@@ -24,6 +24,7 @@ import {
   createRoundedDiamond,
   createRoundedLine,
   createRoundedRect,
+  renderSvgElement,
 } from "./shapes";
 import { createUpdateChange } from "../../services/Actions";
 
@@ -290,8 +291,32 @@ const EditableInput = ({
   id: string;
   isEditable: boolean;
   text: string;
-  onChange: React.FormEventHandler<HTMLDivElement>;
+  onChange: React.FormEventHandler<HTMLTextAreaElement>;
 }) => {
+  const ref = React.createRef<HTMLTextAreaElement>();
+  useEffect(() => {
+    if (isEditable) {
+      ref.current?.focus();
+    }
+  }, [isEditable]);
+
+  // TODO: If width gets updated shit needs to work there as well.
+
+  const updateHeight = () => {
+    if (ref.current) {
+      // TODO: Height has to be updated whenever another user changes text, or when loading the initial element.
+      ref.current.style.height = "1px";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  };
+  const onKeyUp = () => {
+    updateHeight();
+  };
+
+  useEffect(() => {
+    updateHeight();
+  }, [text]);
+
   return (
     <foreignObject
       fontSize={14}
@@ -305,88 +330,21 @@ const EditableInput = ({
     >
       <div className="textContainer" data-xmlns="http://www.w3.org/1999/xhtml">
         <style dangerouslySetInnerHTML={{ __html: fontFamily }} />
-        <div
+        <textarea
           className="textInput"
           data-testid="editableInput"
+          ref={ref}
           id={id}
-          //disabled={isEditable}
+          disabled={!isEditable}
           contentEditable={isEditable}
           onInput={onChange}
+          onKeyUp={onKeyUp}
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: text }}
+          value={text}
         />
       </div>
     </foreignObject>
   );
-};
-
-const renderSvgElement = (
-  element: Rect | Text | Diamond | Ellipse,
-  classes: string
-) => {
-  const { type, id, style } = element;
-  if (type === ElementType.Rect) {
-    return (
-      <path
-        key={id}
-        style={style}
-        id={id}
-        d={createRoundedRect(element)}
-        className={classes}
-        data-testid="rect-svg"
-      />
-    );
-  } else if (type === ElementType.Diamond) {
-    return (
-      <path
-        key={id}
-        style={style}
-        id={id}
-        d={createRoundedDiamond(element)}
-        className={classes}
-        data-testid="diamond"
-      />
-    );
-  } else if (type === ElementType.Text) {
-    const { type, renderingOrder, userVersion, ...props } = element;
-    return (
-      <rect
-        key={element.id}
-        {...props}
-        className={classes}
-        data-testid="text"
-      />
-    );
-  } else {
-    const {
-      type,
-      renderingOrder,
-      userVersion,
-      x,
-      y,
-      width,
-      height,
-      rotate,
-      ...props
-    } = element;
-
-    const rx = width / 2;
-    const ry = height / 2;
-    const cx = x + rx;
-    const cy = y + ry;
-    return (
-      <ellipse
-        key={id}
-        rx={rx}
-        ry={ry}
-        cx={cx}
-        cy={cy}
-        {...props}
-        className={classes}
-        data-testid="circle-svg"
-      />
-    );
-  }
 };
 
 const SquareRenderer = ({
@@ -404,21 +362,11 @@ const SquareRenderer = ({
   history: History | null;
   isEditingPolyline: boolean;
 }) => {
-  const [text, setText] = useState(element.text);
-
-  useEffect(() => {
-    // Only update the state if its changed by another user.
-    // Since the uncontrolled state will get messed up if the user changes alters the local state
-    if (element.text !== text && !isSelected) {
-      setText(element.text);
-    }
-  }, [element, text, isSelected]);
-
-  const onChangeInput: React.FormEventHandler<HTMLDivElement> = (e) => {
+  const onChangeInput: React.FormEventHandler<HTMLTextAreaElement> = (e) => {
     const elementCopy = copy(element);
     if (elementCopy && history) {
       const changeAction = createUpdateChange(
-        { ...elementCopy, text: e.currentTarget.innerHTML || "" },
+        { ...elementCopy, text: e.currentTarget.value },
         false,
         history?.currentUserId
       );
@@ -428,6 +376,7 @@ const SquareRenderer = ({
 
   const isEditable =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
+
   const { type, renderingOrder, userVersion, style, ...props } = element;
   const { x, y, width, height, rotate } = props;
   const renderElement = (
@@ -440,7 +389,7 @@ const SquareRenderer = ({
         height={height}
         id={element.id}
         isEditable={isEditable}
-        text={text}
+        text={element.text}
         onChange={onChangeInput}
       />
     </g>

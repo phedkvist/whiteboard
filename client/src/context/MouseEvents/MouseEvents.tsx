@@ -426,7 +426,6 @@ export const MouseEventsProvider = ({
           break;
         }
 
-        console.log("ID: ", e.target.id);
         if (!selectedElements.includes(e.target.id)) {
           setSelectionMode({
             ...selectionMode,
@@ -734,9 +733,10 @@ export const MouseEventsProvider = ({
 
         setSelectionMode({
           ...selectionMode,
-          type: SelectionModes.None,
+          type: SelectionModes.TextEditing,
         });
-        setSelectedElements([]);
+        setSelectedElements([element.id]);
+
         break;
       }
       case SelectionModes.Rotating:
