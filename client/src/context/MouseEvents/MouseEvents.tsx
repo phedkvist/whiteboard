@@ -36,6 +36,7 @@ import {
   getClientCoordinates,
   getClosestElementId,
   getOverlappingPoint,
+  getViewBoxAfterZoom,
   setElementCoords,
   setupMovingElement,
   setupResizeElement,
@@ -56,8 +57,6 @@ interface IMouseEvents {
   onMouseUp: MouseEventHandler<SVGSVGElement>;
   onMouseMove: MouseEventHandler<SVGSVGElement>;
 }
-
-const ZOOM_SENSITIVITY = 0.05;
 
 export const MouseEventsContext = createContext<IMouseEvents | null>(null);
 
@@ -125,33 +124,20 @@ export const MouseEventsProvider = ({
     }
   };
 
-  const onScroll = (e: WheelEvent) => {
+  const onWheel = (e: WheelEvent) => {
     if (e.cancelable) {
       e.preventDefault();
     }
 
     if (isMetaPressed) {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const mx = e.offsetX;
-      const my = e.offsetY;
-      const dw = w * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-      const dh = h * Math.sign(e.deltaY) * ZOOM_SENSITIVITY;
-      const dx = (dw * mx) / w;
-      const dy = (dh * my) / h;
-      const newViewBox = {
-        x: viewBox.x + dx,
-        y: viewBox.y + dy,
-        w: viewBox.w - dw,
-        h: viewBox.h - dh,
-      };
-      const scale = newViewBox.w / w;
+      const { offsetX, offsetY, deltaY } = e;
+      const newViewBox = getViewBoxAfterZoom(viewBox, offsetX, offsetY, deltaY);
       if (newViewBox.w < 100 || newViewBox.h < 100) {
         return;
       } else if (newViewBox.w > 5000 || newViewBox.h > 5000) {
         return;
       }
-      setViewBox({ ...viewBox, ...newViewBox, scale });
+      setViewBox({ ...viewBox, ...newViewBox });
     } else {
       setViewBox({
         ...viewBox,
@@ -161,14 +147,23 @@ export const MouseEventsProvider = ({
     }
   };
 
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      setIsMetaPressed(false);
+      setIsSpacePressed(false);
+    }
+  };
+
   useLayoutEffect(() => {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
-    window.addEventListener("wheel", onScroll, { passive: false });
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("wheel", onScroll);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("visibilitychange", onVisibilityChange);
     };
   });
 

@@ -269,3 +269,28 @@ export const getClosestElementId = (
   }
   return id;
 };
+
+export const getViewBoxAfterZoom = (
+  viewBox: ViewBox,
+  offsetX: number,
+  offsetY: number,
+  deltaY: number,
+  zoomSensitivity: number = 0.05
+) => {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const mx = offsetX;
+  const my = offsetY;
+  const dw = w * Math.sign(deltaY) * zoomSensitivity;
+  const dh = h * Math.sign(deltaY) * zoomSensitivity;
+  const dx = (dw * mx) / w;
+  const dy = (dh * my) / h;
+  const newViewBox = {
+    x: viewBox.x - dx,
+    y: viewBox.y - dy,
+    w: viewBox.w + dw,
+    h: viewBox.h + dh,
+    scale: (viewBox.w + dw) / w,
+  };
+  return newViewBox;
+};

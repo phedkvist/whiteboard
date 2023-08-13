@@ -19,6 +19,8 @@ import {
   createRoundedRect,
 } from "../../components/Canvas/shapes";
 import { diamondStub, rectStub } from "../../stubs";
+import { initialViewBox } from "../../types";
+import { getViewBoxAfterZoom } from "./helpers";
 
 const mockGetRoomId = (
   _params: URLSearchParams,
@@ -57,7 +59,7 @@ const mouseDragEvent = (element: HTMLElement, from: Pos, to: Pos) => {
 const clickOnElement = (element: HTMLElement, pos: Pos) =>
   mouseDragEvent(element, pos, pos);
 
-describe("MouseEvents", () => {
+describe("MouseEvents Elements", () => {
   const createElements = [
     ["Rect", "rect-svg"],
     ["Diamond", "diamond"],
@@ -401,5 +403,65 @@ describe("MouseEvents", () => {
     expect(line).toBeDefined();
 
     // TODO: Check that they are selected.
+  });
+});
+
+describe("MouseEvents wheel events", () => {
+  it("Should get new viewBox when zooming out", async () => {
+    const viewBox = initialViewBox(window);
+    const newViewBox = getViewBoxAfterZoom(viewBox, 200, 200, 1);
+    expect(newViewBox).toEqual({
+      h: 806.4,
+      scale: 1.05,
+      w: 1075.2,
+      x: -10,
+      y: -10.000000000000002,
+    });
+  });
+
+  it("Should get new viewBox when zooming in", () => {
+    const viewBox = initialViewBox(window);
+    const newViewBox = getViewBoxAfterZoom(viewBox, 200, 200, -1);
+    expect(newViewBox).toEqual({
+      h: 729.6,
+      scale: 0.95,
+      w: 972.8,
+      x: 10,
+      y: 10.000000000000002,
+    });
+  });
+
+  it("Should zoom in when clicking zoom in button", () => {
+    const screen = renderWrapper();
+    const canvas = screen.getByTestId("canvas");
+
+    fireEvent.click(screen.getByText("+"));
+    expect(canvas.getAttribute("viewBox")).toEqual("0 0 921.6 691.2");
+  });
+
+  it("Should zoom out when click zoom out button", () => {
+    const screen = renderWrapper();
+    const canvas = screen.getByTestId("canvas");
+
+    fireEvent.click(screen.getByText("-"));
+    expect(canvas.getAttribute("viewBox")).toEqual(
+      "0 0 1126.4 844.8000000000001"
+    );
+  });
+
+  it("Should move viewBox when scrolling down", () => {
+    const screen = renderWrapper();
+    const canvas = screen.getByTestId("canvas");
+
+    fireEvent.wheel(window, { deltaX: 10, deltaY: 10 });
+    expect(canvas.getAttribute("viewBox")).toEqual("10 10 1024 768");
+  });
+
+  it("Should move viewBox when scrolling up", () => {
+    const screen = renderWrapper();
+    const canvas = screen.getByTestId("canvas");
+
+    fireEvent.wheel(window, { deltaX: -10, deltaY: -10 });
+    expect(canvas.getAttribute("viewBox")).toEqual("-10 -10 1024 768");
   });
 });
