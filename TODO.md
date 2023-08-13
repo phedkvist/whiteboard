@@ -4,11 +4,12 @@
 
 - [x] Handle zooming in/out
 - [x] Add ability to add diamond element
-- [ ] Improve the polyline so it doesn't include the last point, it should be removed. And allow for a straight line element, and a polyline one.
-- [ ] Update the UI so it looks nicer.
-- [ ] Add undo/redo of operations
 - [x] Refactor the Canvas/Elements ase there is too much code duplication.
 - [x] Refactor the MouseEvents.tests.tsx ase there is too much code duplication.
+- [ ] Improve the polyline so it doesn't include the last point, it should be removed. And allow for a straight line element, and a polyline one.
+- [ ] Update the UI so it looks nicer.
+- [ ] Auto suggest a new element after having created one (include points that can be used to draw lines from).
+- [ ] Add undo/redo of operations
 - [ ] Add ability to add generic path
 - [ ] Add history logs
 - [ ] Add e2e encryption
