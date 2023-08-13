@@ -1,4 +1,4 @@
-import { LegacyRef, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import {
   SelectionModes,
   SelectionMode,
@@ -20,12 +20,7 @@ import {
   CONNECTING_BORDER_STYLE,
   CORNER_OFFSET,
 } from "../../constants";
-import {
-  createRoundedDiamond,
-  createRoundedLine,
-  createRoundedRect,
-  renderSvgElement,
-} from "./shapes";
+import { createRoundedLine, renderSvgElement } from "./shapes";
 import { createUpdateChange } from "../../services/Actions";
 
 const getCornerCoords = (e: Element) => {
@@ -280,7 +275,7 @@ const EditableInput = ({
   width,
   height,
   id,
-  isEditable,
+  isEnabled,
   text,
   onChange,
 }: {
@@ -289,33 +284,31 @@ const EditableInput = ({
   width: number;
   height: number;
   id: string;
-  isEditable: boolean;
+  isEnabled: boolean;
   text: string;
   onChange: React.FormEventHandler<HTMLTextAreaElement>;
 }) => {
   const ref = React.createRef<HTMLTextAreaElement>();
   useEffect(() => {
-    if (isEditable) {
+    if (isEnabled) {
       ref.current?.focus();
     }
-  }, [isEditable]);
+  }, [isEnabled, ref]);
 
-  // TODO: If width gets updated shit needs to work there as well.
-
-  const updateHeight = () => {
+  const updateHeight = useCallback(() => {
     if (ref.current) {
-      // TODO: Height has to be updated whenever another user changes text, or when loading the initial element.
       ref.current.style.height = "1px";
       ref.current.style.height = ref.current.scrollHeight + "px";
     }
-  };
+  }, [ref]);
+
   const onKeyUp = () => {
     updateHeight();
   };
 
   useEffect(() => {
     updateHeight();
-  }, [text]);
+  }, [text, updateHeight]);
 
   return (
     <foreignObject
@@ -335,8 +328,7 @@ const EditableInput = ({
           data-testid="editableInput"
           ref={ref}
           id={id}
-          disabled={!isEditable}
-          contentEditable={isEditable}
+          disabled={!isEnabled}
           onInput={onChange}
           onKeyUp={onKeyUp}
           suppressContentEditableWarning
@@ -374,7 +366,7 @@ const SquareRenderer = ({
     }
   };
 
-  const isEditable =
+  const isEnabled =
     isSelected && selectionMode.type === SelectionModes.TextEditing;
 
   const { type, renderingOrder, userVersion, style, ...props } = element;
@@ -388,7 +380,7 @@ const SquareRenderer = ({
         width={width}
         height={height}
         id={element.id}
-        isEditable={isEditable}
+        isEnabled={isEnabled}
         text={element.text}
         onChange={onChangeInput}
       />

@@ -50,8 +50,12 @@ const Edit = () => {
         <RedoIcon />
       </Button>
       {zoomValue + "%"}
-      <Button onClick={increaseViewBox}>{"+"}</Button>
-      <Button onClick={decreaseViewBox}>{"-"}</Button>
+      <Button onClick={increaseViewBox} id="zoomIn">
+        {"+"}
+      </Button>
+      <Button onClick={decreaseViewBox} id="zoomOut">
+        {"-"}
+      </Button>
     </EditContainer>
   );
 };
