@@ -15,6 +15,7 @@ export interface SelectionCoordinates {
   yOffset: number;
   selectedCorner: null | Corner | number;
   currentPointIndex: number;
+  nextPointIndex: number;
 }
 
 export enum Corner {
@@ -209,9 +210,50 @@ export const initialSelectionCoordinates = {
   yOffset: 0,
   selectedCorner: null,
   currentPointIndex: 1,
+  nextPointIndex: 0,
 };
 
 export interface ClientCoordinates {
   x: number;
   y: number;
+}
+
+export class SelectionModeHelper {
+  static isNone(selectionMode: SelectionMode) {
+    return Boolean(selectionMode.type === SelectionModes.None);
+  }
+  static isAddingRect(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Rect &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
+  static isAddingDiamond(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Diamond &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
+  static isAddingEllipse(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Ellipse &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
+  static isAddingText(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Text &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
+
+  static isAddingPolyline(selectionMode: SelectionMode) {
+    return Boolean(
+      selectionMode.elementType === ElementType.Polyline &&
+        selectionMode.type === SelectionModes.Add
+    );
+  }
 }

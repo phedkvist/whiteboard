@@ -11,6 +11,7 @@ import {
   Element as IElement,
   ElementType,
   ClientCoordinates,
+  Point,
 } from "../../types";
 import { copy, getClosestCornerById } from "../../helpers/utility";
 import { updateDiamondAction } from "../../services/Actions/Diamond";
@@ -293,4 +294,20 @@ export const getViewBoxAfterZoom = (
     scale: (viewBox.w + dw) / w,
   };
   return newViewBox;
+};
+
+export const isPointSame = (p1: Point, p2: Point) => {
+  if (p1.x === p2.x && p1.y === p2.y) {
+    return true;
+  } else if (
+    Boolean(p1.connectingElementId) ||
+    Boolean(p2.connectingElementId)
+  ) {
+    return (
+      p1.connectingElementId === p2.connectingElementId &&
+      p1.connectingPointX === p2.connectingPointX &&
+      p1.connectingPointY === p2.connectingPointY
+    );
+  }
+  return false;
 };
