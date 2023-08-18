@@ -32,24 +32,19 @@ import {
   createPolylineAction,
   updatePolylineAction,
 } from "../../services/Actions/Polyline";
-import * as KeyCode from "keycode-js";
 import {
   findSelectedElements,
   getClientCoordinates,
   getClosestElementId,
   getOverlappingPoint,
-  getViewBoxAfterZoom,
   isPointSame,
   setElementCoords,
   setupMovingElement,
   setupResizeElement,
   setupRotateElement,
 } from "./helpers";
-import {
-  createDeleteChange,
-  createNewChange,
-  createUpdateChange,
-} from "../../services/Actions";
+import { createNewChange, createUpdateChange } from "../../services/Actions";
+import { useKeyboardEvents } from "../KeyboardEvents/useKeyboardEvents";
 
 // create a context with all of the mouse event handlers, that can be plugged into the canvas.
 // might be able to move certain "mouse event" related state into this context.
@@ -81,116 +76,8 @@ export const MouseEventsProvider = ({
     viewBox,
     setViewBox,
   } = useAppState();
-  const [isSpacePressed, setIsSpacePressed] = useState(false);
-  const [isMetaPressed, setIsMetaPressed] = useState(false);
 
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.code === KeyCode.CODE_ESCAPE) {
-      if (SelectionModeHelper.isAddingPolyline(selectionMode)) {
-        const selectedElement = selectedElements[0];
-        const isEphemeral = false;
-        if (!selectedElement || !history) return;
-
-        const element = copy(appState.elements[selectedElement]) as Polyline;
-        const shouldRemoveLastPoint =
-          selectionCoordinates.nextPointIndex === element.points.length - 1;
-        if (shouldRemoveLastPoint) {
-          element.points = element.points.slice(0, -1);
-        }
-        element.state = ElementState.Visible;
-        const changeAction = createUpdateChange(
-          element,
-          isEphemeral,
-          history?.currentUserId
-        );
-        changeAction && history?.addLocalChange(changeAction);
-        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
-        return;
-      }
-
-      setSelectionMode({ ...selectionMode, type: SelectionModes.None });
-      setSelectedElements([]);
-      setSelectionCoordinates({
-        ...selectionCoordinates,
-        startX: null,
-        startY: null,
-        currentX: null,
-        currentY: null,
-        currentPointIndex: 0,
-      });
-      return;
-    }
-    if (e.code === KeyCode.CODE_SPACE) {
-      setIsSpacePressed(true);
-    }
-    if (e.code === KeyCode.CODE_BACK_SPACE) {
-      if (selectionMode.type === SelectionModes.TextEditing) return;
-      const changes = selectedElements
-        .map((id) => {
-          const element = appState.elements[id];
-          return createDeleteChange(element, history?.currentUserId!);
-        })
-        .filter((c) => c !== null);
-      changes.forEach((c) => history?.addLocalChange(c!));
-      setSelectedElements([]);
-    }
-
-    if (e.code === KeyCode.CODE_META_LEFT) {
-      setIsMetaPressed(true);
-    }
-  };
-
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.code === KeyCode.CODE_SPACE) {
-      setIsSpacePressed(false);
-    }
-    if (e.code === KeyCode.CODE_META_LEFT) {
-      setIsMetaPressed(false);
-    }
-  };
-
-  const onWheel = (e: WheelEvent) => {
-    if (e.cancelable) {
-      e.preventDefault();
-    }
-
-    if (isMetaPressed) {
-      const { offsetX, offsetY, deltaY } = e;
-      const newViewBox = getViewBoxAfterZoom(viewBox, offsetX, offsetY, deltaY);
-      if (newViewBox.w < 100 || newViewBox.h < 100) {
-        return;
-      } else if (newViewBox.w > 5000 || newViewBox.h > 5000) {
-        return;
-      }
-      setViewBox({ ...viewBox, ...newViewBox });
-    } else {
-      setViewBox({
-        ...viewBox,
-        x: viewBox.x + e.deltaX,
-        y: viewBox.y + e.deltaY,
-      });
-    }
-  };
-
-  const onVisibilityChange = () => {
-    if (document.hidden) {
-      setIsMetaPressed(false);
-      setIsSpacePressed(false);
-    }
-  };
-
-  useLayoutEffect(() => {
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
-    window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  });
+  const [isSpacePressed] = useKeyboardEvents();
 
   const onMouseOver: MouseEventHandler<SVGSVGElement> = (e) => {
     if (!(e.target instanceof Element) || e.target.id === "container") {
