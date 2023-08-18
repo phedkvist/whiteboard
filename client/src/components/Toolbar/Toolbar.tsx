@@ -6,6 +6,14 @@ import {
 } from "../../types";
 import { useAppState } from "../../context/AppState";
 import styled from "styled-components";
+import {
+  DiamondSvg,
+  EllipseSvg,
+  LineSvg,
+  PointerSvg,
+  RectSvg,
+  TextSvg,
+} from "./SvgIcons";
 
 const Toolbar = styled.div`
   position: absolute;
@@ -15,13 +23,13 @@ const Toolbar = styled.div`
   z-index: 2;
   background-color: #f3f2f2;
   border-radius: 4px;
-  border: 1px solid lightgray;
   padding: 10px;
 `;
 
 const Button = styled.button<{ isActive: boolean }>`
   border: none;
-  border-bottom: ${(props) => (props.isActive ? "1px solid #66bdee" : "none")};
+  /* border-bottom: ${(props) =>
+    props.isActive ? "1px solid #66bdee" : "none"}; */
   color: ${(props) => (props.isActive ? "#66bdee" : "black")};
   background-color: transparent;
   padding: 10px;
@@ -30,6 +38,16 @@ const Button = styled.button<{ isActive: boolean }>`
 const ToolbarComponent = () => {
   const { setSelectedElements, setSelectionMode, selectionMode } =
     useAppState();
+
+  const isActiveSelect = SelectionModeHelper.isNone(selectionMode);
+  const isActiveRect = SelectionModeHelper.isAddingRect(selectionMode);
+  const isActiveDiamond = SelectionModeHelper.isAddingDiamond(selectionMode);
+  const isActiveEllipse = SelectionModeHelper.isAddingEllipse(selectionMode);
+  const isActiveText = SelectionModeHelper.isAddingText(selectionMode);
+  const isActivePolyline = SelectionModeHelper.isAddingPolyline(selectionMode);
+
+  const activeColor = "#2D9CDB";
+  const inactiveColor = "#000";
   return (
     <Toolbar id="toolbar">
       <Button
@@ -43,7 +61,7 @@ const ToolbarComponent = () => {
           });
         }}
       >
-        Pointer
+        <PointerSvg color={isActiveSelect ? activeColor : inactiveColor} />
       </Button>
       <Button
         id="toolbar_rect"
@@ -57,7 +75,7 @@ const ToolbarComponent = () => {
           });
         }}
       >
-        Rect
+        <RectSvg color={isActiveRect ? activeColor : inactiveColor} />
       </Button>
       <Button
         id="toolbar_diamond"
@@ -70,7 +88,7 @@ const ToolbarComponent = () => {
           });
         }}
       >
-        Diamond
+        <DiamondSvg color={isActiveDiamond ? activeColor : inactiveColor} />
       </Button>
       <Button
         id="toolbar_ellipse"
@@ -83,7 +101,7 @@ const ToolbarComponent = () => {
           });
         }}
       >
-        Circle
+        <EllipseSvg color={isActiveEllipse ? activeColor : inactiveColor} />
       </Button>
       <Button
         id="toolbar_text"
@@ -96,7 +114,7 @@ const ToolbarComponent = () => {
           });
         }}
       >
-        Text
+        <TextSvg color={isActiveText ? activeColor : inactiveColor} />
       </Button>
       <Button
         id="toolbar_polyline"
@@ -109,7 +127,7 @@ const ToolbarComponent = () => {
           });
         }}
       >
-        Line
+        <LineSvg color={isActivePolyline ? activeColor : inactiveColor} />
       </Button>
     </Toolbar>
   );
