@@ -1,4 +1,9 @@
-import { SelectionModes, SelectionMode, ElementType } from "../../types";
+import {
+  SelectionModes,
+  SelectionMode,
+  ElementType,
+  SelectionModeHelper,
+} from "../../types";
 import { useAppState } from "../../context/AppState";
 import styled from "styled-components";
 
@@ -21,46 +26,6 @@ const Button = styled.button<{ isActive: boolean }>`
   background-color: transparent;
   padding: 10px;
 `;
-
-class SelectionModeHelper {
-  static isNone(selectionMode: SelectionMode) {
-    return Boolean(selectionMode.type === SelectionModes.None);
-  }
-  static isAddingRect(selectionMode: SelectionMode) {
-    return Boolean(
-      selectionMode.elementType === ElementType.Rect &&
-        selectionMode.type === SelectionModes.Add
-    );
-  }
-
-  static isAddingDiamond(selectionMode: SelectionMode) {
-    return Boolean(
-      selectionMode.elementType === ElementType.Diamond &&
-        selectionMode.type === SelectionModes.Add
-    );
-  }
-
-  static isAddingEllipse(selectionMode: SelectionMode) {
-    return Boolean(
-      selectionMode.elementType === ElementType.Ellipse &&
-        selectionMode.type === SelectionModes.Add
-    );
-  }
-
-  static isAddingText(selectionMode: SelectionMode) {
-    return Boolean(
-      selectionMode.elementType === ElementType.Text &&
-        selectionMode.type === SelectionModes.Add
-    );
-  }
-
-  static isAddingPolyline(selectionMode: SelectionMode) {
-    return Boolean(
-      selectionMode.elementType === ElementType.Polyline &&
-        selectionMode.type === SelectionModes.Add
-    );
-  }
-}
 
 const ToolbarComponent = () => {
   const { setSelectedElements, setSelectionMode, selectionMode } =

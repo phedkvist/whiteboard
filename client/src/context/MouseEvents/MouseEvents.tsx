@@ -15,6 +15,8 @@ import {
   Point,
   Diamond,
   Ellipse,
+  SelectionModeHelper,
+  Polyline,
 } from "../../types";
 import {
   resizeRect,
@@ -37,6 +39,7 @@ import {
   getClosestElementId,
   getOverlappingPoint,
   getViewBoxAfterZoom,
+  isPointSame,
   setElementCoords,
   setupMovingElement,
   setupResizeElement,
@@ -83,6 +86,28 @@ export const MouseEventsProvider = ({
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.code === KeyCode.CODE_ESCAPE) {
+      if (SelectionModeHelper.isAddingPolyline(selectionMode)) {
+        const selectedElement = selectedElements[0];
+        const isEphemeral = false;
+        if (!selectedElement || !history) return;
+
+        const element = copy(appState.elements[selectedElement]) as Polyline;
+        const shouldRemoveLastPoint =
+          selectionCoordinates.nextPointIndex === element.points.length - 1;
+        if (shouldRemoveLastPoint) {
+          element.points = element.points.slice(0, -1);
+        }
+        element.state = ElementState.Visible;
+        const changeAction = createUpdateChange(
+          element,
+          isEphemeral,
+          history?.currentUserId
+        );
+        changeAction && history?.addLocalChange(changeAction);
+        setSelectionMode({ ...selectionMode, type: SelectionModes.None });
+        return;
+      }
+
       setSelectionMode({ ...selectionMode, type: SelectionModes.None });
       setSelectedElements([]);
       setSelectionCoordinates({
@@ -341,6 +366,7 @@ export const MouseEventsProvider = ({
               setSelectionCoordinates({
                 ...selectionCoordinates,
                 currentPointIndex: selectionCoordinates.currentPointIndex + 1,
+                nextPointIndex: selectionCoordinates.nextPointIndex + 1,
               });
             } else {
               const id = uuid();
@@ -372,7 +398,8 @@ export const MouseEventsProvider = ({
               );
               setSelectionCoordinates({
                 ...selectionCoordinates,
-                currentPointIndex: 1,
+                currentPointIndex: 0,
+                nextPointIndex: 1,
               });
               break;
             }
@@ -571,7 +598,11 @@ export const MouseEventsProvider = ({
               ...overlappingPoint,
             };
             const points = [...creationElement.points];
-            points[selectionCoordinates.currentPointIndex] = endPoint;
+            const prevPoint = points[selectionCoordinates.nextPointIndex - 1];
+            const isPointsSame = isPointSame(prevPoint, endPoint);
+            if (!isPointsSame) {
+              points[selectionCoordinates.nextPointIndex] = endPoint;
+            }
             history?.addLocalChange(
               updatePolylineAction(
                 { ...creationElement, points, state: ElementState.Creation },

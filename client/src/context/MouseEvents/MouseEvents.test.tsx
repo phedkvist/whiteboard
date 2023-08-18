@@ -288,7 +288,18 @@ describe("MouseEvents Elements", () => {
 
       const canvas = screen.getByTestId("canvas");
       if (btn === "Line") {
-        mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+        fireEvent.mouseDown(canvas, {
+          clientX: 100,
+          clientY: 100,
+        });
+        fireEvent.mouseMove(canvas, {
+          clientX: 200,
+          clientY: 200,
+        });
+        fireEvent.mouseDown(canvas, {
+          clientX: 200,
+          clientY: 200,
+        });
         fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
         clickOnElement(canvas, { x: 150, y: 150 });
       } else if (btn === "Text") {
@@ -317,7 +328,18 @@ describe("MouseEvents Elements", () => {
     fireEvent.click(screen.getByText("Line"));
     const canvas = screen.getByTestId("canvas");
 
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 100 });
+    fireEvent.mouseDown(canvas, {
+      clientX: 100,
+      clientY: 0,
+    });
+    fireEvent.mouseMove(canvas, {
+      clientX: 200,
+      clientY: 0,
+    });
+    fireEvent.mouseDown(canvas, {
+      clientX: 200,
+      clientY: 0,
+    });
     fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
 
     const line = screen.getByTestId("polyline");
@@ -325,8 +347,8 @@ describe("MouseEvents Elements", () => {
     await waitFor(() => {
       expect(line.getAttribute("d")).toEqual(
         createRoundedLine([
-          [100, 100],
-          [200, 100],
+          [100, 0],
+          [200, 0],
         ])
       );
     });
@@ -338,8 +360,19 @@ describe("MouseEvents Elements", () => {
     fireEvent.click(screen.getByText("Line"));
     const canvas = screen.getByTestId("canvas");
 
-    // two separate onclick events pretty much
-    mouseDragEvent(canvas, { x: 100, y: 0 }, { x: 200, y: 0 });
+    fireEvent.mouseDown(canvas, {
+      clientX: 100,
+      clientY: 0,
+    });
+    fireEvent.mouseMove(canvas, {
+      clientX: 200,
+      clientY: 0,
+    });
+    fireEvent.mouseDown(canvas, {
+      clientX: 200,
+      clientY: 0,
+    });
+
     fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
 
     const line = screen.getByTestId("polyline");
@@ -397,8 +430,18 @@ describe("MouseEvents Elements", () => {
 
     // create a line
     fireEvent.click(screen.getByText("Line"));
-    clickOnElement(canvas, { x: 100, y: 100 });
-    clickOnElement(canvas, { x: 200, y: 200 });
+    fireEvent.mouseDown(canvas, {
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.mouseMove(canvas, {
+      clientX: 200,
+      clientY: 200,
+    });
+    fireEvent.mouseDown(canvas, {
+      clientX: 200,
+      clientY: 200,
+    });
     const line = screen.getByTestId("polyline");
     expect(line).toBeDefined();
 
