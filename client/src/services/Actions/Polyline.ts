@@ -13,7 +13,7 @@ export const createPolylineAction = (
     text: "",
     points: [point],
     rotate: 0,
-    stroke: "black",
+    style: { stroke: "#d9d9d9" },
     state: ElementState.Creation,
     strokeWidth: "4px",
     renderingOrder,
@@ -21,6 +21,7 @@ export const createPolylineAction = (
       userId,
       version: 1,
     },
+    stroke: "",
   };
 
   return {
