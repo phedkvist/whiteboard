@@ -21,7 +21,9 @@ export const createDiamondAction = (
     rotate: 0,
     renderingOrder,
     style: {
-      fill: "#FDFD96",
+      fill: "#fff",
+      strokeWidth: 1,
+      stroke: "#D9D9D9",
     },
     userVersion: {
       userId,
