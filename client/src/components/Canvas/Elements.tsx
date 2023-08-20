@@ -410,7 +410,7 @@ const PolylineRenderer = ({
   elements: { [id: string]: Element };
 }) => {
   const { type, renderingOrder, points, id, userVersion, ...props } = polyline;
-  const arrowStyle = { fill: props.style?.stroke || "" };
+  const arrowStyle = props.style?.stroke;
 
   const processedPoints: [number, number][] = points.map((p) => {
     if (p.connectingElementId && p.connectingElementId in elements) {
@@ -433,7 +433,7 @@ const PolylineRenderer = ({
     <g id={`g-${id}`}>
       <defs>
         <marker
-          id="arrow"
+          id={`${id}-arrow`}
           key={`${id}-arrow`}
           orient="auto"
           markerWidth="3"
@@ -441,10 +441,10 @@ const PolylineRenderer = ({
           refX="1.5"
           refY="2"
         >
-          <path d="M0,0 V4 L2,2 Z" style={arrowStyle} />
+          <path d="M0,0 V4 L2,2 Z" fill={arrowStyle} />
         </marker>
         <marker
-          id="arrow-reverse"
+          id={`${id}-arrow-reverse`}
           key={`${id}-arrow-reverse`}
           orient="auto"
           markerWidth="3"
@@ -452,7 +452,7 @@ const PolylineRenderer = ({
           refX="0.5"
           refY="2"
         >
-          <path d="M2,0 V4 L0,2 Z" style={arrowStyle} />
+          <path d="M2,0 V4 L0,2 Z" fill={arrowStyle} />
         </marker>
       </defs>
       <path
@@ -462,8 +462,8 @@ const PolylineRenderer = ({
         d={createRoundedLine(processedPoints)}
         fill={"transparent"}
         className={classes}
-        markerStart="url(#arrow-reverse)"
-        markerEnd="url(#arrow)"
+        markerStart={`url(#${id}-arrow-reverse)`}
+        markerEnd={`url(#${id}-arrow)`}
         data-testid="polyline"
       ></path>
       {isSelected &&
