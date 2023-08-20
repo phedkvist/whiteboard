@@ -91,7 +91,7 @@ export const useKeyboardEvents = () => {
         newElementType = ElementType.Rect;
       } else if (e.code === KeyCode.CODE_D) {
         newElementType = ElementType.Diamond;
-      } else if (e.code === KeyCode.CODE_E) {
+      } else if (e.code === KeyCode.CODE_O) {
         newElementType = ElementType.Ellipse;
       } else if (e.code === KeyCode.CODE_T) {
         newElementType = ElementType.Text;
@@ -99,9 +99,17 @@ export const useKeyboardEvents = () => {
         newElementType = ElementType.Polyline;
       }
       if (newElementType) {
+        setSelectedElements([]);
         setSelectionMode({
           type: SelectionModes.Add,
           elementType: newElementType,
+        });
+      }
+      if (e.code === KeyCode.CODE_V) {
+        setSelectedElements([]);
+        setSelectionMode({
+          type: SelectionModes.Selected,
+          elementType: undefined,
         });
       }
     }

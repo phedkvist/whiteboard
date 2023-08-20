@@ -222,6 +222,11 @@ export class SelectionModeHelper {
   static isNone(selectionMode: SelectionMode) {
     return Boolean(selectionMode.type === SelectionModes.None);
   }
+
+  static isMultiSelecting(selectionMode: SelectionMode) {
+    return Boolean(selectionMode.type === SelectionModes.MultiSelecting);
+  }
+
   static isAddingRect(selectionMode: SelectionMode) {
     return Boolean(
       selectionMode.elementType === ElementType.Rect &&

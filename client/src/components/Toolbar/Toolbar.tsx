@@ -39,7 +39,9 @@ const ToolbarComponent = () => {
   const { setSelectedElements, setSelectionMode, selectionMode } =
     useAppState();
 
-  const isActiveSelect = SelectionModeHelper.isNone(selectionMode);
+  const isActiveSelect =
+    SelectionModeHelper.isNone(selectionMode) ||
+    SelectionModeHelper.isMultiSelecting(selectionMode);
   const isActiveRect = SelectionModeHelper.isAddingRect(selectionMode);
   const isActiveDiamond = SelectionModeHelper.isAddingDiamond(selectionMode);
   const isActiveEllipse = SelectionModeHelper.isAddingEllipse(selectionMode);
@@ -52,7 +54,7 @@ const ToolbarComponent = () => {
     <Toolbar id="toolbar">
       <Button
         id="toolbar_select"
-        isActive={SelectionModeHelper.isNone(selectionMode)}
+        isActive={isActiveSelect}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -65,7 +67,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_rect"
-        isActive={SelectionModeHelper.isAddingRect(selectionMode)}
+        isActive={isActiveRect}
         onClick={() => {
           setSelectedElements([]);
 
@@ -79,7 +81,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_diamond"
-        isActive={SelectionModeHelper.isAddingDiamond(selectionMode)}
+        isActive={isActiveDiamond}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -92,7 +94,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_ellipse"
-        isActive={SelectionModeHelper.isAddingEllipse(selectionMode)}
+        isActive={isActiveEllipse}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -105,7 +107,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_text"
-        isActive={SelectionModeHelper.isAddingText(selectionMode)}
+        isActive={isActiveText}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -118,7 +120,7 @@ const ToolbarComponent = () => {
       </Button>
       <Button
         id="toolbar_polyline"
-        isActive={SelectionModeHelper.isAddingPolyline(selectionMode)}
+        isActive={isActivePolyline}
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
