@@ -1,9 +1,4 @@
-import {
-  SelectionModes,
-  SelectionMode,
-  ElementType,
-  SelectionModeHelper,
-} from "../../types";
+import { SelectionModes, ElementType, SelectionModeHelper } from "../../types";
 import { useAppState } from "../../context/AppState";
 import styled from "styled-components";
 import {

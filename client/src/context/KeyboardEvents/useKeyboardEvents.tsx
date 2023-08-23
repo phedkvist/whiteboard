@@ -18,7 +18,6 @@ export const useKeyboardEvents = () => {
     history,
     selectedElements,
     setSelectedElements,
-    setHoverElement,
     selectionCoordinates,
     setSelectionCoordinates,
     selectionMode,
