@@ -1,10 +1,4 @@
-import {
-  createContext,
-  MouseEventHandler,
-  useContext,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { createContext, MouseEventHandler, useContext } from "react";
 import {
   SelectionModes,
   ElementType,
@@ -15,8 +9,6 @@ import {
   Point,
   Diamond,
   Ellipse,
-  SelectionModeHelper,
-  Polyline,
 } from "../../types";
 import {
   resizeRect,

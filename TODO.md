@@ -8,6 +8,8 @@
 - [x] Refactor the MouseEvents.tests.tsx ase there is too much code duplication.
 - [x] Improve the polyline so it doesn't include the last point, it should be removed.
 - [ ] Update the UI so it looks nicer.
+- [ ] Add more edit properties of shapes
+- [ ] Add copy/paste functionality
 - [ ] Auto suggest a new element after having created one (include points that can be used to draw lines from).
 - [ ] Add undo/redo of operations
 - [ ] Add ability to add generic path
