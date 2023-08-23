@@ -50,6 +50,7 @@ const ToolbarComponent = () => {
       <Button
         id="toolbar_select"
         isActive={isActiveSelect}
+        data-testid="pointer-btn"
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -63,6 +64,7 @@ const ToolbarComponent = () => {
       <Button
         id="toolbar_rect"
         isActive={isActiveRect}
+        data-testid="rect-btn"
         onClick={() => {
           setSelectedElements([]);
 
@@ -77,6 +79,7 @@ const ToolbarComponent = () => {
       <Button
         id="toolbar_diamond"
         isActive={isActiveDiamond}
+        data-testid="diamond-btn"
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -90,6 +93,7 @@ const ToolbarComponent = () => {
       <Button
         id="toolbar_ellipse"
         isActive={isActiveEllipse}
+        data-testid="circle-btn"
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -103,6 +107,7 @@ const ToolbarComponent = () => {
       <Button
         id="toolbar_text"
         isActive={isActiveText}
+        data-testid="text-btn"
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
@@ -116,6 +121,7 @@ const ToolbarComponent = () => {
       <Button
         id="toolbar_polyline"
         isActive={isActivePolyline}
+        data-testid="polyline-btn"
         onClick={() => {
           setSelectedElements([]);
           setSelectionMode({
