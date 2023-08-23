@@ -61,25 +61,28 @@ const clickOnElement = (element: HTMLElement, pos: Pos) =>
 
 describe("MouseEvents Elements", () => {
   const createElements = [
-    ["Rect", "rect-svg"],
-    ["Diamond", "diamond"],
-    ["Circle", "circle-svg"],
-    ["Text", "text"],
+    ["rect-btn", "rect-svg"],
+    ["diamond-btn", "diamond"],
+    ["circle-btn", "circle-svg"],
+    ["text-btn", "text"],
   ];
-  it.each(createElements)("Should create a %s", (buttonText, elementTestId) => {
-    renderWrapper();
+  it.each(createElements)(
+    "Should create a %s",
+    (buttonTestId, elementTestId) => {
+      renderWrapper();
 
-    fireEvent.click(screen.getByText(buttonText));
+      fireEvent.click(screen.getByTestId(buttonTestId));
 
-    const canvas = screen.getByTestId("canvas");
-    mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
+      const canvas = screen.getByTestId("canvas");
+      mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
 
-    expect(screen.getByTestId(elementTestId)).toBeDefined();
-  });
+      expect(screen.getByTestId(elementTestId)).toBeDefined();
+    }
+  );
 
   const moveElements = [
     [
-      "Rect",
+      "rect-btn",
       "rect-svg",
       createRoundedRect({
         ...rectStub,
@@ -90,7 +93,7 @@ describe("MouseEvents Elements", () => {
       }),
     ],
     [
-      "Diamond",
+      "diamond-btn",
       "diamond",
       createRoundedDiamond({
         ...diamondStub,
@@ -100,15 +103,15 @@ describe("MouseEvents Elements", () => {
         width: 100,
       }),
     ],
-    ["Circle", "circle-svg", "-"],
+    ["circle-btn", "circle-svg", "-"],
   ];
 
   it.each(moveElements)(
     "Should move an existing %s",
-    async (buttonText, elementTestId, d) => {
+    async (buttonTestId, elementTestId, d) => {
       renderWrapper();
 
-      fireEvent.click(screen.getByText(buttonText));
+      fireEvent.click(screen.getByTestId(buttonTestId));
 
       const canvas = screen.getByTestId("canvas");
       mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -118,7 +121,7 @@ describe("MouseEvents Elements", () => {
       mouseDragEvent(element, { x: 200, y: 200 }, { x: 300, y: 300 });
 
       await waitFor(() => {
-        if (buttonText === "Circle") {
+        if (buttonTestId === "circle-btn") {
           expect(Number(element.getAttribute("cx"))).toEqual(250);
           expect(Number(element.getAttribute("cy"))).toEqual(250);
         } else {
@@ -128,12 +131,17 @@ describe("MouseEvents Elements", () => {
     }
   );
 
-  const addTextToElements = ["Rect", "Diamond", "Text", "Circle"];
+  const addTextToElements = [
+    "rect-btn",
+    "diamond-btn",
+    "text-btn",
+    "circle-btn",
+  ];
 
-  it.each(addTextToElements)("Should add text to %s", async (buttonText) => {
+  it.each(addTextToElements)("Should add text to %s", async (buttonTestId) => {
     renderWrapper();
 
-    fireEvent.click(screen.getByText(buttonText));
+    fireEvent.click(screen.getByTestId(buttonTestId));
 
     const canvas = screen.getByTestId("canvas");
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -150,7 +158,7 @@ describe("MouseEvents Elements", () => {
 
   const resizeElements = [
     [
-      "Rect",
+      "rect-btn",
       "rect-svg",
       createRoundedRect({
         ...rectStub,
@@ -161,7 +169,7 @@ describe("MouseEvents Elements", () => {
       }),
     ],
     [
-      "Diamond",
+      "diamond-btn",
       "diamond",
       createRoundedDiamond({
         ...diamondStub,
@@ -171,15 +179,15 @@ describe("MouseEvents Elements", () => {
         width: 200,
       }),
     ],
-    ["Circle", "circle-svg", "-"],
-    ["Text", "text", "-"],
+    ["circle-btn", "circle-svg", "-"],
+    ["text-btn", "text", "-"],
   ];
   it.each(resizeElements)(
     "Should resize a %s",
-    async (buttonText, elementTestId, d) => {
+    async (buttonTestId, elementTestId, d) => {
       renderWrapper();
 
-      fireEvent.click(screen.getByText(buttonText));
+      fireEvent.click(screen.getByTestId(buttonTestId));
 
       const canvas = screen.getByTestId("canvas");
       mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -208,12 +216,12 @@ describe("MouseEvents Elements", () => {
       mouseDragEvent(resizeBtn, { x: 205, y: 205 }, { x: 300, y: 300 });
 
       await waitFor(() => {
-        if (buttonText === "Circle") {
+        if (buttonTestId === "circle-btn") {
           expect(Number(element.getAttribute("rx"))).toEqual(100);
           expect(Number(element.getAttribute("ry"))).toEqual(100);
           expect(Number(element.getAttribute("cx"))).toEqual(200);
           expect(Number(element.getAttribute("cy"))).toEqual(200);
-        } else if (buttonText === "Text") {
+        } else if (buttonTestId === "text-btn") {
           expect(Number(element.getAttribute("x"))).toEqual(100);
           expect(Number(element.getAttribute("y"))).toEqual(100);
           expect(Number(element.getAttribute("width"))).toEqual(200);
@@ -226,18 +234,18 @@ describe("MouseEvents Elements", () => {
   );
 
   const rotateElements = [
-    ["Rect", "rect-svg", "rotate(270, 150, 150)"],
-    ["Diamond", "diamond", "rotate(270, 150, 150)"],
-    ["Circle", "circle-svg", "rotate(270, 150, 150)"],
-    ["Text", "text", "rotate(239, 150, 110)"],
+    ["rect-btn", "rect-svg", "rotate(270, 150, 150)"],
+    ["diamond-btn", "diamond", "rotate(270, 150, 150)"],
+    ["circle-btn", "circle-svg", "rotate(270, 150, 150)"],
+    ["text-btn", "text", "rotate(263, 250, 130)"],
   ];
 
   it.each(rotateElements)(
     "Should rotate a %s",
-    async (buttonText, elementTestId, transform) => {
+    async (buttonTestId, elementTestId, transform) => {
       renderWrapper();
 
-      fireEvent.click(screen.getByText(buttonText));
+      fireEvent.click(screen.getByTestId(buttonTestId));
 
       const canvas = screen.getByTestId("canvas");
       mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -274,20 +282,20 @@ describe("MouseEvents Elements", () => {
   );
 
   const deleteElements = [
-    { btn: "Rect", testId: "rect-svg" },
-    { btn: "Circle", testId: "circle-svg" },
-    { btn: "Text", testId: "text" },
-    { btn: "Line", testId: "polyline" },
-    { btn: "Diamond", testId: "diamond" },
+    { btnTestId: "rect-btn", testId: "rect-svg" },
+    { btnTestId: "circle-btn", testId: "circle-svg" },
+    { btnTestId: "text-btn", testId: "text" },
+    { btnTestId: "polyline-btn", testId: "polyline" },
+    { btnTestId: "diamond-btn", testId: "diamond" },
   ];
-  deleteElements.forEach(({ btn, testId }) => {
-    it(`Should delete a ${btn}`, async () => {
+  deleteElements.forEach(({ btnTestId, testId }) => {
+    it(`Should delete a ${btnTestId}`, async () => {
       const screen = renderWrapper();
 
-      fireEvent.click(screen.getByText(btn));
+      fireEvent.click(screen.getByTestId(btnTestId));
 
       const canvas = screen.getByTestId("canvas");
-      if (btn === "Line") {
+      if (btnTestId === "polyline-btn") {
         fireEvent.mouseDown(canvas, {
           clientX: 100,
           clientY: 100,
@@ -302,7 +310,7 @@ describe("MouseEvents Elements", () => {
         });
         fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
         clickOnElement(canvas, { x: 150, y: 150 });
-      } else if (btn === "Text") {
+      } else if (btnTestId === "text-btn") {
         clickOnElement(canvas, { x: 100, y: 100 });
         fireEvent.keyDown(window, { code: KeyCode.CODE_ESCAPE });
         clickOnElement(canvas, { x: 110, y: 110 });
@@ -325,7 +333,7 @@ describe("MouseEvents Elements", () => {
   it("Should create a line", async () => {
     const screen = renderWrapper();
 
-    fireEvent.click(screen.getByText("Line"));
+    fireEvent.click(screen.getByTestId("polyline-btn"));
     const canvas = screen.getByTestId("canvas");
 
     fireEvent.mouseDown(canvas, {
@@ -357,7 +365,7 @@ describe("MouseEvents Elements", () => {
   it("Should move a line", async () => {
     const screen = renderWrapper();
 
-    fireEvent.click(screen.getByText("Line"));
+    fireEvent.click(screen.getByTestId("polyline-btn"));
     const canvas = screen.getByTestId("canvas");
 
     fireEvent.mouseDown(canvas, {
@@ -392,7 +400,7 @@ describe("MouseEvents Elements", () => {
   it("Should move a text element", async () => {
     const screen = renderWrapper();
 
-    fireEvent.click(screen.getByText("Text"));
+    fireEvent.click(screen.getByTestId("text-btn"));
     const canvas = screen.getByTestId("canvas");
 
     // one onclick event
@@ -413,23 +421,23 @@ describe("MouseEvents Elements", () => {
     const canvas = screen.getByTestId("canvas");
 
     // create a rect
-    fireEvent.click(screen.getByText("Rect"));
+    fireEvent.click(screen.getByTestId("rect-btn"));
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
     screen.getByTestId("rect-svg");
 
     // create a circle
-    fireEvent.click(screen.getByText("Circle"));
+    fireEvent.click(screen.getByTestId("circle-btn"));
     mouseDragEvent(canvas, { x: 100, y: 100 }, { x: 200, y: 200 });
     expect(screen.getByTestId("circle-svg")).toBeDefined();
 
     // create a text element
-    fireEvent.click(screen.getByText("Text"));
+    fireEvent.click(screen.getByTestId("text-btn"));
     clickOnElement(canvas, { x: 100, y: 100 });
     const text = screen.getByTestId("text");
     expect(text).toBeDefined();
 
     // create a line
-    fireEvent.click(screen.getByText("Line"));
+    fireEvent.click(screen.getByTestId("polyline-btn"));
     fireEvent.mouseDown(canvas, {
       clientX: 100,
       clientY: 100,
