@@ -10,13 +10,11 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <React.StrictMode>
-    <HashRouter basename="/">
-      <Routes>
-        <Route path="/" element={<App />} />
-      </Routes>
-    </HashRouter>
-  </React.StrictMode>
+  <HashRouter basename="/">
+    <Routes>
+      <Route path="/" element={<App />} />
+    </Routes>
+  </HashRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function
