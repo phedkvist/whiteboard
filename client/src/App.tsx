@@ -7,12 +7,12 @@ import { Debugger } from "./components/Debugger/Debugger";
 import { MouseEventsProvider } from "./context/MouseEvents/MouseEvents";
 import ContextMenu from "./components/ContextMenu/ContextMenu";
 import { AppStateProvider } from "./context/AppState";
-import { getRoomId as getRoomIdImport } from "./helpers/user";
+import { useRoomId as useRoomIdImport } from "./hooks/useRoomId";
 
-function App({ getRoomId }: { getRoomId?: typeof getRoomIdImport }) {
+function App({ useRoomId }: { useRoomId?: typeof useRoomIdImport }) {
   return (
     <div className="App">
-      <AppStateProvider getRoomId={getRoomId}>
+      <AppStateProvider useRoomId={useRoomId}>
         <Toolbar />
         <Properties />
         <MouseEventsProvider>

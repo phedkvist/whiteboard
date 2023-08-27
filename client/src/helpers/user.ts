@@ -1,7 +1,5 @@
 import animals from "./animals.json";
 import adjectives from "./adjectives.json";
-import { SetURLSearchParams } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 
 function getRandomArbitrary(min: number, max: number) {
   return Math.round(Math.random() * (max - min) + min);
@@ -30,16 +28,3 @@ export function getDarkColor() {
   }
   return color;
 }
-
-export const getRoomId = (
-  params: URLSearchParams,
-  setSearchParams: SetURLSearchParams
-) => {
-  if (params.has("roomId")) {
-    return params.get("roomId") as string;
-  } else {
-    const uuid = uuidv4();
-    setSearchParams({ roomId: uuid });
-    return uuid;
-  }
-};

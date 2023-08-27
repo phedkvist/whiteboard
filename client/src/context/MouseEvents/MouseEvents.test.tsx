@@ -1,16 +1,5 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
-import {
-  MemoryRouter,
-  Route,
-  Routes,
-  SetURLSearchParams,
-} from "react-router-dom";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import App from "../../App";
 import * as KeyCode from "keycode-js";
 import {
@@ -21,16 +10,18 @@ import {
 import { diamondStub, rectStub } from "../../stubs";
 import { initialViewBox } from "../../types";
 import { getViewBoxAfterZoom } from "./helpers";
+import { useRoomId } from "../../hooks/useRoomId";
+import { mock, when } from "strong-mock";
 
-const mockGetRoomId = (
-  _params: URLSearchParams,
-  _setSearchParams: SetURLSearchParams
-) => "1234";
 export const renderWrapper = () => {
+  const useGetRoomId = mock<typeof useRoomId>();
+  when(() => useGetRoomId())
+    .thenReturn("1234")
+    .anyTimes();
   return render(
     <MemoryRouter basename="/">
       <Routes>
-        <Route path="/" element={<App getRoomId={mockGetRoomId} />} />
+        <Route path="/" element={<App useRoomId={useGetRoomId} />} />
       </Routes>
     </MemoryRouter>
   );

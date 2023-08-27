@@ -10,9 +10,8 @@ import {
   initialViewBox,
 } from "../types";
 import History from "../services/History";
-import { useSearchParams } from "react-router-dom";
-import { getRoomId as getRoomIdImport } from "../helpers/user";
 import { useViewBox } from "../hooks/useViewBox";
+import { useRoomId as useRoomIdImport } from "../hooks/useRoomId";
 
 interface IAppStateContext {
   appState: AppState;
@@ -60,15 +59,14 @@ type AppStateProviderProps = {
     | React.ReactPortal
     | null
     | undefined;
-  getRoomId?: typeof getRoomIdImport;
+  useRoomId?: typeof useRoomIdImport;
 };
 
 export const AppStateProvider = ({
-  getRoomId = getRoomIdImport,
+  useRoomId = useRoomIdImport,
   children,
 }: AppStateProviderProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const roomId = getRoomId(searchParams, setSearchParams);
+  const roomId = useRoomId();
   const [appState, setAppState] = useState<AppState>(initialState);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const [history] = useState(() => new History(appState, setAppState, roomId));
