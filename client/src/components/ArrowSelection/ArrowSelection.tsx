@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
+import { ArrowOption } from "../../types";
 
 const LeftArrowSvg = () => (
   <svg
@@ -143,12 +144,6 @@ const ListItem = styled.li`
 export enum Side {
   left = "left",
   right = "right",
-}
-
-export enum ArrowOption {
-  none = "none",
-  slim = "slim",
-  thick = "thick",
 }
 
 const ArrowButtonDropdown = ({

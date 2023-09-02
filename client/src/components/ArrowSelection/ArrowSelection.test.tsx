@@ -1,11 +1,7 @@
 import { mock, resetAll, verifyAll, when } from "strong-mock";
-import {
-  ArrowOption,
-  ArrowSelection,
-  ArrowSelectionProps,
-  Side,
-} from "./ArrowSelection";
+import { ArrowSelection, ArrowSelectionProps, Side } from "./ArrowSelection";
 import { fireEvent, render } from "@testing-library/react";
+import { ArrowOption } from "../../types";
 
 describe("ArrowSelection", () => {
   afterEach(() => {
