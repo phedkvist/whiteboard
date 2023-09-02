@@ -5,12 +5,16 @@ type Rect = { left: number; top: number; right: number; bottom: number };
 
 // TODO: Take in account a rotated rect
 export function isRectsIntersecting(r1: Rect, r2: Rect) {
-  return !(
+  if (
     r2.left > r1.right ||
     r2.right < r1.left ||
     r2.top > r1.bottom ||
     r2.bottom < r1.top
-  );
+  ) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 export function isLineInsideRect(
