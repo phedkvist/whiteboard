@@ -9,6 +9,7 @@ import {
   Polyline,
   Text,
   Diamond,
+  ArrowOption,
 } from "../../types";
 import { copy } from "../../helpers/utility";
 import History from "../../services/History";
@@ -22,7 +23,7 @@ import {
 } from "../../constants";
 import { createRoundedLine, renderSvgElement } from "./shapes";
 import { createUpdateChange } from "../../services/Actions";
-import { ArrowOption, Side } from "../ArrowSelection/ArrowSelection";
+import { Side } from "../ArrowSelection/ArrowSelection";
 
 const getCornerCoords = (e: Element) => {
   if (
