@@ -29,7 +29,7 @@ export const createPolylineAction = (
     },
     stroke: "",
     leftArrow: ArrowOption.slim,
-    rightArrow: ArrowOption.thick,
+    rightArrow: ArrowOption.slim,
   };
 
   return {
