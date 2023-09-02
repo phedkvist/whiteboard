@@ -88,8 +88,6 @@ export const MouseEventsProvider = ({
 
     const isDoubleClick = e.detail === 2;
 
-    // console.log("onMouseDown: ", e.target.id);
-
     switch (selectionMode.type) {
       case SelectionModes.None: {
         if (!(e.target instanceof Element)) return;
@@ -327,14 +325,16 @@ export const MouseEventsProvider = ({
           break;
         }
 
-        if (!selectedElements.includes(e.target.id)) {
+        const id = getClosestElementId(e) || e.target.id;
+
+        if (!selectedElements.includes(id)) {
           setSelectionMode({
             ...selectionMode,
             type: SelectionModes.None,
           });
         }
 
-        if (selectedElements.includes(e.target.id)) {
+        if (selectedElements.includes(id)) {
           setSelectionMode({
             ...selectionMode,
             type: SelectionModes.Selected,
