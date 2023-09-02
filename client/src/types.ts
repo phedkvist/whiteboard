@@ -1,3 +1,4 @@
+import { ArrowOption } from "./components/ArrowSelection/ArrowSelection";
 import { UserVersion } from "./services/ChangeTypes";
 import { CSSProperties } from "react";
 
@@ -113,6 +114,8 @@ export interface Polyline extends ElementBase {
   fill?: string;
   stroke: string;
   strokeWidth: string;
+  leftArrow: ArrowOption;
+  rightArrow: ArrowOption;
 }
 
 export enum ElementType {

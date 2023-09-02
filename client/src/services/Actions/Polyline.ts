@@ -1,3 +1,4 @@
+import { ArrowOption } from "../../components/ArrowSelection/ArrowSelection";
 import { ElementState, ElementType, Point, Polyline } from "../../types";
 import { Change, ChangeType } from "../ChangeTypes";
 
@@ -22,6 +23,8 @@ export const createPolylineAction = (
       version: 1,
     },
     stroke: "",
+    leftArrow: ArrowOption.slim,
+    rightArrow: ArrowOption.thick,
   };
 
   return {

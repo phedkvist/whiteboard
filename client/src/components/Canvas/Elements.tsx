@@ -22,6 +22,7 @@ import {
 } from "../../constants";
 import { createRoundedLine, renderSvgElement } from "./shapes";
 import { createUpdateChange } from "../../services/Actions";
+import { ArrowOption, Side } from "../ArrowSelection/ArrowSelection";
 
 const getCornerCoords = (e: Element) => {
   if (
@@ -409,7 +410,16 @@ const PolylineRenderer = ({
   isSelected: boolean;
   elements: { [id: string]: Element };
 }) => {
-  const { type, renderingOrder, points, id, userVersion, ...props } = polyline;
+  const {
+    type,
+    renderingOrder,
+    points,
+    id,
+    userVersion,
+    leftArrow,
+    rightArrow,
+    ...props
+  } = polyline;
   const arrowStyle = props.style?.stroke;
 
   const processedPoints: [number, number][] = points.map((p) => {
@@ -429,6 +439,26 @@ const PolylineRenderer = ({
     }
   });
 
+  const getArrowStyle = (side: Side, option: ArrowOption) => {
+    if (option === ArrowOption.slim) {
+      const d = side === Side.left ? "M0,0 L2,2 L0,4" : "M2,0 L0,2 L2,4";
+      return (
+        <path
+          d={d}
+          fill="transparent"
+          stroke={arrowStyle}
+          strokeWidth={0.8}
+          strokeLinejoin="round"
+        />
+      );
+    } else if (option === ArrowOption.thick) {
+      const d = side === Side.left ? "M0,0 V4 L2,2 Z" : "M2,0 V4 L0,2 Z";
+      return <path d={d} fill={arrowStyle} />;
+    } else {
+      return <path d="" />;
+    }
+  };
+
   return (
     <g id={`g-${id}`}>
       <defs>
@@ -441,7 +471,7 @@ const PolylineRenderer = ({
           refX="1.5"
           refY="2"
         >
-          <path d="M0,0 V4 L2,2 Z" fill={arrowStyle} />
+          {getArrowStyle(Side.left, leftArrow)};
         </marker>
         <marker
           id={`${id}-arrow-reverse`}
@@ -452,7 +482,7 @@ const PolylineRenderer = ({
           refX="0.5"
           refY="2"
         >
-          <path d="M2,0 V4 L0,2 Z" fill={arrowStyle} />
+          {getArrowStyle(Side.right, rightArrow)};
         </marker>
       </defs>
       <path
