@@ -132,7 +132,7 @@ export const findSelectedElements = (
     left: Math.min(startX, currentX),
     top: Math.min(startY, currentY),
     right: Math.max(startX, currentX),
-    bottom: Math.max(startX, currentX),
+    bottom: Math.max(startY, currentY),
   };
   return Object.keys(elements).filter((elementId) => {
     const element = elements[elementId];
