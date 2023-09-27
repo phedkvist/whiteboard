@@ -13,7 +13,11 @@ import {
   ClientCoordinates,
   Point,
 } from "../../types";
-import { copy, getClosestCornerById } from "../../helpers/utility";
+import {
+  copy,
+  findOverlappingElement,
+  getClosestCornerById,
+} from "../../helpers/utility";
 import { updateDiamondAction } from "../../services/Actions/Diamond";
 
 export const setupResizeElement = (
@@ -218,10 +222,11 @@ export const setElementCoords = (
 };
 
 export const getOverlappingPoint = (
-  newX: number,
-  newY: number,
-  overlappingElement: IElement | undefined
+  x: number,
+  y: number,
+  elements: IElement[]
 ) => {
+  const overlappingElement = findOverlappingElement(x, y, elements);
   if (overlappingElement) {
     switch (overlappingElement.type) {
       case ElementType.Rect:
@@ -229,15 +234,19 @@ export const getOverlappingPoint = (
       case ElementType.Diamond:
       case ElementType.Ellipse:
         return {
+          x,
+          y,
           connectingElementId: overlappingElement.id,
-          connectingPointX: overlappingElement.x - newX,
-          connectingPointY: overlappingElement.y - newY,
+          connectingPointX: overlappingElement.x - x,
+          connectingPointY: overlappingElement.y - y,
         };
       default:
         break;
     }
   }
   return {
+    x,
+    y,
     connectingElementId: undefined,
     connectingPointX: undefined,
     connectingPointY: undefined,

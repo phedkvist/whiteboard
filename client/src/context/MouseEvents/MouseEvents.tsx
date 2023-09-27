@@ -130,8 +130,10 @@ export const MouseEventsProvider = ({
         if (!id) {
           return;
         }
+        const isResizing = id.includes("resize");
+        const isRotating = id.includes("rotate");
 
-        if (id.includes("resize")) {
+        if (isResizing) {
           const elementId = id.split("-resize-")[0];
           const element = appState.elements[elementId];
           // For now only one element at a time can be resized
@@ -146,7 +148,7 @@ export const MouseEventsProvider = ({
             clientCoordinates
           );
           break;
-        } else if (id.includes("rotate")) {
+        } else if (isRotating) {
           const elementId = id.split("-rotate")[0];
           const element = appState.elements[elementId];
           // For now only one element at a time can be resized
@@ -252,21 +254,11 @@ export const MouseEventsProvider = ({
               setSelectedElements([...selectedElements, id]);
               const x = initialX;
               const y = initialY;
-              const overlappingElement = findOverlappingElement(
+              const firstPoint: Point = getOverlappingPoint(
                 x,
                 y,
                 Object.values(appState.elements)
               );
-              const overlappingPoint = getOverlappingPoint(
-                x,
-                y,
-                overlappingElement
-              );
-              const firstPoint: Point = {
-                x,
-                y,
-                ...overlappingPoint,
-              };
               addLocalChange(
                 createPolylineAction(
                   firstPoint,
@@ -462,21 +454,11 @@ export const MouseEventsProvider = ({
           case ElementType.Polyline: {
             const { x, y } = clientCoordinates;
 
-            const overlappingElement = findOverlappingElement(
+            const endPoint = getOverlappingPoint(
               x,
               y,
               Object.values(appState.elements)
             );
-            const overlappingPoint = getOverlappingPoint(
-              x,
-              y,
-              overlappingElement
-            );
-            const endPoint: Point = {
-              x,
-              y,
-              ...overlappingPoint,
-            };
             const points = [...creationElement.points];
             const prevPoint = points[selectionCoordinates.nextPointIndex - 1];
             const isPointsSame = isPointSame(prevPoint, endPoint);
@@ -547,15 +529,10 @@ export const MouseEventsProvider = ({
               const pos = selectedCorner as number;
               newPoints[pos].x = newX;
               newPoints[pos].y = newY;
-              const overlappingElement = findOverlappingElement(
-                newX,
-                newY,
-                Object.values(appState.elements)
-              );
               const overlappingPoint = getOverlappingPoint(
                 newX,
                 newY,
-                overlappingElement
+                Object.values(appState.elements)
               );
               newPoints[pos] = { ...newPoints[pos], ...overlappingPoint };
               addLocalChange(
