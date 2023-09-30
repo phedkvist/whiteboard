@@ -24,11 +24,14 @@ import {
   updatePolylineAction,
 } from "../../services/Actions/Polyline";
 import {
+  extractElementId,
   findSelectedElements,
   getClientCoordinates,
   getClosestElementId,
+  getElementFromId,
   getOverlappingPoint,
   isPointSame,
+  SelectionAction,
   setElementCoords,
   setupMovingElement,
   setupResizeElement,
@@ -36,9 +39,8 @@ import {
 } from "./helpers";
 import { createNewChange, createUpdateChange } from "../../services/Actions";
 import { useKeyboardEvents } from "../KeyboardEvents/useKeyboardEvents";
-
-// create a context with all of the mouse event handlers, that can be plugged into the canvas.
-// might be able to move certain "mouse event" related state into this context.
+import { isRight, match } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 
 interface IMouseEvents {
   onMouseOver: MouseEventHandler<SVGSVGElement>;
@@ -83,6 +85,13 @@ export const MouseEventsProvider = ({
     if (e.button !== MouseButtons.LEFT) return;
 
     const isDoubleClick = e.detail === 2;
+    const matchFunc = match<null, SelectionAction, void>(
+      () => console.log("oh no"),
+      ({ selectionCoordinates, selectionMode }) => {
+        setSelectionCoordinates(selectionCoordinates);
+        setSelectionMode(selectionMode);
+      }
+    );
 
     switch (selectionMode.type) {
       case SelectionModes.None: {
@@ -108,14 +117,13 @@ export const MouseEventsProvider = ({
             ...selectionMode,
             type: SelectionModes.MultiSelecting,
           });
-          const initialX = clientCoordinates.x;
-          const initialY = clientCoordinates.y;
+          const { x, y } = clientCoordinates;
           setSelectionCoordinates({
             ...selectionCoordinates,
-            initialX,
-            initialY,
-            startX: initialX,
-            startY: initialY,
+            initialX: x,
+            initialY: y,
+            startX: x,
+            startY: y,
           });
           return;
         }
@@ -129,32 +137,33 @@ export const MouseEventsProvider = ({
 
         if (isResizing) {
           const elementId = id.split("-resize-")[0];
-          const element = appState.elements[elementId];
           // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupResizeElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            clientCoordinates
+          pipe(
+            extractElementId(e.target.id, "-resize-"),
+            getElementFromId(appState.elements),
+            setupResizeElement(
+              e,
+              selectionCoordinates,
+              selectionMode,
+              clientCoordinates
+            ),
+            matchFunc
           );
           break;
         } else if (isRotating) {
           const elementId = id.split("-rotate")[0];
-          const element = appState.elements[elementId];
-          // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupRotateElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            viewBox.scale
+          pipe(
+            extractElementId(e.target.id, "-rotate"),
+            getElementFromId(appState.elements),
+            setupRotateElement(
+              e,
+              selectionCoordinates,
+              selectionMode,
+              viewBox.scale
+            ),
+            matchFunc
           );
           break;
         }
@@ -185,15 +194,16 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Add: {
-        const initialX = clientCoordinates.x;
-        const initialY = clientCoordinates.y;
+        const { x, y } = clientCoordinates;
         setSelectionCoordinates({
           ...selectionCoordinates,
-          initialX,
-          initialY,
+          initialX: x,
+          initialY: y,
         });
 
         const renderingOrder = Object.keys(appState.elements).length + 1;
+
+        // For add mode, just pass in data to a func, we get left or right, if right, create an object.
 
         switch (selectionMode.elementType) {
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
@@ -205,8 +215,8 @@ export const MouseEventsProvider = ({
             setSelectedElements([...selectedElements, id]);
             const change = createNewChange(
               selectionMode.elementType,
-              initialX,
-              initialY,
+              x,
+              y,
               renderingOrder,
               id,
               history.currentUserId
@@ -246,8 +256,6 @@ export const MouseEventsProvider = ({
             } else {
               const id = uuid();
               setSelectedElements([...selectedElements, id]);
-              const x = initialX;
-              const y = initialY;
               const firstPoint: Point = getOverlappingPoint(
                 x,
                 y,
@@ -283,32 +291,33 @@ export const MouseEventsProvider = ({
         }
         if (e.target.id.includes("resize")) {
           const elementId = e.target.id.split("-resize")[0];
-          const element = appState.elements[elementId];
           // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupResizeElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            clientCoordinates
+          pipe(
+            extractElementId(e.target.id, "-resize-"),
+            getElementFromId(appState.elements),
+            setupResizeElement(
+              e,
+              selectionCoordinates,
+              selectionMode,
+              clientCoordinates
+            ),
+            matchFunc
           );
           break;
         } else if (e.target.id.includes("rotate")) {
           const elementId = e.target.id.split("-rotate")[0];
-          const element = appState.elements[elementId];
-          // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupRotateElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            viewBox.scale
+          pipe(
+            extractElementId(e.target.id, "-rotate"),
+            getElementFromId(appState.elements),
+            setupRotateElement(
+              e,
+              selectionCoordinates,
+              selectionMode,
+              viewBox.scale
+            ),
+            matchFunc
           );
           break;
         }

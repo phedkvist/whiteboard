@@ -57,7 +57,7 @@ export default class History {
 
     this.ws = ws;
     this.ws.addEventListener("message", this.onMessage.bind(this), false);
-    this.ws.addEventListener("close", this.onClose.bind(this), false);
+    // this.ws.addEventListener("close", this.onClose.bind(this), false);
     this.ws.addEventListener("open", this.onOpen.bind(this), false);
   }
 
