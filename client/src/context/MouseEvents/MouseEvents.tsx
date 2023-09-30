@@ -39,7 +39,8 @@ import {
 } from "./helpers";
 import { createNewChange, createUpdateChange } from "../../services/Actions";
 import { useKeyboardEvents } from "../KeyboardEvents/useKeyboardEvents";
-import { isRight, match } from "fp-ts/lib/Either";
+import * as E from "fp-ts/Either";
+
 import { pipe } from "fp-ts/lib/function";
 
 interface IMouseEvents {
@@ -85,8 +86,8 @@ export const MouseEventsProvider = ({
     if (e.button !== MouseButtons.LEFT) return;
 
     const isDoubleClick = e.detail === 2;
-    const matchFunc = match<null, SelectionAction, void>(
-      () => console.log("oh no"),
+    const matchFunc = E.match<string, SelectionAction, void>(
+      (message: string) => console.error(message),
       ({ selectionCoordinates, selectionMode }) => {
         setSelectionCoordinates(selectionCoordinates);
         setSelectionMode(selectionMode);
@@ -141,12 +142,14 @@ export const MouseEventsProvider = ({
           setSelectedElements([elementId]);
           pipe(
             extractElementId(e.target.id, "-resize-"),
-            getElementFromId(appState.elements),
-            setupResizeElement(
-              e,
-              selectionCoordinates,
-              selectionMode,
-              clientCoordinates
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupResizeElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                clientCoordinates
+              )
             ),
             matchFunc
           );
@@ -156,12 +159,14 @@ export const MouseEventsProvider = ({
           setSelectedElements([elementId]);
           pipe(
             extractElementId(e.target.id, "-rotate"),
-            getElementFromId(appState.elements),
-            setupRotateElement(
-              e,
-              selectionCoordinates,
-              selectionMode,
-              viewBox.scale
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupRotateElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                viewBox.scale
+              )
             ),
             matchFunc
           );
@@ -294,13 +299,15 @@ export const MouseEventsProvider = ({
           // For now only one element at a time can be resized
           setSelectedElements([elementId]);
           pipe(
-            extractElementId(e.target.id, "-resize-"),
-            getElementFromId(appState.elements),
-            setupResizeElement(
-              e,
-              selectionCoordinates,
-              selectionMode,
-              clientCoordinates
+            extractElementId(e.target.id, "-resize"),
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupResizeElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                clientCoordinates
+              )
             ),
             matchFunc
           );
@@ -310,12 +317,14 @@ export const MouseEventsProvider = ({
           setSelectedElements([elementId]);
           pipe(
             extractElementId(e.target.id, "-rotate"),
-            getElementFromId(appState.elements),
-            setupRotateElement(
-              e,
-              selectionCoordinates,
-              selectionMode,
-              viewBox.scale
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupRotateElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                viewBox.scale
+              )
             ),
             matchFunc
           );

@@ -51,15 +51,17 @@ export const setupResizeElement =
     selectionMode: SelectionMode,
     clientCoordinates: ClientCoordinates
   ) =>
-  (val: Either<null, IElement>): Either<null, SelectionAction> => {
-    if (isLeft(val)) {
-      return left(null);
-    }
-    if (!(e.target instanceof Element)) return left(null);
+  (element: IElement): Either<string, SelectionAction> => {
+    if (!(e.target instanceof Element))
+      return left("event is of incorrect type");
     const { xOffset, yOffset, width, height } = getBoundingRect(e);
-    if (!xOffset || !yOffset || !width || !height) return left(null);
-
-    const element = val.right;
+    if (
+      xOffset === null ||
+      yOffset === null ||
+      width === undefined ||
+      height === undefined
+    )
+      return left("Failed to receive xOffset, yOffset, width and height");
 
     const selectedCorner = getClosestCornerById(element, e.target.id);
     return right({
@@ -83,22 +85,20 @@ export const setupResizeElement =
 export const extractElementId = (
   elementId: string,
   match: string
-): Either<null, string> => {
+): Either<string, string> => {
   const vals = elementId.split(match);
   if (vals.length > 0) return right(vals[0]);
-  else return left(null);
+  else return left("Failed to extract id: " + elementId);
 };
 
 export const getElementFromId =
   (elements: AppState["elements"]) =>
-  (value: Either<null, string>): Either<null, IElement> => {
-    if (isRight(value)) {
-      const element = elements[value.right];
-      if (element) {
-        return right(element);
-      }
+  (elementId: string): Either<string, IElement> => {
+    const element = elements[elementId];
+    if (element) {
+      return right(element);
     }
-    return left(null);
+    return left("Unable to find element with id: " + elementId);
   };
 
 export const setupRotateElement =
@@ -108,15 +108,11 @@ export const setupRotateElement =
     selectionMode: SelectionMode,
     scale: number
   ) =>
-  (val: Either<null, IElement>): Either<null, SelectionAction> => {
-    if (isLeft(val)) {
-      return left(null);
-    }
-    const element = val.right;
-    if (!(e.target instanceof Element)) return left(null);
+  (element: IElement): Either<string, SelectionAction> => {
+    if (!(e.target instanceof Element)) return left("");
     const { width, height } =
       e.target.parentElement?.children[0].getBoundingClientRect() || {};
-    if (!(width && height)) return left(null);
+    if (!(width && height)) return left("");
     const initialX = e.clientX * scale;
     const initialY = e.clientY * scale;
     return right({
