@@ -1,3 +1,4 @@
+import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
 import { isLineInsideRect, isRectsIntersecting } from "../../helpers/intersect";
 import { updateEllipseAction } from "../../services/Actions/Ellipse";
 import { updatePolylineAction } from "../../services/Actions/Polyline";
@@ -12,87 +13,123 @@ import {
   ElementType,
   ClientCoordinates,
   Point,
+  AppState,
 } from "../../types";
-import { copy, getClosestCornerById } from "../../helpers/utility";
+import {
+  copy,
+  findOverlappingElement,
+  getClosestCornerById,
+} from "../../helpers/utility";
 import { updateDiamondAction } from "../../services/Actions/Diamond";
 
-export const setupResizeElement = (
-  e: React.MouseEvent<SVGSVGElement, MouseEvent>,
-  element: IElement,
-  setSelectionCoordinates: (
-    value: React.SetStateAction<SelectionCoordinates>
-  ) => void,
-  selectionCoordinates: SelectionCoordinates,
-  setSelectionMode: (value: React.SetStateAction<SelectionMode>) => void,
-  selectionMode: SelectionMode,
-  clientCoordinates: ClientCoordinates
+export const getBoundingRect = (
+  e: React.MouseEvent<SVGSVGElement, MouseEvent>
 ) => {
-  if (!(e.target instanceof Element)) return;
-  const {
-    x: xOffset,
-    y: yOffset,
-    width,
-    height,
-  } = e.target?.parentElement?.children[0].getBoundingClientRect() || {
+  const { x, y, width, height } = (
+    e.target as Element
+  ).parentElement?.children[0].getBoundingClientRect() || {
     x: null,
     y: null,
   };
-  if (xOffset === null || yOffset === null) return;
-  if (width === undefined || height === undefined) return;
-
-  const selectedCorner = getClosestCornerById(element, e.target.id);
-  if (selectedCorner === null) return;
-  setSelectionCoordinates({
-    ...selectionCoordinates,
-    xOffset,
-    yOffset,
-    initialX: clientCoordinates.x,
-    initialY: clientCoordinates.y,
-    initialWidth: width,
-    initialHeight: height,
-    selectedCorner,
-  });
-  setSelectionMode({
-    ...selectionMode,
-    elementType: element.type,
-    type: SelectionModes.Resizing,
-  });
+  return {
+    xOffset: x,
+    yOffset: y,
+    width,
+    height,
+  };
 };
 
-export const setupRotateElement = (
-  e: React.MouseEvent<SVGSVGElement, MouseEvent>,
-  element: IElement,
-  setSelectionCoordinates: (
-    value: React.SetStateAction<SelectionCoordinates>
-  ) => void,
-  selectionCoordinates: SelectionCoordinates,
-  setSelectionMode: (value: React.SetStateAction<SelectionMode>) => void,
-  selectionMode: SelectionMode,
-  scale: number
-) => {
-  if (!(e.target instanceof Element)) return;
-  const { width, height } =
-    e.target?.parentElement?.children[0].getBoundingClientRect() || {
-      x: null,
-      y: null,
-    };
-  if (!(width && height)) return;
-  const initialX = e.clientX * scale; // TODO: Strange that we don't just use the client coordinates here?
-  const initialY = e.clientY * scale;
-  setSelectionCoordinates({
-    // TODO: Remove this setSelectionCoordinates from here, this should happen in mouseEvents already.
-    ...selectionCoordinates,
-    initialX,
-    initialY,
-    initialWidth: width,
-    initialHeight: height,
-  });
-  setSelectionMode({
-    ...selectionMode,
-    elementType: element.type,
-    type: SelectionModes.Rotating,
-  });
+export interface SelectionAction {
+  selectionCoordinates: SelectionCoordinates;
+  selectionMode: SelectionMode;
+}
+
+export const setupResizeElement =
+  (
+    e: React.MouseEvent<SVGSVGElement, MouseEvent>,
+    selectionCoordinates: SelectionCoordinates,
+    selectionMode: SelectionMode,
+    clientCoordinates: ClientCoordinates
+  ) =>
+  (element: IElement): Either<string, SelectionAction> => {
+    if (!(e.target instanceof Element))
+      return left("event is of incorrect type");
+    const { xOffset, yOffset, width, height } = getBoundingRect(e);
+    if (
+      xOffset === null ||
+      yOffset === null ||
+      width === undefined ||
+      height === undefined
+    )
+      return left("Failed to receive xOffset, yOffset, width and height");
+
+    const selectedCorner = getClosestCornerById(element, e.target.id);
+    return right({
+      selectionCoordinates: {
+        ...selectionCoordinates,
+        xOffset,
+        yOffset,
+        initialX: clientCoordinates.x,
+        initialY: clientCoordinates.y,
+        initialWidth: width,
+        initialHeight: height,
+        selectedCorner,
+      },
+      selectionMode: {
+        ...selectionMode,
+        elementType: element.type,
+        type: SelectionModes.Resizing,
+      },
+    });
+  };
+export const extractElementId = (
+  elementId: string,
+  match: string
+): Either<string, string> => {
+  const vals = elementId.split(match);
+  if (vals.length > 0) return right(vals[0]);
+  else return left("Failed to extract id: " + elementId);
 };
+
+export const getElementFromId =
+  (elements: AppState["elements"]) =>
+  (elementId: string): Either<string, IElement> => {
+    const element = elements[elementId];
+    if (element) {
+      return right(element);
+    }
+    return left("Unable to find element with id: " + elementId);
+  };
+
+export const setupRotateElement =
+  (
+    e: React.MouseEvent<SVGSVGElement, MouseEvent>,
+    selectionCoordinates: SelectionCoordinates,
+    selectionMode: SelectionMode,
+    scale: number
+  ) =>
+  (element: IElement): Either<string, SelectionAction> => {
+    if (!(e.target instanceof Element)) return left("");
+    const { width, height } =
+      e.target.parentElement?.children[0].getBoundingClientRect() || {};
+    if (!(width && height)) return left("");
+    const initialX = e.clientX * scale;
+    const initialY = e.clientY * scale;
+    return right({
+      selectionCoordinates: {
+        ...selectionCoordinates,
+        initialX,
+        initialY,
+        initialWidth: width,
+        initialHeight: height,
+      },
+      selectionMode: {
+        ...selectionMode,
+        elementType: element.type,
+        type: SelectionModes.Rotating,
+      },
+    });
+  };
 
 export const setupMovingElement = (
   e: React.MouseEvent<SVGSVGElement, MouseEvent>,
@@ -218,10 +255,11 @@ export const setElementCoords = (
 };
 
 export const getOverlappingPoint = (
-  newX: number,
-  newY: number,
-  overlappingElement: IElement | undefined
+  x: number,
+  y: number,
+  elements: IElement[]
 ) => {
+  const overlappingElement = findOverlappingElement(x, y, elements);
   if (overlappingElement) {
     switch (overlappingElement.type) {
       case ElementType.Rect:
@@ -229,15 +267,19 @@ export const getOverlappingPoint = (
       case ElementType.Diamond:
       case ElementType.Ellipse:
         return {
+          x,
+          y,
           connectingElementId: overlappingElement.id,
-          connectingPointX: overlappingElement.x - newX,
-          connectingPointY: overlappingElement.y - newY,
+          connectingPointX: overlappingElement.x - x,
+          connectingPointY: overlappingElement.y - y,
         };
       default:
         break;
     }
   }
   return {
+    x,
+    y,
     connectingElementId: undefined,
     connectingPointX: undefined,
     connectingPointY: undefined,

@@ -15,7 +15,6 @@ import {
   getMidPoints,
   MouseButtons,
   copy,
-  findOverlappingElement,
 } from "../../helpers/utility";
 import { useAppState } from "../AppState";
 import { v4 as uuid } from "uuid";
@@ -25,11 +24,14 @@ import {
   updatePolylineAction,
 } from "../../services/Actions/Polyline";
 import {
+  extractElementId,
   findSelectedElements,
   getClientCoordinates,
   getClosestElementId,
+  getElementFromId,
   getOverlappingPoint,
   isPointSame,
+  SelectionAction,
   setElementCoords,
   setupMovingElement,
   setupResizeElement,
@@ -37,9 +39,9 @@ import {
 } from "./helpers";
 import { createNewChange, createUpdateChange } from "../../services/Actions";
 import { useKeyboardEvents } from "../KeyboardEvents/useKeyboardEvents";
+import * as E from "fp-ts/Either";
 
-// create a context with all of the mouse event handlers, that can be plugged into the canvas.
-// might be able to move certain "mouse event" related state into this context.
+import { pipe } from "fp-ts/lib/function";
 
 interface IMouseEvents {
   onMouseOver: MouseEventHandler<SVGSVGElement>;
@@ -79,14 +81,18 @@ export const MouseEventsProvider = ({
     setHoverElement(e.target.id);
   };
 
-  // Non-pure function
-  // Extract all the "logic" into separate functions that can be easily tested.
-  // Should return new viewbox, selectionMode,
   const onMouseDown: MouseEventHandler<SVGSVGElement> = (e) => {
     const clientCoordinates = getClientCoordinates(e, viewBox);
     if (e.button !== MouseButtons.LEFT) return;
 
     const isDoubleClick = e.detail === 2;
+    const matchFunc = E.match<string, SelectionAction, void>(
+      (message: string) => console.error(message),
+      ({ selectionCoordinates, selectionMode }) => {
+        setSelectionCoordinates(selectionCoordinates);
+        setSelectionMode(selectionMode);
+      }
+    );
 
     switch (selectionMode.type) {
       case SelectionModes.None: {
@@ -112,14 +118,13 @@ export const MouseEventsProvider = ({
             ...selectionMode,
             type: SelectionModes.MultiSelecting,
           });
-          const initialX = clientCoordinates.x;
-          const initialY = clientCoordinates.y;
+          const { x, y } = clientCoordinates;
           setSelectionCoordinates({
             ...selectionCoordinates,
-            initialX,
-            initialY,
-            startX: initialX,
-            startY: initialY,
+            initialX: x,
+            initialY: y,
+            startX: x,
+            startY: y,
           });
           return;
         }
@@ -128,40 +133,47 @@ export const MouseEventsProvider = ({
         if (!id) {
           return;
         }
+        const isResizing = id.includes("resize");
+        const isRotating = id.includes("rotate");
 
-        if (id.includes("resize")) {
+        if (isResizing) {
           const elementId = id.split("-resize-")[0];
-          const element = appState.elements[elementId];
           // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupResizeElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            clientCoordinates
+          pipe(
+            extractElementId(e.target.id, "-resize-"),
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupResizeElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                clientCoordinates
+              )
+            ),
+            matchFunc
           );
           break;
-        } else if (id.includes("rotate")) {
+        } else if (isRotating) {
           const elementId = id.split("-rotate")[0];
-          const element = appState.elements[elementId];
-          // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupRotateElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            viewBox.scale
+          pipe(
+            extractElementId(e.target.id, "-rotate"),
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupRotateElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                viewBox.scale
+              )
+            ),
+            matchFunc
           );
           break;
         }
 
-        if (selectedElements !== null && !selectedElements.includes(id)) {
+        if (!selectedElements.includes(id)) {
           removeSelection();
         } else if (selectedElements.includes(id) && isDoubleClick) {
           const e = appState.elements[id];
@@ -187,15 +199,16 @@ export const MouseEventsProvider = ({
         break;
       }
       case SelectionModes.Add: {
-        const initialX = clientCoordinates.x;
-        const initialY = clientCoordinates.y;
+        const { x, y } = clientCoordinates;
         setSelectionCoordinates({
           ...selectionCoordinates,
-          initialX,
-          initialY,
+          initialX: x,
+          initialY: y,
         });
 
         const renderingOrder = Object.keys(appState.elements).length + 1;
+
+        // For add mode, just pass in data to a func, we get left or right, if right, create an object.
 
         switch (selectionMode.elementType) {
           // TODO: The first few cases can be simplified where a helper func returns the element we want to create.
@@ -207,13 +220,13 @@ export const MouseEventsProvider = ({
             setSelectedElements([...selectedElements, id]);
             const change = createNewChange(
               selectionMode.elementType,
-              initialX,
-              initialY,
+              x,
+              y,
               renderingOrder,
               id,
-              history?.currentUserId!!
+              history.currentUserId
             );
-            change && history?.addLocalChange(change);
+            change && history.addLocalChange(change);
             break;
           }
           case ElementType.Polyline: {
@@ -228,14 +241,14 @@ export const MouseEventsProvider = ({
                 );
               }
               // TODO: Check if it should be connected to an element.
-              history?.addLocalChange(
+              history.addLocalChange(
                 updatePolylineAction(
                   {
                     ...creationElement,
                     state: ElementState.Visible,
                   },
                   false,
-                  history?.currentUserId
+                  history.currentUserId
                 )
               );
 
@@ -248,29 +261,17 @@ export const MouseEventsProvider = ({
             } else {
               const id = uuid();
               setSelectedElements([...selectedElements, id]);
-              const x = initialX;
-              const y = initialY;
-              const overlappingElement = findOverlappingElement(
+              const firstPoint: Point = getOverlappingPoint(
                 x,
                 y,
                 Object.values(appState.elements)
               );
-              const overlappingPoint = getOverlappingPoint(
-                x,
-                y,
-                overlappingElement
-              );
-              const firstPoint: Point = {
-                x,
-                y,
-                ...overlappingPoint,
-              };
-              history?.addLocalChange(
+              history.addLocalChange(
                 createPolylineAction(
                   firstPoint,
                   renderingOrder,
                   id,
-                  history?.currentUserId
+                  history.currentUserId
                 )
               );
               setSelectionCoordinates({
@@ -295,32 +296,37 @@ export const MouseEventsProvider = ({
         }
         if (e.target.id.includes("resize")) {
           const elementId = e.target.id.split("-resize")[0];
-          const element = appState.elements[elementId];
           // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupResizeElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            clientCoordinates
+          pipe(
+            extractElementId(e.target.id, "-resize"),
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupResizeElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                clientCoordinates
+              )
+            ),
+            matchFunc
           );
           break;
         } else if (e.target.id.includes("rotate")) {
           const elementId = e.target.id.split("-rotate")[0];
-          const element = appState.elements[elementId];
-          // For now only one element at a time can be resized
           setSelectedElements([elementId]);
-          setupRotateElement(
-            e,
-            element,
-            setSelectionCoordinates,
-            selectionCoordinates,
-            setSelectionMode,
-            selectionMode,
-            viewBox.scale
+          pipe(
+            extractElementId(e.target.id, "-rotate"),
+            E.chain(getElementFromId(appState.elements)),
+            E.chain(
+              setupRotateElement(
+                e,
+                selectionCoordinates,
+                selectionMode,
+                viewBox.scale
+              )
+            ),
+            matchFunc
           );
           break;
         }
@@ -360,8 +366,7 @@ export const MouseEventsProvider = ({
     const clientCoordinates = getClientCoordinates(e, viewBox);
     const { movementX, movementY } = e;
 
-    // send cursor needs to take scaling into account
-    history?.sendCursor(clientCoordinates.x, clientCoordinates.y);
+    history.sendCursor(clientCoordinates.x, clientCoordinates.y);
     const isEphemeral = true;
 
     if (e.button !== MouseButtons.LEFT) return;
@@ -426,9 +431,9 @@ export const MouseEventsProvider = ({
               dx,
               dy,
               originElement,
-              history?.currentUserId!
+              history.currentUserId
             );
-            history?.addLocalChange(changeAction);
+            history.addLocalChange(changeAction);
           }
         });
         break;
@@ -453,40 +458,30 @@ export const MouseEventsProvider = ({
                 state: ElementState.Creation,
               },
               isEphemeral,
-              history?.currentUserId!!
+              history.currentUserId
             );
-            change && history?.addLocalChange(change);
+            change && history.addLocalChange(change);
             break;
           }
           case ElementType.Polyline: {
             const { x, y } = clientCoordinates;
 
-            const overlappingElement = findOverlappingElement(
+            const endPoint = getOverlappingPoint(
               x,
               y,
               Object.values(appState.elements)
             );
-            const overlappingPoint = getOverlappingPoint(
-              x,
-              y,
-              overlappingElement
-            );
-            const endPoint: Point = {
-              x,
-              y,
-              ...overlappingPoint,
-            };
             const points = [...creationElement.points];
             const prevPoint = points[selectionCoordinates.nextPointIndex - 1];
             const isPointsSame = isPointSame(prevPoint, endPoint);
             if (!isPointsSame) {
               points[selectionCoordinates.nextPointIndex] = endPoint;
             }
-            history?.addLocalChange(
+            history.addLocalChange(
               updatePolylineAction(
                 { ...creationElement, points, state: ElementState.Creation },
                 isEphemeral,
-                history?.currentUserId
+                history.currentUserId
               )
             );
             break;
@@ -525,9 +520,9 @@ export const MouseEventsProvider = ({
                   y,
                 },
                 isEphemeral,
-                history?.currentUserId!!
+                history.currentUserId
               );
-              changeUpdate && history?.addLocalChange(changeUpdate);
+              changeUpdate && history.addLocalChange(changeUpdate);
 
               break;
             }
@@ -546,25 +541,20 @@ export const MouseEventsProvider = ({
               const pos = selectedCorner as number;
               newPoints[pos].x = newX;
               newPoints[pos].y = newY;
-              const overlappingElement = findOverlappingElement(
+              const overlappingPoint = getOverlappingPoint(
                 newX,
                 newY,
                 Object.values(appState.elements)
               );
-              const overlappingPoint = getOverlappingPoint(
-                newX,
-                newY,
-                overlappingElement
-              );
               newPoints[pos] = { ...newPoints[pos], ...overlappingPoint };
-              history?.addLocalChange(
+              history.addLocalChange(
                 updatePolylineAction(
                   {
                     ...el,
                     points: newPoints,
                   },
                   isEphemeral,
-                  history?.currentUserId
+                  history.currentUserId
                 )
               );
             }
@@ -592,9 +582,9 @@ export const MouseEventsProvider = ({
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
       }
     }
   };
@@ -614,9 +604,9 @@ export const MouseEventsProvider = ({
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
 
         setSelectionMode({ ...selectionMode, type: SelectionModes.None });
         break;
@@ -632,9 +622,9 @@ export const MouseEventsProvider = ({
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
 
         setSelectionMode({
           ...selectionMode,
@@ -657,9 +647,9 @@ export const MouseEventsProvider = ({
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
 
         setSelectionMode({
           ...selectionMode,
