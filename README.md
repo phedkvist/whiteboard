@@ -9,11 +9,21 @@ Run npm install in both client & server.
 Create a postgres db using the following command.
 
 ```shell
-docker run --name postgres-db -e POSTGRES_PASSWORD=docker -p 5432:5432 -d postgres
+docker run --name postgres-db -e POSTGRES_PASSWORD=db-password -p 5432:5432 -d postgres
 ```
 
-Then create a db using psql.
 
+List the container.
+```shell
+docker ps
+```
+
+Copy the container id, and enter the container:
+```shell
+docker exec -it CONTAINER_ID bash
+```
+
+Then create a db:
 ```shell
 > psql postgres://postgres:db-password@localhost:5432
 > CREATE DATABASE WHITEBOARD_DB;
