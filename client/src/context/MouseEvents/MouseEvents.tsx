@@ -88,6 +88,7 @@ export const MouseEventsProvider = ({
 
     const isDoubleClick = e.detail === 2;
 
+
     switch (selectionMode.type) {
       case SelectionModes.None: {
         if (!(e.target instanceof Element)) return;
@@ -163,15 +164,6 @@ export const MouseEventsProvider = ({
 
         if (selectedElements !== null && !selectedElements.includes(id)) {
           removeSelection();
-        } else if (selectedElements.includes(id) && isDoubleClick) {
-          const e = appState.elements[id];
-          if (e.type !== ElementType.Polyline) {
-            setSelectionMode({
-              ...selectionMode,
-              type: SelectionModes.TextEditing,
-            });
-            break;
-          }
         }
         setSelectionMode({ ...selectionMode, type: SelectionModes.Selected });
         // This path is only for single select
@@ -211,9 +203,9 @@ export const MouseEventsProvider = ({
               initialY,
               renderingOrder,
               id,
-              history?.currentUserId!!
+              history.currentUserId
             );
-            change && history?.addLocalChange(change);
+            change && history.addLocalChange(change);
             break;
           }
           case ElementType.Polyline: {
@@ -228,14 +220,14 @@ export const MouseEventsProvider = ({
                 );
               }
               // TODO: Check if it should be connected to an element.
-              history?.addLocalChange(
+              history.addLocalChange(
                 updatePolylineAction(
                   {
                     ...creationElement,
                     state: ElementState.Visible,
                   },
                   false,
-                  history?.currentUserId
+                  history.currentUserId
                 )
               );
 
@@ -265,12 +257,12 @@ export const MouseEventsProvider = ({
                 y,
                 ...overlappingPoint,
               };
-              history?.addLocalChange(
+              history.addLocalChange(
                 createPolylineAction(
                   firstPoint,
                   renderingOrder,
                   id,
-                  history?.currentUserId
+                  history.currentUserId
                 )
               );
               setSelectionCoordinates({
@@ -361,7 +353,7 @@ export const MouseEventsProvider = ({
     const { movementX, movementY } = e;
 
     // send cursor needs to take scaling into account
-    history?.sendCursor(clientCoordinates.x, clientCoordinates.y);
+    history.sendCursor(clientCoordinates.x, clientCoordinates.y);
     const isEphemeral = true;
 
     if (e.button !== MouseButtons.LEFT) return;
@@ -426,9 +418,9 @@ export const MouseEventsProvider = ({
               dx,
               dy,
               originElement,
-              history?.currentUserId!
+              history.currentUserId
             );
-            history?.addLocalChange(changeAction);
+            history.addLocalChange(changeAction);
           }
         });
         break;
@@ -453,9 +445,9 @@ export const MouseEventsProvider = ({
                 state: ElementState.Creation,
               },
               isEphemeral,
-              history?.currentUserId!!
+              history.currentUserId!
             );
-            change && history?.addLocalChange(change);
+            change && history.addLocalChange(change);
             break;
           }
           case ElementType.Polyline: {
@@ -482,11 +474,11 @@ export const MouseEventsProvider = ({
             if (!isPointsSame) {
               points[selectionCoordinates.nextPointIndex] = endPoint;
             }
-            history?.addLocalChange(
+            history.addLocalChange(
               updatePolylineAction(
                 { ...creationElement, points, state: ElementState.Creation },
                 isEphemeral,
-                history?.currentUserId
+                history.currentUserId
               )
             );
             break;
@@ -525,9 +517,9 @@ export const MouseEventsProvider = ({
                   y,
                 },
                 isEphemeral,
-                history?.currentUserId!!
+                history.currentUserId!
               );
-              changeUpdate && history?.addLocalChange(changeUpdate);
+              changeUpdate && history.addLocalChange(changeUpdate);
 
               break;
             }
@@ -557,14 +549,14 @@ export const MouseEventsProvider = ({
                 overlappingElement
               );
               newPoints[pos] = { ...newPoints[pos], ...overlappingPoint };
-              history?.addLocalChange(
+              history.addLocalChange(
                 updatePolylineAction(
                   {
                     ...el,
                     points: newPoints,
                   },
                   isEphemeral,
-                  history?.currentUserId
+                  history.currentUserId
                 )
               );
             }
@@ -588,13 +580,12 @@ export const MouseEventsProvider = ({
           (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90
         );
         element.rotate = rotate;
-        if (!history) return;
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
       }
     }
   };
@@ -614,9 +605,9 @@ export const MouseEventsProvider = ({
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
 
         setSelectionMode({ ...selectionMode, type: SelectionModes.None });
         break;
@@ -632,9 +623,9 @@ export const MouseEventsProvider = ({
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
 
         setSelectionMode({
           ...selectionMode,
@@ -657,9 +648,9 @@ export const MouseEventsProvider = ({
         const changeAction = createUpdateChange(
           element,
           isEphemeral,
-          history?.currentUserId
+          history.currentUserId
         );
-        changeAction && history?.addLocalChange(changeAction);
+        changeAction && history.addLocalChange(changeAction);
 
         setSelectionMode({
           ...selectionMode,
