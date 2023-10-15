@@ -15,7 +15,7 @@ import { useRoomId as useRoomIdImport } from "../hooks/useRoomId";
 
 interface IAppStateContext {
   appState: AppState;
-  history: History | null;
+  history: History;
   selectedElements: string[];
   setSelectedElements: React.Dispatch<React.SetStateAction<string[]>>;
   hoverElement: string | null;
@@ -33,7 +33,7 @@ interface IAppStateContext {
 
 export const AppStateContext = createContext<IAppStateContext>({
   appState: initialState,
-  history: null,
+  history: null!,
   selectedElements: [],
   setSelectedElements: () => {},
   hoverElement: null,
@@ -79,6 +79,11 @@ export const AppStateProvider = ({
   });
   const [showDebugger] = useState(false);
   const [viewBox, setViewBox] = useViewBox();
+
+  if (!history) {
+    return <p>Loading...</p>
+  }
+
   return (
     <AppStateContext.Provider
       value={{

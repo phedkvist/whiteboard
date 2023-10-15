@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   SelectionModes,
   SelectionMode,
@@ -24,6 +24,7 @@ import {
 import { createRoundedLine, renderSvgElement } from "./shapes";
 import { createUpdateChange } from "../../services/Actions";
 import { Side } from "../ArrowSelection/ArrowSelection";
+import { useAppState } from "../../context/AppState";
 
 const getCornerCoords = (e: Element) => {
   if (
@@ -291,9 +292,16 @@ const EditableInput = ({
   onChange: React.FormEventHandler<HTMLTextAreaElement>;
 }) => {
   const ref = React.createRef<HTMLTextAreaElement>();
+  const {
+    setSelectedElements,
+    selectionMode,
+    setSelectionMode,
+  } = useAppState();
+
   useEffect(() => {
-    if (isEnabled) {
-      ref.current?.focus();
+    if (isEnabled && ref.current) {
+      // Mainly needed when element just gets created. Otherwise the onClick handles the rest
+      ref.current.focus();
     }
   }, [isEnabled, ref]);
 
@@ -312,6 +320,14 @@ const EditableInput = ({
     updateHeight();
   }, [text, updateHeight]);
 
+  const onClick = () => {
+    setSelectionMode({
+      ...selectionMode,
+      type: SelectionModes.TextEditing,
+    });
+    setSelectedElements([id]);
+  };
+
   return (
     <foreignObject
       fontSize={14}
@@ -323,14 +339,18 @@ const EditableInput = ({
       textAnchor="middle"
       id={id}
     >
-      <div className="textContainer" data-xmlns="http://www.w3.org/1999/xhtml">
+      <div
+        className="textContainer"
+        data-xmlns="http://www.w3.org/1999/xhtml"
+      >
         <style dangerouslySetInnerHTML={{ __html: fontFamily }} />
         <textarea
           className="textInput"
           data-testid="editableInput"
           ref={ref}
           id={id}
-          disabled={!isEnabled}
+          // disabled={!isEnabled}
+          onClick={onClick}
           onInput={onChange}
           onKeyUp={onKeyUp}
           suppressContentEditableWarning
