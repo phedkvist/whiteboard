@@ -12,6 +12,10 @@ import { getViewBoxAfterZoom } from "../MouseEvents/helpers";
 import { useAppState } from "../AppState";
 import * as KeyCode from "keycode-js";
 
+const getIsZoomingTrackpad = (e: WheelEvent): boolean => {
+  return e.deltaY % 1 !== 0;
+}
+
 export const useKeyboardEvents = () => {
   const {
     appState,
@@ -123,12 +127,17 @@ export const useKeyboardEvents = () => {
     }
   };
 
+  
+
   const onWheel = (e: WheelEvent) => {
     if (e.cancelable) {
       e.preventDefault();
     }
 
-    if (isMetaPressed) {
+    const isZoomingTrackpad = getIsZoomingTrackpad(e);
+
+    if (isMetaPressed || isZoomingTrackpad) {
+      
       const { offsetX, offsetY, deltaY } = e;
       const newViewBox = getViewBoxAfterZoom(viewBox, offsetX, offsetY, deltaY);
       if (newViewBox.w < 100 || newViewBox.h < 100) {
